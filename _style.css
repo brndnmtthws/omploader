@@ -110,9 +110,13 @@ div#container div.content div.form .input {
 }
 
 div#container div.content div.form div.name {
+	margin-right: 5px;
+}
+
+div#container div.content div.form div.label {
 	color: #a8002b;
 	font-weight: bold;
-	margin-bottom: 5px;
+	margin-bottom: 3px;
 }
 
 div#container div.content div.form textarea {

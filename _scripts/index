@@ -143,11 +143,24 @@ FCGI.each_cgi {|cgi|
       form =
         '        <form enctype="multipart/form-data" action="u" method="post">' + "\n" +
         '          <div class="form">' + "\n" +
-        '            <div class="float name">Name</div>' + "\n" +
+        '            <div class="float name left-align">' + "\n" +
+        '              <div class="label">Name</div>' + "\n" +
+        '              <input type="line" name="name" size="25" class="input field" />' + "\n" +
+        '            </div>' + "\n" +
+        '            <div class="float left-align">' + "\n" +
+        '              <div class="label">Syntax</div>' + "\n" +
+        '              <select name="syntax" class="input">' + "\n" +
+        '                <option value="C">C</option>' + "\n" +
+        '                <option value="Delphi">Delphi</option>' + "\n" +
+        '                <option value="HTML">HTML</option>' + "\n" +
+        '                <option selected value="raw">Plain Text</option>' + "\n" +
+        '                <option value="Plaintext">Plain Text (Numbered)</option>' + "\n" +
+        '                <option value="Ruby">Ruby</option>' + "\n" +
+        '                <option value="XML">XML</option>' + "\n" +
+        '              </select>' + "\n" +
+        '            </div>' + "\n" +
         '            <br class="clear" />' + "\n" +
-        '            <div class="float"><input type="line" name="name" size="25" class="input field" /></div>' + "\n" +
-        '            <br class="clear" />' + "\n" +
-        '            <div class="float"><textarea name="paste" class="input field"></textarea></div>' + "\n" +
+        '            <div class="float"><textarea name="paste" class="input"></textarea></div>' + "\n" +
         '            <br class="clear" />' + "\n" +
         '            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
         '          </div>' + "\n" +

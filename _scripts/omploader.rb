@@ -31,10 +31,7 @@ def xhtml_pre(title = '')
     '    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
     '    <link rel="stylesheet" type="text/css" href="_style.css" />' + "\n" +
     '    <link rel="shortcut icon" href="_omploader.ico" type="image/x-icon" />' + "\n" +
-    '    <title>omploader'
-  xhtml_pre += ' ' + title + ' ' if !title.empty?
-  xhtml_pre += 
-    '</title>' + "\n" +
+    '    <title>omploader' + title + '</title>' + "\n" +
     '  </head>' + "\n" +
     '  <body>' + "\n" +
     '    <div id="container">' + "\n" +

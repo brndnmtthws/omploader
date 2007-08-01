@@ -15,6 +15,7 @@ Requirements:
  * ruby-fcgi (http://rubyforge.org/projects/fcgi/)
  * libvorbisfile-ruby
  * ruby-mmap (http://moulon.inra.fr/ruby/mmap.html)
+ * CodeRay (http://coderay.rubychan.de/)
 
 the code for libvorbisfile-ruby and ruby-mmap are available from the omploader svn repo
 

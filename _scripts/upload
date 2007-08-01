@@ -8,6 +8,7 @@
 require 'omploader'
 require 'filemagic'
 require 'rubygems'
+require 'coderay'
 require 'curb'
 require 'uri'
 
@@ -64,10 +65,15 @@ FCGI.each_cgi {|cgi|
           next
         end
       elsif cgi.has_key?('paste')
+        syntax = cgi['syntax'].read
         datum = cgi['paste'].read
         next if datum.empty?
         name = cgi['name'].read
         name = 'pasta' if name.empty?
+        if syntax != 'raw' and !syntax.empty?
+          datum = CodeRay::Duo[syntax.downcase, :page].highlight(datum).sub('lang="de"', 'lang="en"')
+          datum = datum.sub('CodeRay HTML Encoder Example', 'omploader – ' + name + ' (' + syntax + ')')
+        end
         stop = true
       elsif stop
         break
