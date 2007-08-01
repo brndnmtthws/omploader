@@ -10,6 +10,7 @@ require 'fcgi'
 require 'cgi/session'
 require 'cgi/session/pstore'
 require 'mysql'
+require 'yaml'
 
 config = YAML::load(File.open('config'))
 
