@@ -12,14 +12,13 @@ require 'cgi/session/pstore'
 require 'mysql'
 require 'yaml'
 
-config = YAML::load(File.open('config'))
+Config = YAML::load(File.open('config'))
 
-Max_upload_count = config['limits']['upload_count']
-Max_upload_period = config['limits']['upload_period']
-
-db_params = config['database']
+Max_upload_count = Config['limits']['upload_count']
+Max_upload_period = Config['limits']['upload_period']
 
 def db_connect
+  db_params = Config['database']
   db = Mysql.real_connect(db_params['host'], db_params['user'], db_params['pass'], db_params['name'])
   return db
 end
