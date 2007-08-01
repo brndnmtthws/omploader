@@ -200,7 +200,7 @@ FCGI.each_cgi {|cgi|
   end
   body =
     '      <div class="content large">' + "\n" +
-    '        <a href="' + simpler_key + '">' + simpler + ' omp</a> | <a href="' + bigger_key + '">' + bigger + ' loader</a> | <a href="' + curler_key + '">from ' + curler + '</a> | <a href="' + paster_key + '">' + pasteer + '</a> | <a href="l">list</a>' + "\n" +
+    '        <a href="' + simpler_key + '">' + simpler + ' omp</a> | <a href="' + bigger_key + '">' + bigger + ' loader</a> | <a href="' + curler_key + '">from ' + curler + '</a> | <a href="' + paster_key + '">' + paster + '</a> | <a href="l">list</a>' + "\n" +
     '        <div class="powered">powered by diddyweb ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
     '      </div>' + "\n" +
     '      <div class="title">Upload</div>' + "\n" +
