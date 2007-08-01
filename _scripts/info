@@ -1,0 +1,159 @@
+#!/usr/bin/env ruby
+#
+# Copyright 2007 David Shakaryan <omp@gentoo.org>
+# Copyright 2007 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+
+require 'omploader'
+require 'tempfile'
+require 'rubygems'
+require 'id3lib'
+require 'mmap'
+require 'vorbisfile'
+
+db = db_connect
+
+FCGI.each_cgi {|cgi|
+  db_check(db)
+  register_visit(cgi, db)
+
+  id_b64 = cgi.params['id'].to_s
+  id = from_b64(id_b64)
+
+  # Verify that id is strictly numeric.
+  if id =~ /\A\d+\z/
+    query = db.prepare('select
+        names.name,
+        metadata.size,
+        metadata.hits,
+        metadata.creation_time,
+        content_types_main.type,
+        content_types_sub.type
+      from
+        metadata
+        inner join names on names.id = metadata.name_id
+        inner join content_types on content_types.id = metadata.content_type_id
+        inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+        inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
+      where
+        metadata.id = ?')
+    query.execute(id)
+
+    # Verify that id exists in database.
+    if query.num_rows > 0
+      info = query.fetch
+      name = info[0]
+      size = info[1]
+      hits = info[2].to_s
+      creation_time = info[3].to_s
+      content_type_main = info[4].to_s
+      content_type_sub = info[5].to_s
+      content_type = content_type_main + '/' + content_type_sub
+
+      # get and process referrers
+      query = db.prepare('select
+            referrers.address,
+	    referrals.count
+          from
+            metadata
+            inner join referrals on referrals.metadata_id = metadata.id
+	    inner join referrers on referrers.id = referrals.referrer_id
+          where
+            metadata.id = ?
+	  order by referrals.count desc
+	  limit 3  
+	    ')
+      referrers = ''
+      query.execute(id).num_rows.times do
+        res = query.fetch
+        address = res[0].to_s
+        count = res[1].to_s
+        referrers += '          <div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
+      end
+      referrers = '          No referrers!' + "\n" if referrers.empty?
+
+      if size > 1024*1024
+        n = (size.to_i/1024.0/1024.0).to_s
+        size = n.split('.')[0] + '.' + n.split('.')[1][0...2] + ' MiB'
+      elsif size > 1024
+        n = (size.to_i/1024.0).to_s
+        size = n.split('.')[0] + '.' + n.split('.')[1][0...2] + ' KiB'
+      elsif size == 1
+        size = size.to_s + ' byte'
+      else
+        size = size.to_s + ' bytes'
+      end
+      
+      meta = ''
+
+      if content_type_main == 'image'
+        file_link = '<img src="t' + id_b64 + '" alt="View file!" />'
+      elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
+        query = db.prepare('select
+            data.datum
+          from
+            metadata inner join data on data.id = metadata.datum_id
+          where
+            metadata.id = ?')
+        res = query.execute(id).fetch
+        tmp = Tempfile.new(name)
+        tmp.close
+        mmap = Mmap.new(tmp.path, 'rw')
+        mmap.insert(0, res[0])
+        if content_type == 'audio/mpeg'
+          tag = ID3Lib::Tag.new(tmp.path)
+          artist = tag.artist
+          title = tag.title
+          album = tag.album
+          year = tag.year
+        elsif content_type == 'application/ogg'
+          vf = Ogg::VorbisFile.new
+          tmp.open
+          if vf.open(tmp)
+            comments = vf.comments(-1)
+            artist = comments['artist']
+            title = comments['title']
+            album = comments['album']
+            year = comments['date']
+          end
+        end
+        meta += '          <div class="left"><strong>Artist:</strong></div><div class="right">' + artist + '</div><br class="clear" />' + "\n" if artist and !artist.empty?
+        meta += '          <div class="left"><strong>Title:</strong></div><div class="right">' + title + '</div><br class="clear" />' + "\n" if title and !title.empty?
+        meta += '          <div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
+        meta += '          <div class="left"><strong>Year:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
+        meta = meta.insert(0, '          <br />' + "\n") if !meta.empty?
+        file_link = 'View file!'
+      else
+        file_link = 'View file!'
+      end
+
+      cgi.out('type' => 'text/html', 'expires' => Time.now + 604800) {
+        xhtml_pre(' – ' + name + ' (' + content_type + ')') +
+        '        <div class="title">Information for ' + id_b64 + '</div>' + "\n" +
+        '        <div class="content">' + "\n" +
+        '          <div class="thumb automargin"><div class="container"><a href="v' + id_b64 + '">' + file_link + '</a></div></div>' + "\n" +
+        '          <div class="left"><strong>Name:</strong></div><div class="right">' + name + '</div><br class="clear" />' + "\n" +
+        '          <div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
+        '          <div class="left"><strong>Hits:</strong></div><div class="right">' + hits + '</div><br class="clear" />' + "\n" +
+        '          <div class="left"><strong>Upload Time:</strong></div><div class="right">' + creation_time + '</div><br class="clear" />' + "\n" +
+        '          <div class="left"><strong>Content Type:</strong></div><div class="right">' + content_type + '</div><br class="clear" />' + "\n" +
+        meta +
+        '        </div>' + "\n" +
+        '        <div class="title">Top referrers</div>' + "\n" +
+        '        <div class="content">' + "\n" +
+        referrers +
+        '        </div>' + "\n" +
+        xhtml_post
+      }
+    else
+      cgi.out('text/html') {
+        xhtml_pre + '        <div class="content large">Nothing to pee here.</div>' + xhtml_post
+      }
+    end
+  else
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">You are a trad.</div>' + xhtml_post
+    }
+  end
+}

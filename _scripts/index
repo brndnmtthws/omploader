@@ -1,0 +1,214 @@
+#!/usr/bin/env ruby
+#
+# Copyright 2007 David Shakaryan <omp@gentoo.org>
+# Copyright 2007 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+
+require 'omploader'
+
+db = db_connect
+
+FCGI.each_cgi {|cgi|
+  db_check(db)
+  visitor_id = register_visit(cgi, db)
+
+  owner_id = get_owner_id(cgi, db)
+
+  query = db.prepare('select big, simple, curl, paste from owners where id = ?')
+  res = query.execute(owner_id).fetch
+  
+  big = res[0].to_i
+  simple = res[1].to_i
+  curl = res[2].to_i
+  paste = res[3].to_i
+
+  if !cgi.params['paste'].empty?
+    to_paste = cgi.params['paste'].to_s.to_i
+  else
+    to_paste = paste
+  end
+  if !cgi.params['big'].empty?
+    to_big = cgi.params['big'].to_s.to_i
+    paste = 1
+    to_paste = 0
+  else
+    to_big = big
+  end
+  if !cgi.params['simple'].empty?
+    to_simple = cgi.params['simple'].to_s.to_i
+  else
+    to_simple = simple
+  end
+  if !cgi.params['curl'].empty?
+    to_curl = cgi.params['curl'].to_s.to_i
+    paste = 1
+    to_paste = 0
+  else
+    to_curl = curl
+  end
+  if to_big != big or to_simple != simple or to_curl != curl or to_paste != paste
+    big = to_big
+    simple = to_simple
+    curl = to_curl
+    paste = to_paste
+    query = db.prepare('update owners set big = ?, simple = ?, curl = ?, paste = ? where id = ?')
+    res = query.execute(big.to_s, simple.to_s, curl.to_s, paste.to_s, owner_id)
+#    print cgi.header({ 'Status' => '302 Moved', 'location' => '/'})
+#    next
+  end
+
+  if simple == 1
+    top_images_list = ''
+    top_files_list = ''
+  else
+    top_images_list = '      <div class="title">Top Images</div>' + "\n" + '      <div class="content">' + "\n"
+    top_images_list_info = ''
+    query = db.prepare('select
+        metadata.id,
+        names.name from metadata
+        inner join names on names.id = metadata.name_id
+        inner join content_types on content_types.id = metadata.content_type_id
+        inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+      where
+        content_types_main.type = "image"
+        and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800
+      order by
+        metadata.hits desc,
+        metadata.creation_time desc
+      limit
+        5')
+    query.execute.num_rows.times do
+      result = query.fetch
+      id = to_b64(result.first.to_s)
+      name = result.last.to_s
+
+      top_images_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+      top_images_list_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
+    end
+    top_images_list += '        <br class="clear" />' + "\n" + top_images_list_info + '        <br class="clear" />' + "\n" + '      </div>' + "\n"
+
+    top_files_list = '      <div class="title">Top Files</div>' + "\n" + '      <div class="content left-align">' + "\n"
+    query = db.prepare('select
+        metadata.id,
+        names.name from metadata
+        inner join names on names.id = metadata.name_id
+        inner join content_types on content_types.id = metadata.content_type_id
+        inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+      where
+        content_types_main.type != "image"
+        and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800
+      order by
+        metadata.hits desc,
+        metadata.creation_time desc
+      limit
+        5')
+    query.execute.num_rows.times do
+      result = query.fetch
+      id = to_b64(result.first.to_s)
+      name = result.last.to_s
+
+      top_files_list += '      <a href="i' + id + '">Info</a> <span style="color: #bbb">┃</span> <a href="v' + id + '">' + name + '</a><br />' + "\n"
+    end
+    top_files_list += '      </div>' + "\n"
+  end
+
+  query = db.prepare('select count(*) from metadata')
+  count = query.execute.fetch.to_s
+
+  query = db.prepare('select count from upload_throttle where visitor_id = ?')
+  throttle = query.execute(visitor_id).fetch.to_s
+
+  if throttle.to_i < Max_upload_count
+    if curl == 1
+      input_type = 'field'
+      input_name = 'url'
+    else
+      input_type = 'file'
+      input_name = 'file'
+    end
+    if big == 1 and paste != 1
+      form =
+        '        <form enctype="multipart/form-data" action="u" method="post">' + "\n" +
+        '           <div class="form">' + "\n" +
+        '            <input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
+        '            <input type="' + input_type + '" name="' + input_name + '2" size="25" class="input field" /><br />' + "\n" +
+        '            <input type="' + input_type + '" name="' + input_name + '3" size="25" class="input field" /><br />' + "\n" +
+        '            <input type="' + input_type + '" name="' + input_name + '4" size="25" class="input field" /><br />' + "\n" +
+        '            <input type="' + input_type + '" name="' + input_name + '5" size="25" class="input field" /><br />' + "\n" +
+        '            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
+        '          </div>' + "\n" +
+        '        </form>'
+    elsif paste == 1
+      form =
+        '        <form enctype="multipart/form-data" action="u" method="post">' + "\n" +
+        '          <div class="form">' + "\n" +
+        '            <div class="float name">Name</div>' + "\n" +
+        '            <br class="clear" />' + "\n" +
+        '            <div class="float"><input type="line" name="name" size="25" class="input field" /></div>' + "\n" +
+        '            <br class="clear" />' + "\n" +
+        '            <div class="float"><textarea name="paste" class="input field"></textarea></div>' + "\n" +
+        '            <br class="clear" />' + "\n" +
+        '            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
+        '          </div>' + "\n" +
+        '        </form>'
+    else
+      form =
+        '        <form enctype="multipart/form-data" action="u" method="post">' + "\n" +
+        '          <div class="form">' + "\n" +
+        '            <input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
+        '            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
+        '          </div>' + "\n" +
+        '        </form>'
+    end
+  else
+    form = '        <h3>NO COOKIE!</h3>'
+  end
+
+  if simple == 0
+    simpler = 'less'
+    simpler_key = 'S'
+  else
+    simpler = 'more'
+    simpler_key = 's'
+  end
+  if big == 0
+    bigger = 'big'
+    bigger_key = 'B'
+  else
+    bigger = 'small'
+    bigger_key = 'b'
+  end
+  if curl == 0
+    curler = 'url'
+    curler_key = 'C'
+  else
+    curler = 'file'
+    curler_key = 'c'
+  end
+  if paste == 0
+    pasteer = 'ompasta'
+    pasteer_key = 'p'
+  else
+    if curl == 0
+      pasteer = 'from file'
+      pasteer_key = 'c'
+    else
+      pasteer = 'from url'
+      pasteer_key = 'C'
+    end
+  end
+  body =
+    '      <div class="content large">' + "\n" +
+    '        <a href="' + simpler_key + '">' + simpler + ' omp</a> | <a href="' + bigger_key + '">' + bigger + ' loader</a> | <a href="' + curler_key + '">from ' + curler + '</a> | <a href="' + pasteer_key + '">' + pasteer + '</a> | <a href="l">list</a>' + "\n" +
+    '        <div class="powered">powered by diddyweb ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
+    '      </div>' + "\n" +
+    '      <div class="title">Upload</div>' + "\n" +
+    '      <div class="content">' + "\n" +
+    form + "\n" +
+    '      </div>' + "\n" +
+    top_images_list +
+    top_files_list
+
+  cgi.out('text/html') { xhtml_pre + body + xhtml_post }
+}

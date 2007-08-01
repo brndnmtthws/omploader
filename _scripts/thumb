@@ -1,0 +1,113 @@
+#!/usr/bin/env ruby
+#
+# Copyright 2007 David Shakaryan <omp@gentoo.org>
+# Copyright 2007 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+
+require 'omploader'
+require 'RMagick'
+include Magick
+
+db = db_connect
+
+FCGI.each_cgi {|cgi|
+  db_check(db)
+  register_visit(cgi, db)
+
+  id = from_b64(cgi.params['id'].to_s)
+
+  # Verify that id is strictly numeric.
+  if id =~ /\A\d+\z/
+    query = db.prepare('select
+        metadata.datum_id,
+        metadata.content_type_id,
+        metadata.thumbnail_id,
+        names.name
+      from
+        metadata
+        inner join names on names.id = metadata.name_id
+      where
+        metadata.id = ?')
+    query.execute(id)
+
+    # Verify that id exists in database.
+    if query.num_rows > 0
+      info = query.fetch
+      datum_id = info[0].to_s
+      content_type_id = info[1].to_s
+      thumbnail_id = info[2].to_s
+      name = info[3].to_s
+
+      if !datum_id.empty? and !content_type_id.empty?
+        name = name.insert(name.rindex('.'), '-thumb') if !name.empty?
+
+        query = db.prepare('select
+            content_types_main.type,
+            content_types_sub.type
+          from
+            content_types
+            inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+            inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
+          where
+            content_types.id = ?')
+        result = query.execute(content_type_id).fetch
+
+        content_type = result[0]+ '/' + result[1]
+
+        if result[0] == 'image' and thumbnail_id.empty?
+          query = db.prepare('select datum from data where id = ?')
+          datum = query.execute(datum_id).fetch.to_s
+          thumb = Image.from_blob(datum)[0]
+
+          # Determine best thumbnail size.
+          if (thumb.columns.to_f / thumb.rows.to_f) == (4/3.0)
+            thumb = thumb.thumbnail(100, 75)
+          elsif (thumb.columns.to_f / thumb.rows.to_f) > (4/3.0)
+            thumb = thumb.thumbnail(100, 75 * ((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f)))
+          else
+            thumb = thumb.thumbnail(100 * ((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0)), 75)
+          end
+
+          begin
+            query = db.prepare('insert into thumbnails (image) values (?)')
+            result = query.execute(thumb.to_blob.to_s)
+
+            query = db.prepare('update metadata set thumbnail_id = ? where id = ?')
+            query.execute(result.insert_id, id)
+          rescue Mysql::Error => e
+            db.rollback
+          end
+
+          cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { thumb.to_blob.to_s }
+        elsif result[0] == 'image'
+	begin
+          query = db.prepare('select image from thumbnails where id = ?')
+          result = query.execute(thumbnail_id)
+          query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
+          query.execute(thumbnail_id)
+          cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { result.fetch.to_s }
+          rescue Mysql::Error => e
+            db.rollback
+          end
+        else
+          cgi.out('text/html') {
+            xhtml_pre + '        <div class="content large">You are a trad.</div>' + xhtml_post
+          }
+        end
+      else
+        cgi.out('text/html') {
+          xhtml_pre + '        <div class="content large">You are a trad.</div>' + xhtml_post
+        }
+      end
+    else
+      cgi.out('text/html') {
+        xhtml_pre + '        <div class="content large">Nothing to pee here.</div>' + xhtml_post
+      }
+    end
+  else
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">You are a trad.</div>' + xhtml_post
+    }
+  end
+}

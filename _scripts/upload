@@ -1,0 +1,157 @@
+#!/usr/bin/env ruby
+#
+# Copyright 2007 David Shakaryan <omp@gentoo.org>
+# Copyright 2007 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+
+require 'omploader'
+require 'filemagic'
+require 'rubygems'
+require 'curb'
+require 'uri'
+
+db = db_connect
+
+FCGI.each_cgi {|cgi|
+  db_check(db)
+  visitor_id = register_visit(cgi, db)
+
+  output = ''
+  
+  owner_id = get_owner_id(cgi, db)
+  
+
+  query = db.prepare('select count from upload_throttle where visitor_id = ?')
+  throttle = query.execute(visitor_id).fetch.to_s
+  if throttle.to_i > Max_upload_count
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">Slow down there, cowboy.</div>' + xhtml_post
+    }
+    next
+  end
+
+  saved = 0
+  stop = true
+
+  # Verify that a file parameter is present.
+  for i in 1...6
+    begin
+      db.query('begin')
+      if cgi.has_key?('file' + i.to_s)
+        file = cgi['file' + i.to_s]
+        datum = file.read
+        next if datum.length > 2**24 or datum.empty?
+        name = file.original_filename.chomp
+      elsif cgi.has_key?('url' + i.to_s)
+        begin
+        url = cgi['url' + i.to_s].read
+        begin
+        # do some checking on our url
+        url = URI.extract(url).first
+        split = URI.split(url)
+        host = split[2]
+        next if host == cgi.host
+        path = split[5]
+        name = URI.unescape(File.basename(path))
+        name = url if name.empty? or name == '/'
+        rescue
+          next
+        end
+        next if url == 'URL'
+        datum = Curl::Easy.perform(url).body_str
+        rescue
+          next
+        end
+      elsif cgi.has_key?('paste')
+        datum = cgi['paste'].read
+        next if datum.empty?
+        name = cgi['name'].read
+        name = 'pasta' if name.empty?
+        stop = true
+      elsif stop
+        break
+      else
+        next
+      end
+
+      query = db.prepare('insert into data (datum) values (?)')
+      datum_id = query.execute(datum).insert_id
+ 
+      query = db.prepare('select id from names where name = ?')
+      query.execute(name)
+      if query.num_rows > 0
+        name_id = query.fetch.to_s
+      else
+        query = db.prepare('insert into names (name) values (?)')
+        name_id = query.execute(name).insert_id
+      end
+
+      fm = FileMagic.new(FileMagic::MAGIC_MIME)
+      content_type = fm.buffer(datum)
+  
+      content_type = content_type.chomp.split('/', 2)
+      content_type_main = content_type.first
+      content_type_sub = content_type.last
+      query = db.prepare('select id from content_types_main where type = ?')
+      query.execute(content_type_main)
+      if query.num_rows > 0
+        content_type_main_id = query.fetch.to_s
+      else
+        query = db.prepare('insert into content_types_main (type) values (?)')
+        content_type_main_id = query.execute(content_type_main).insert_id
+      end
+      query = db.prepare('select id from content_types_sub where type = ?')
+      query.execute(content_type_sub)
+      if query.num_rows > 0
+        content_type_sub_id = query.fetch.to_s
+      else
+        query = db.prepare('insert into content_types_sub (type) values (?)')
+        content_type_sub_id = query.execute(content_type_sub).insert_id
+      end
+      query = db.prepare('select id from content_types where content_type_main_id = ? and content_type_sub_id = ?')
+      res = query.execute(content_type_main_id, content_type_sub_id)
+      if query.num_rows > 0
+        content_type_id = res.fetch.to_s
+      else
+        query = db.prepare('insert into content_types (content_type_main_id, content_type_sub_id) values (?,?)')
+        content_type_id = query.execute(content_type_main_id, content_type_sub_id).insert_id
+      end
+  
+      query = db.prepare('insert into metadata (content_type_id, name_id, size, datum_id, owner_id) values (?,?,?,?,?)')
+      query.execute(content_type_id, name_id, datum.length, datum_id, owner_id)
+
+      db.commit
+
+      saved = saved + 1
+  
+      id = to_b64(query.insert_id.to_s)
+ 
+      output = output +
+        '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
+        '      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n"
+    rescue
+      # Discard changes if error occurs.
+      db.rollback
+    end
+  end
+  if saved > 0
+    query = db.prepare('insert into upload_throttle (visitor_id, count) values (?,?) on duplicate key update count = count + ?')
+    query.execute(visitor_id, saved, saved)
+    db.commit
+    cgi.out {
+      xhtml_pre +
+      '        <div class="content large">' + "\n" +
+      '          Omploaded!<br />' + "\n" +
+      '          <br />' + "\n" +
+      output +
+      '        </div>' + "\n" +
+      xhtml_post
+    }
+  else
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">You are a trad.</div>' + xhtml_post
+    }
+    db.rollback
+  end
+}

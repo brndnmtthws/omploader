@@ -1,0 +1,7 @@
+Options +ExecCGI
+
+# Use mod_fcgi
+SetHandler fcgid-script
+
+# In case you want to use plain cgi
+# SetHandler cgi-script

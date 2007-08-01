@@ -1,0 +1,14 @@
+---
+# Database settings
+database:
+  name: omploader
+  user: omploader
+  pass: omploader
+  host: localhost
+
+# Limits (ie min/maximums)
+limits:
+# Number of uploads in a given period (in seconds)
+# before getting throttled
+  upload_count: 10
+  upload_period: 120

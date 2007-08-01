@@ -1,0 +1,100 @@
+#!/usr/bin/env ruby
+#
+# Copyright 2007 David Shakaryan <omp@gentoo.org>
+# Copyright 2007 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+
+require 'omploader'
+require 'uri'
+
+db = db_connect
+
+FCGI.each_cgi {|cgi|
+  db_check(db)
+  visitor_id = register_visit(cgi, db)
+
+  id = from_b64(cgi.params['id'].to_s)
+
+  # Verify that id is strictly numeric.
+  if id =~ /\A\d+\z/
+    begin
+      db.query('begin')
+
+      query = db.prepare('select
+          metadata.datum_id,
+          metadata.content_type_id,
+          names.name from metadata inner join names on names.id = metadata.name_id
+        where
+          metadata.id = ?')
+      query.execute(id)
+
+      # Verify that id exists in database.
+      if query.num_rows > 0
+        info = query.fetch
+        datum_id = info[0].to_s
+        content_type_id = info[1].to_s
+        name = info[2].to_s
+
+        # Increment vote number if this is first view from visitor.
+        query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
+        res = query.execute(visitor_id, id)
+        if res.num_rows == 0
+          query = db.prepare('update metadata set hits = hits + 1 where id = ?')
+          query.execute(id)
+          query = db.prepare('insert into votes (visitor_id, metadata_id) values (?,?)')
+          query.execute(visitor_id, id)
+          referrer = cgi.referer.to_s
+          referrer = URI.extract(referrer).first
+          if referrer and !referrer.empty?
+            split = URI.split(referrer)
+            host = split[2]
+            if host != cgi.host
+              query = db.prepare('select id from referrers where address = ?')
+              query.execute(referrer)
+              if query.num_rows < 1
+                query = db.prepare('insert into referrers (address) values (?)')
+                query.execute(referrer)
+                referrer_id = query.insert_id.to_s
+              else
+                referrer_id = query.fetch.to_s
+              end
+              query = db.prepare('insert into referrals (referrer_id, metadata_id) values (?,?) on duplicate key update count = count + 1')
+              query.execute(referrer_id, id)
+            end
+          end
+        end
+
+        query = db.prepare('select
+            data.datum,
+            content_types_main.type,
+            content_types_sub.type
+          from
+            data
+            inner join content_types on content_types.id = ?
+            inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+            inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
+          where
+            data.id = ?')
+        result = query.execute(content_type_id, datum_id).fetch
+
+        db.commit
+
+        datum = result[0]
+        content_type = result[1]+ '/' + result[2]
+
+        cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { datum }
+      else
+        cgi.out('text/html') {
+          xhtml_pre + '        <div class="content large">Nothing to pee here.</div>' + xhtml_post
+        }
+      end
+    rescue Mysql::Error => e
+      db.rollback
+    end
+  else
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">You are a trad.</div>' + xhtml_post
+    }
+  end
+}
