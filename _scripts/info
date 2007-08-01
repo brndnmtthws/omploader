@@ -123,9 +123,9 @@ FCGI.each_cgi {|cgi|
         meta += '          <div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
         meta += '          <div class="left"><strong>Year:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
         meta = meta.insert(0, '          <br />' + "\n") if !meta.empty?
-        file_link = 'View file!'
+        file_link = '<img src="_omploader_thumb.png" alt="View file!" />'
       else
-        file_link = 'View file!'
+        file_link = '<img src="_omploader_thumb.png" alt="View file!" />'
       end
 
       cgi.out('type' => 'text/html', 'expires' => Time.now + 604800) {

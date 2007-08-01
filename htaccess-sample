@@ -20,4 +20,4 @@ RewriteRule ^l(\d+)(.)(.)(.)(.)(\d+)(.*)$ _scripts/list?results=$1&order=$2&colu
 RewriteRule ^t(.+)$ _scripts/thumb?id=$1 [L]
 RewriteRule ^u(.*)$ _scripts/upload$1 [L]
 RewriteRule ^v(.+)$ _scripts/view?id=$1 [L]
-RewriteRule ^favicon.ico$ _omploader.ico [L]
+RewriteRule ^favicon.ico$ _omploader_icon.png [L]

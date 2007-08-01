@@ -145,6 +145,10 @@ div#container div.content div.thumb div.container {
 	display: table-cell;
 }
 
+div#container div.content div.thumb div.container a {
+	background-color: transparent;
+}
+
 div#container div.content div.thumb div.container img {
 	margin-bottom: -4px;
 }
