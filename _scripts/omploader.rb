@@ -47,7 +47,7 @@ end
 
 def xhtml_post
   xhtml_post =
-    '      <div id="footer">an <a href="irc://irc.freenode.net/##otw">##otw</a> collaboration</div>' + "\n" +
+    '      <div id="footer">an <a href="irc://irc.freenode.net/##otw">##otw</a> collaboration ┃ <a href="http://svn.omploader.org/">view svn repository</a></div>' + "\n" +
     '    </div>' + "\n" +
     '  </body>' + "\n" +
     '</html>'
