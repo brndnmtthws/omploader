@@ -231,7 +231,7 @@ FCGI.each_cgi {|cgi|
     end
     
     if !owner_name.empty?
-      owner_name = '          <div class="left"><strong>Owner:</strong></div><div class="right">' + owner_name + '</div><br class="clear" />' + "\n"
+      info_owner_name = '          <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n"
     end
 
     if !comment_body.empty?
