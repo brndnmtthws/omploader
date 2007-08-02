@@ -34,7 +34,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `metadata_id` (`metadata_id`,`comment_id`),
   CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Table structure for table `comments_body`
@@ -44,7 +44,7 @@ CREATE TABLE `comments_body` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `body` varchar(750) collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Table structure for table `content_types`
@@ -56,7 +56,7 @@ CREATE TABLE `content_types` (
   `content_type_sub_id` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `content_type_main_id` (`content_type_main_id`,`content_type_sub_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types_main`
@@ -67,7 +67,7 @@ CREATE TABLE `content_types_main` (
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types_sub`
@@ -78,7 +78,7 @@ CREATE TABLE `content_types_sub` (
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `data`
@@ -88,7 +88,7 @@ CREATE TABLE `data` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `datum` mediumblob NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1503 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `metadata`
@@ -106,7 +106,7 @@ CREATE TABLE `metadata` (
   `owner_id` int(10) unsigned default NULL,
   `comment_count` tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1493 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `names`
@@ -117,7 +117,7 @@ CREATE TABLE `names` (
   `name` varchar(75) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=198 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `owners`
@@ -136,7 +136,7 @@ CREATE TABLE `owners` (
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `session_id` (`session_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=695 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `referrals`
@@ -150,7 +150,7 @@ CREATE TABLE `referrals` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `referrer_id` (`referrer_id`,`metadata_id`),
   CONSTRAINT `referrals_ibfk_1` FOREIGN KEY (`referrer_id`) REFERENCES `referrers` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `referrers`
@@ -161,7 +161,7 @@ CREATE TABLE `referrers` (
   `address` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `thumbnails`
@@ -172,7 +172,7 @@ CREATE TABLE `thumbnails` (
   `image` mediumblob NOT NULL,
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=390 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `upload_throttle`
@@ -185,7 +185,7 @@ CREATE TABLE `upload_throttle` (
   `date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `visitor_id` (`visitor_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `visitors`
@@ -197,7 +197,7 @@ CREATE TABLE `visitors` (
   `last_visit` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=18280 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `votes`
@@ -211,7 +211,7 @@ CREATE TABLE `votes` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `visitor_id` (`visitor_id`,`metadata_id`),
   CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=948 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping routines for database 'omploader'
