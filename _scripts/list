@@ -179,12 +179,13 @@ begin
     file_number = 0
     query.execute((page - 1) * results).num_rows.times do
       result = query.fetch
-      id = result[0].to_s.to_b64
+      id = result[0].to_s
       date = result[1].to_s
       hits = result[2].to_s
       comment_count = result[3].to_s
       name = result[4].to_s
       next if id.to_i < 1
+      id = id.to_b64
   
       if images_only
         files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
