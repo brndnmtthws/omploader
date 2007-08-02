@@ -13,12 +13,10 @@ database:
 
 # Limits (ie min/maximums)
 limits:
-# Number of uploads in a given period (in seconds)
+# Number of uploads in a given period (in minutes)
 # before getting throttled
 #
-# Note: the cron script runs every minute, so you
-# can't have a period less than 60 seconds and any
-# period will be rounded down to the nearest
-# multiple of 60
+# Note: the cron script needs to run every minute
+# for this to work properly
   upload_count: 10
-  upload_period: 120
+  upload_period: 2
