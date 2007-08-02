@@ -129,46 +129,54 @@ FCGI.each_cgi {|cgi|
     query = db.prepare('select name from owners where id = ?')
     owner_name = query.execute(owner_id).fetch.to_s
     
+    if cgi.has_key?('hide')
+      hide_link = '<a href="i' + id.to_b64 + '">Show Comments</a>'
+    else
+      hide_link = '<a href="i' + id.to_b64 + '-hide">Hide Comments</a>'
+    end
+
     comments_body =
       '        <div class="title">' + "\n" + 
-      '          <div class="links"><a href="#comment_post">Post</a></div>' + "\n" +
+      '          <div class="links">' + hide_link + ' ┃ <a href="#comment_post">Post</a></div>' + "\n" +
       '          <div>Comments</div>' + "\n" +
       '        </div>' + "\n"
     cnum = 0
-      
-    if comment_count > 0
-      query = db.prepare('select
-          comments.id,
-          comments.creation_date,
-          comments_body.body,
-          owners.name
-        from
-          comments
-          inner join metadata on metadata.id = comments.metadata_id
-          inner join comments_body on comments_body.id = comments.comment_id
-          inner join owners on owners.id = comments.owner_id
-        where
-          metadata.id = ?
-        order by comments.creation_date asc
-          ')
-      query.execute(id).num_rows.times do
-        res = query.fetch
-        cid = res[0].to_s
-        date = res[1].to_s
-        body = res[2].to_s
-        lname = res[3].to_s
-        if lname.empty?
-          lname = 'some luser'
+    
+    if !cgi.has_key?('hide')
+      if comment_count > 0
+        query = db.prepare('select
+            comments.id,
+            comments.creation_date,
+            comments_body.body,
+            owners.name
+          from
+            comments
+            inner join metadata on metadata.id = comments.metadata_id
+            inner join comments_body on comments_body.id = comments.comment_id
+            inner join owners on owners.id = comments.owner_id
+          where
+            metadata.id = ?
+          order by comments.creation_date asc
+            ')
+        query.execute(id).num_rows.times do
+          res = query.fetch
+          cid = res[0].to_s
+          date = res[1].to_s
+          body = res[2].to_s
+          lname = res[3].to_s
+          if lname.empty?
+            lname = 'some luser'
+          end
+          cnum += 1
+          comments_body +=
+            '        <a name="comment_' + cid + '"></a>' + "\n" +
+            '        <div class="content comment left-align">' + "\n" +
+            '          <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
+            '          <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">┃</span> <a href="#comment_' + cid + '">#' + cnum.to_s + '</a></div>' + "\n" +
+            '          <br class="clear" />' + "\n" +
+            '          <pre style="margin-bottom: 0; text-align: left"">' + body + '</pre>' + "\n" +
+            '        </div>' + "\n"
         end
-        cnum += 1
-        comments_body +=
-          '        <a name="comment_' + cid + '"></a>' + "\n" +
-          '        <div class="content comment left-align">' + "\n" +
-          '          <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
-          '          <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">┃</span> <a href="#comment_' + cid + '">#' + cnum.to_s  + '</a></div>' + "\n" +
-          '          <br class="clear" />' + "\n" +
-          '          <pre style="margin-bottom: 0; text-align: left"">' + body + '</pre>' + "\n" +
-          '        </div>' + "\n"
       end
     end
     
