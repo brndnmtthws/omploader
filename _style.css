@@ -61,12 +61,12 @@ div#footer {
 	margin: 20px 0 10px 0;
 }
 
-div#footer a {
+div#container div.title a, div#footer a {
 	color: #a8002b;
 	text-decoration: none;
 }
 
-div #footer a:hover {
+div#container div.title a:hover, div #footer a:hover {
 	color: #f0e1e5;
 	background-color: #a8002b;
 }
@@ -86,6 +86,10 @@ div#container div.title {
 	text-align: left;
 	padding: 3px;
 	margin-bottom: 5px;
+}
+
+div#container div.title div.links {
+	float: right
 }
 
 div#container div.content {
@@ -198,5 +202,18 @@ div#container div.large {
 div#container div.large div.powered {
 	font-size: 0.8em;
 	margin-top: 5px;
+}
+
+div#container div.comment {
+	margin-bottom: 5px;
+}
+
+div#container div.comment pre {
+	text-align: left;
+	margin: 5px 0px 5px 0px;
+}
+
+div#container div.content div.form textarea.comment {
+	height: 100px;
 }
 
