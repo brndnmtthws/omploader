@@ -68,13 +68,15 @@ FCGI.each_cgi {|cgi|
         metadata.comment_count,
         metadata.creation_time,
         content_types_main.type,
-        content_types_sub.type
+        content_types_sub.type,
+        owners.name
       from
         metadata
         inner join names on names.id = metadata.name_id
         inner join content_types on content_types.id = metadata.content_type_id
         inner join content_types_main on content_types_main.id = content_types.content_type_main_id
         inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
+        inner join owners on owners.id = metadata.owner_id
       where
         metadata.id = ?')
     query.execute(id)
@@ -89,6 +91,7 @@ FCGI.each_cgi {|cgi|
       creation_time = info[4].to_s
       content_type_main = info[5].to_s
       content_type_sub = info[6].to_s
+      info_owners_name = info[7].to_s
       content_type = content_type_main + '/' + content_type_sub
 
       # get and process referrers
@@ -228,7 +231,7 @@ FCGI.each_cgi {|cgi|
         '        <div class="title">Information for ' + id_b64 + '</div>' + "\n" +
         '        <div class="content">' + "\n" +
         '          <div class="thumb automargin"><div class="container"><a href="v' + id_b64 + '">' + file_link + '</a></div></div>' + "\n" +
-        owner_name +
+        info_owner_name +
         '          <div class="left"><strong>Name:</strong></div><div class="right">' + name + '</div><br class="clear" />' + "\n" +
         '          <div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
         '          <div class="left"><strong>Hits:</strong></div><div class="right">' + hits + '</div><br class="clear" />' + "\n" +
