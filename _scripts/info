@@ -230,7 +230,7 @@ FCGI.each_cgi {|cgi|
       file_link = '<img src="_omploader_thumb.png" alt="View file!" />'
     end
     
-    if !owner_name.empty?
+    if !info_owner_name.empty?
       info_owner_name = '          <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n"
     end
 
