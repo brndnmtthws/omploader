@@ -235,17 +235,17 @@ FCGI.each_cgi {|cgi|
   rescue RuntimeError => err
     db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  ' + err + '</div>' + xhtml_post
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue SyntaxError, NameError => err
     db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + '</div>' + xhtml_post
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue StandardError => err
     db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + '</div>' + xhtml_post
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue
     db.rollback if !db.nil? if !db.nil?
