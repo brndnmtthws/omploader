@@ -17,13 +17,19 @@ ConfigFile = YAML::load(File.open('config'))
 Max_upload_count = ConfigFile['limits']['upload_count']
 Max_upload_period = ConfigFile['limits']['upload_period']
 
+Sql = Mysql.init
+
 def db_connect
-  db_params = ConfigFile['database']
-  db = Mysql.real_connect(db_params['host'], db_params['user'], db_params['pass'], db_params['name'])
-  query = db.prepare('set time_zone = ?')
-  query.execute(db_params['timezone'])
-  db.query('begin') # begin transaction
-  return db
+  begin
+    db_params = ConfigFile['database']
+    db = Sql.real_connect(db_params['host'], db_params['user'], db_params['pass'], db_params['name'])
+    query = db.prepare('set time_zone = ?')
+    query.execute(db_params['timezone'])
+  rescue Mysql::Error => err
+    raise err.error
+  ensure
+    return db
+  end
 end
 
 def xhtml_pre(title = '')
@@ -60,16 +66,24 @@ end
 def db_check(db)
   begin
     db.ping
-  rescue Mysql::Error => e
+  rescue Mysql::Error => err
     db = db_connect
+  ensure
+    raise Sql.error() if db.nil?
+    db.query('begin') # begin transaction
   end
 end
 
 # Update visitors table in database.
 def register_visit(cgi, db)
-  query = db.prepare('insert into visitors (address) values (?) on duplicate key update last_visit = current_timestamp, id = last_insert_id(id)')
-  visitor_id = query.execute(cgi.remote_addr.to_s).insert_id.to_s
-  return visitor_id
+  begin
+    query = db.prepare('insert into visitors (address) values (?) on duplicate key update last_visit = current_timestamp, id = last_insert_id(id)')
+    visitor_id = query.execute(cgi.remote_addr.to_s).insert_id.to_s
+  rescue Mysql::Error => err
+    throw :Mysql::Error err
+  ensure
+    return visitor_id
+  end
 end
 
 def run_cron(db)

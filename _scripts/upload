@@ -150,27 +150,27 @@ FCGI.each_cgi {|cgi|
     }
     db.commit
   rescue Mysql::Error => err
-    db.rollback
+    db.rollback if !db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
     }
   rescue RuntimeError => err
-    db.rollback
+    db.rollback if !db.nil?
     cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  ' + err + '</div>' + xhtml_post
     }
   rescue SyntaxError, NameError => err
-    db.rollback
+    db.rollback if !db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + '</div>' + xhtml_post
     }
   rescue StandardError => err
-    db.rollback
+    db.rollback if !db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + bang + '</div>' + xhtml_post
     }
   rescue
-    db.rollback
+    db.rollback if !db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
     }
