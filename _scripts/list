@@ -93,6 +93,8 @@ begin
       column = 'names.name'
     elsif column_short == 'h'
       column = 'metadata.hits'
+    elsif column_short == 'c'
+      column = 'metadata.comment_count'
     else
       column_short = 't'
       column = 'metadata.creation_time'
@@ -153,6 +155,7 @@ begin
         metadata.id,
         metadata.creation_time,
         metadata.hits,
+        metadata.comment_count,
         names.name,
         content_types_main.type,
         content_types_sub.type
@@ -179,7 +182,8 @@ begin
       id = result[0].to_s
       date = result[1].to_s
       hits = result[2].to_s
-      name = result[3].to_s
+      comment_count = result[3].to_s
+      name = result[4].to_s
       next if id.to_i < 1
       id = to_b64(id)
   
@@ -195,7 +199,7 @@ begin
           files_list_info = ''
         end
       else
-        files_list += '        ' + date + ' | <a href="i' + id + '">info</a>' + ' | ' + hits + ' | <a href="v' + id + '">' + name + '</a><br />' + "\n"
+        files_list += '        ' + date + ' | <a href="i' + id + '">info</a>' + ' | ' + hits + ' | ' + comment_count + ' | <a href="v' + id + '">' + name + '</a><br />' + "\n"
       end
     end
   
@@ -211,7 +215,8 @@ begin
     headers =
       '        <strong>Creation Date</strong> [ <a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n" +
       '        <strong>Names</strong> [ <a href="l' + results.to_s + 'an' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dn' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n" +
-      '        <strong>Hits</strong> [ <a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n"
+      '        <strong>Hits</strong> [ <a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n" +
+      '        <strong>Comments</strong> [ <a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n"
   
     page_links = ''
     if page > 1
