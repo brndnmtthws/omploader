@@ -5,6 +5,11 @@ database:
   user: omploader
   pass: omploader
   host: localhost
+# Takes zoneinfo names as a param, eg.
+# Canada/Mountain
+# Europe/Helsinki
+# US/Eastern
+  timezone: UTC
 
 # Limits (ie min/maximums)
 limits:

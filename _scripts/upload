@@ -11,34 +11,31 @@ require 'rubygems'
 require 'coderay'
 require 'curb'
 require 'uri'
+require 'sanitize'
 
 db = db_connect
 
 FCGI.each_cgi {|cgi|
-  db_check(db)
-  visitor_id = register_visit(cgi, db)
-
-  output = ''
+  begin
+    db_check(db)
+    visitor_id = register_visit(cgi, db)
   
-  owner_id = get_owner_id(cgi, db)
+    output = ''
+    
+    owner_id = get_owner_id(cgi, db)
+    
   
-
-  query = db.prepare('select count from upload_throttle where visitor_id = ?')
-  throttle = query.execute(visitor_id).fetch.to_s
-  if throttle.to_i > Max_upload_count
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Slow down there, cowboy.</div>' + xhtml_post
-    }
-    next
-  end
-
-  saved = 0
-  stop = true
-
-  # Verify that a file parameter is present.
-  for i in 1...6
-    begin
-      db.query('begin')
+    query = db.prepare('select count from upload_throttle where visitor_id = ?')
+    throttle = query.execute(visitor_id).fetch.to_s
+    if throttle.to_i > Max_upload_count
+      raise 'Slow down there, cowboy.'
+    end
+  
+    saved = 0
+    stop = true
+  
+    # Verify that a file parameter is present.
+    for i in 1...6
       if cgi.has_key?('file' + i.to_s)
         file = cgi['file' + i.to_s]
         datum = file.read
@@ -46,31 +43,31 @@ FCGI.each_cgi {|cgi|
         name = file.original_filename.chomp
       elsif cgi.has_key?('url' + i.to_s)
         begin
-        url = cgi['url' + i.to_s].read
-        begin
-        # do some checking on our url
-        url = URI.extract(url).first
-        split = URI.split(url)
-        host = split[2]
-        next if host == cgi.host
-        path = split[5]
-        name = URI.unescape(File.basename(path))
-        name = url if name.empty? or name == '/'
-        rescue
-          next
-        end
-        next if url == 'URL'
-        datum = Curl::Easy.perform(url).body_str
-        rescue
-          next
-        end
-      elsif cgi.has_key?('paste')
-        syntax = cgi['syntax'].read
-        datum = cgi['paste'].read
-        next if datum.empty?
-        name = cgi['name'].read
-        name = 'pasta' if name.empty?
-        if syntax != 'raw' and !syntax.empty?
+            url = cgi['url' + i.to_s].read
+            begin
+              # do some checking on our url
+              url = URI.extract(url).first
+              split = URI.split(url)
+              host = split[2]
+              next if host == cgi.host
+              path = split[5]
+              name = URI.unescape(File.basename(path))
+              name = url if name.empty? or name == '/'
+            rescue
+              next
+            end
+            next if url == 'URL'
+            datum = Curl::Easy.perform(url).body_str
+          rescue
+            next
+          end
+        elsif cgi.has_key?('paste')
+          syntax = cgi['syntax'].read
+          datum = cgi['paste'].read
+          next if datum.empty?
+          name = cgi['name'].read
+          name = 'pasta' if name.empty?
+          if syntax != 'raw' and !syntax.empty?
           datum = CodeRay::Duo[syntax.downcase, :page].highlight(datum).sub('lang="de"', 'lang="en"')
           datum = datum.sub('CodeRay HTML Encoder Example', 'omploader – ' + name + ' (' + syntax + ')')
         end
@@ -129,8 +126,6 @@ FCGI.each_cgi {|cgi|
       query = db.prepare('insert into metadata (content_type_id, name_id, size, datum_id, owner_id) values (?,?,?,?,?)')
       query.execute(content_type_id, name_id, datum.length, datum_id, owner_id)
 
-      db.commit
-
       saved = saved + 1
   
       id = to_b64(query.insert_id.to_s)
@@ -138,28 +133,36 @@ FCGI.each_cgi {|cgi|
       output = output +
         '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
         '      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n"
-    rescue
-      # Discard changes if error occurs.
-      db.rollback
     end
-  end
-  if saved > 0
+    if saved < 1
+      raise 'You are a trad.'
+    end
     query = db.prepare('insert into upload_throttle (visitor_id, count) values (?,?) on duplicate key update count = count + ?')
     query.execute(visitor_id, saved, saved)
-    db.commit
     cgi.out {
       xhtml_pre +
       '        <div class="content large">' + "\n" +
-      '          Omploaded!<br />' + "\n" +
+      '          omploaded!<br />' + "\n" +
       '          <br />' + "\n" +
       output +
       '        </div>' + "\n" +
       xhtml_post
     }
-  else
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">You are a trad.</div>' + xhtml_post
-    }
+    db.commit
+  rescue Mysql::Error => err
     db.rollback
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+    }
+  rescue RuntimeError => err
+    db.rollback
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+    }
+  rescue
+    db.rollback
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.</div>' + xhtml_post
+    }
   end
-}
+ }

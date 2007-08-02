@@ -7,5 +7,14 @@
 
 require 'omploader'
 
-db = db_connect
-run_cron(db)
+begin
+  db = db_connect
+  run_cron(db)
+  db.commit
+rescue Mysql::Error => err
+  db.rollback
+  $stderr.puts 'MySQL error in cron script: ' + err
+rescue
+  db.rollback
+  $stderr.puts 'Error in cron script'
+end

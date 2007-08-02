@@ -20,6 +20,9 @@ Max_upload_period = ConfigFile['limits']['upload_period']
 def db_connect
   db_params = ConfigFile['database']
   db = Mysql.real_connect(db_params['host'], db_params['user'], db_params['pass'], db_params['name'])
+  query = db.prepare('set time_zone = ?')
+  query.execute(db_params['timezone'])
+  db.query('begin') # begin transaction
   return db
 end
 
