@@ -20,16 +20,11 @@ Max_upload_period = ConfigFile['limits']['upload_period']
 Sql = Mysql.init
 
 def db_connect
-  begin
-    db_params = ConfigFile['database']
-    db = Sql.real_connect(db_params['host'], db_params['user'], db_params['pass'], db_params['name'])
-    query = db.prepare('set time_zone = ?')
-    query.execute(db_params['timezone'])
-  rescue Mysql::Error => err
-    raise err.error
-  ensure
-    return db
-  end
+  db_params = ConfigFile['database']
+  db = Sql.real_connect(db_params['host'], db_params['user'], db_params['pass'], db_params['name'])
+  query = db.prepare('set time_zone = ?')
+  query.execute(db_params['timezone'])
+  return db
 end
 
 def xhtml_pre(title = '')

@@ -16,7 +16,6 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
   begin
-    
     db_check(db)
     visitor_id = register_visit(cgi, db)
     
