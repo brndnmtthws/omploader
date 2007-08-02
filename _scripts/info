@@ -131,6 +131,11 @@ FCGI.each_cgi {|cgi|
       query = db.prepare('select name from owners where id = ?')
       owner_name = query.execute(owner_id).fetch.to_s
         
+      comments_body =
+          '        <div class="title">' + "\n" + 
+          '          <div class="links"><a href="#comment_post">Post</a></div>' + "\n" +
+          '          <div>Comments</div>' + "\n" +
+          '        </div>' + "\n"
       if comment_count > 0
         query = db.prepare('select
             comments.id,
@@ -146,11 +151,6 @@ FCGI.each_cgi {|cgi|
             metadata.id = ?
           order by comments.creation_date asc
             ')
-        comments_body =
-          '        <div class="title">' + "\n" + 
-          '          <div class="links"><a href="#comment_post">Post</a></div>' + "\n" +
-          '          <div>Comments</div>' + "\n" +
-          '        </div>' + "\n"
         cnum = 0
         query.execute(id).num_rows.times do
           res = query.fetch
