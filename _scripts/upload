@@ -92,6 +92,8 @@ FCGI.each_cgi {|cgi|
         query = db.prepare('insert into names (name) values (?)')
         name_id = query.execute(name).insert_id
       end
+      
+      name = sanitize(name, '')
 
       fm = FileMagic.new(FileMagic::MAGIC_MIME)
       content_type = fm.buffer(datum)

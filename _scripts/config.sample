@@ -10,5 +10,10 @@ database:
 limits:
 # Number of uploads in a given period (in seconds)
 # before getting throttled
+#
+# Note: the cron script runs every minute, so you
+# can't have a period less than 60 seconds and any
+# period will be rounded down to the nearest
+# multiple of 60
   upload_count: 10
   upload_period: 120

@@ -30,4 +30,6 @@ cp _scripts/config.sample _scripts/config
 
 edit _config and run the sql code included (_scripts/sql-structure) and everything should work
 
+add _scripts/cron to your crontab so that it executes every minute
+
 go team!

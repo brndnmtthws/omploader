@@ -11,6 +11,7 @@ require 'rubygems'
 require 'id3lib'
 require 'mmap'
 require 'vorbisfile'
+require 'sanitize'
 
 db = db_connect
 
@@ -18,8 +19,41 @@ FCGI.each_cgi {|cgi|
   db_check(db)
   register_visit(cgi, db)
 
-  id_b64 = cgi.params['id'].to_s
-  id = from_b64(id_b64)
+  comment_name = ''
+  comment_body = ''
+
+  if cgi.has_key?('comment')
+    comment_body = cgi['comment'].read.to_s
+    comment_name = cgi['name'].read.to_s
+    id_b64 = cgi['id'].read
+    id = from_b64(id_b64)
+    comment_body = sanitize(comment_body)
+    comment_name = sanitize(comment_name, '')
+    begin
+      if !comment_body.empty?
+        # Insert our new comment into db
+        db.query('begin')
+        query = db.prepare('insert into comments_body (body) values (?)')
+        comment_id = query.execute(comment_body).insert_id
+        if comment_name.empty?
+          comment_name = 'some luser'
+        end
+        query = db.prepare('insert into comments (comment_id, metadata_id, name) values (?,?,?)')
+        query.execute(comment_id, id, comment_name)
+        query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
+        query.execute(id)
+        db.commit
+      end
+    rescue
+      db.rollback
+    end
+  else
+    id_b64 = cgi['id']
+    id = from_b64(id_b64)
+  end
+
+#  cgi.out("text/plain") { id + ' pee ' + id_b64 + comment_name + ' : ' + comment_body }
+#  next
 
   # Verify that id is strictly numeric.
   if id =~ /\A\d+\z/
@@ -27,6 +61,7 @@ FCGI.each_cgi {|cgi|
         names.name,
         metadata.size,
         metadata.hits,
+        metadata.comment_count,
         metadata.creation_time,
         content_types_main.type,
         content_types_sub.type
@@ -46,9 +81,10 @@ FCGI.each_cgi {|cgi|
       name = info[0]
       size = info[1]
       hits = info[2].to_s
-      creation_time = info[3].to_s
-      content_type_main = info[4].to_s
-      content_type_sub = info[5].to_s
+      comment_count = info[3].to_i
+      creation_time = info[4].to_s
+      content_type_main = info[5].to_s
+      content_type_sub = info[6].to_s
       content_type = content_type_main + '/' + content_type_sub
 
       # get and process referrers
@@ -84,9 +120,52 @@ FCGI.each_cgi {|cgi|
       else
         size = size.to_s + ' bytes'
       end
-      
-      meta = ''
+        
+        
+      if comment_count > 0
+        query = db.prepare('select
+            comments.creation_date,
+            comments.name,
+            comments_body.body
+          from
+            comments
+            inner join metadata on metadata.id = comments.metadata_id
+            inner join comments_body on comments_body.id = comments.comment_id
+          where
+            metadata.id = ?
+          order by comments.creation_date asc
+            ')
+        comments_body =
+          '        <div class="title">Comments</div>' + "\n"
+        query.execute(id).num_rows.times do
+          res = query.fetch
+          date = res[0].to_s
+          name = res[1].to_s
+          body = res[2].to_s
+          comments_body +=
+            '        <div class="content" align="left">' + "\n" +
+            '          <strong>At ' + date + ' ' + name + ' wrote:</strong>' + "\n" +
+            '          <p><em><pre>' + body + '</pre></em></p>' + "\n" +
+            '        </div>' + "\n"
+        end
+      end
+      comment_form =
+        '        <form enctype="multipart/form-data" action="i' + id_b64 + '" method="post">' + "\n" +
+        '          <div class="form">' + "\n" +
+        '            <div class="float name left-align">' + "\n" +
+        '              <div class="label">Name</div>' + "\n" +
+        '              <input type="line" name="name" size="25" class="input field" />' + "\n" +
+        '            </div>' + "\n" +
+        '            </div>' + "\n" +
+        '            <br class="clear" />' + "\n" +
+        '            <div class="float"><textarea name="comment" class="input"></textarea></div>' + "\n" +
+        '            <br class="clear" />' + "\n" +
+        '            <input type="hidden" name="id" value="' + id_b64 + '" />' + "\n" +
+        '            <input type="submit" value="Post comment" class="button" />' + "\n" +
+        '          </div>' + "\n" +
+        '        </form>'
 
+      meta = ''
       if content_type_main == 'image'
         file_link = '<img src="t' + id_b64 + '" alt="View file!" />'
       elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
@@ -128,7 +207,12 @@ FCGI.each_cgi {|cgi|
         file_link = '<img src="_omploader_thumb.png" alt="View file!" />'
       end
 
-      cgi.out('type' => 'text/html', 'expires' => Time.now + 604800) {
+      if !comment_body.empty?
+        expiry = Time.now - 100000
+      else
+        expiry = Time.now + 604800
+      end
+      cgi.out('type' => 'text/html', 'expires' => expiry) {
         xhtml_pre(' – ' + name + ' (' + content_type + ')') +
         '        <div class="title">Information for ' + id_b64 + '</div>' + "\n" +
         '        <div class="content">' + "\n" +
@@ -143,6 +227,10 @@ FCGI.each_cgi {|cgi|
         '        <div class="title">Top referrers</div>' + "\n" +
         '        <div class="content">' + "\n" +
         referrers +
+        '        </div>' + "\n" +
+        comments_body +
+        '        <div class="content">' + "\n" +
+        comment_form +
         '        </div>' + "\n" +
         xhtml_post
       }
