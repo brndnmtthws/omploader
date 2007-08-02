@@ -96,10 +96,20 @@ FCGI.each_cgi {|cgi|
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
     }
+  rescue SyntaxError, NameError => err
+    db.rollback
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + '</div>' + xhtml_post
+    }
+  rescue StandardError => err
+    db.rollback
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + bang + '</div>' + xhtml_post
+    }
   rescue
     db.rollback
     cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.</div>' + xhtml_post
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
     }
   end
 }

@@ -199,20 +199,20 @@ FCGI.each_cgi {|cgi|
         where
           metadata.id = ?')
       res = query.execute(id).fetch
-      tmp = Tempfile.new(name)
-      tmp.close
-      mmap = Mmap.new(tmp.path, 'rw')
+      tmpfile = Tempfile.new(name)
+      tmpfile.close
+      mmap = Mmap.new(tmpfile.path, 'rw')
       mmap.insert(0, res[0])
       if content_type == 'audio/mpeg'
-        tag = ID3Lib::Tag.new(tmp.path)
+        tag = ID3Lib::Tag.new(tmpfile.path)
         artist = tag.artist
         title = tag.title
         album = tag.album
         year = tag.year
       elsif content_type == 'application/ogg'
         vf = Ogg::VorbisFile.new
-        tmp.open
-        if vf.open(tmp)
+        tmpfile.open
+        if vf.open(tmpfile)
           comments = vf.comments(-1)
           artist = comments['artist']
           title = comments['title']
@@ -271,10 +271,22 @@ FCGI.each_cgi {|cgi|
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
     }
-#  rescue
-#    db.rollback
-#    cgi.out('text/html') {
-#      xhtml_pre + '        <div class="content large">Oops, we screwed up.</div>' + xhtml_post
-#    }
+  rescue SyntaxError, NameError => err
+    db.rollback
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + '</div>' + xhtml_post
+    }
+  rescue StandardError => err
+    db.rollback
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + bang + '</div>' + xhtml_post
+    }
+  rescue
+    db.rollback
+    cgi.out('text/html') {
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+    }
+  ensure
+    tmpfile.close! unless tmpfile.nil?
   end
 }
