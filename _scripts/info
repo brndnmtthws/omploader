@@ -131,11 +131,13 @@ FCGI.each_cgi {|cgi|
       if comment_count > 0
         query = db.prepare('select
             comments.creation_date,
-            comments_body.body
+            comments_body.body,
+            owners.name
           from
             comments
             inner join metadata on metadata.id = comments.metadata_id
             inner join comments_body on comments_body.id = comments.comment_id
+            inner join owners on owners.id = comments.owner_id
           where
             metadata.id = ?
           order by comments.creation_date asc
@@ -146,9 +148,10 @@ FCGI.each_cgi {|cgi|
           res = query.fetch
           date = res[0].to_s
           body = res[1].to_s
+          lname = res[2].to_s
           comments_body +=
             '        <div class="content" align="left">' + "\n" +
-            '          <strong>At ' + date + ' ' + owner_name + ' wrote:</strong>' + "\n" +
+            '          <strong>At ' + date + ' ' + lname + ' wrote:</strong>' + "\n" +
             '          <p><em><pre>' + body + '</pre></em></p>' + "\n" +
             '        </div>' + "\n"
         end
