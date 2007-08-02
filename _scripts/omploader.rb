@@ -56,7 +56,7 @@ end
 
 def xhtml_post
   xhtml_post =
-    '      <div id="footer">an <a href="irc://irc.freenode.net/##otw">##otw</a> collaboration ┃ <a href="http://svn.omploader.org/">view svn repository</a> ┃ powered by starving children in africa</div>' + "\n" +
+    '      <div id="footer"><a href="irc://irc.freenode.net/##otw">otw</a> ┃ <a href="http://www.ruby-lang.org/">ruby</a> ┃ <a href="http://www.vim.org/">vim</a> ┃ <a href="http://svn.omploader.org/">svn</a>' + "\n" +
     '    </div>' + "\n" +
     '  </body>' + "\n" +
     '</html>'
