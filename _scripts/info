@@ -249,16 +249,12 @@ FCGI.each_cgi {|cgi|
       file_link = '<img src="_omploader_thumb.png" alt="View file!" />'
     end
     
-    if !info_owner_name.empty?
-      info_owner_name = '          <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n"
-    end
-
     cgi.out('type' => 'text/html') {
       xhtml_pre(' – ' + name + ' (' + content_type + ')') +
       '        <div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
       '        <div class="content">' + "\n" +
       '          <div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
-      info_owner_name +
+      '          <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n" +
       '          <div class="left"><strong>Name:</strong></div><div class="right">' + name + '</div><br class="clear" />' + "\n" +
       '          <div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
       '          <div class="left"><strong>Hits:</strong></div><div class="right">' + hits + '</div><br class="clear" />' + "\n" +
