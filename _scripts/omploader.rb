@@ -88,12 +88,12 @@ def get_owner_id(cgi, db)
     'session_expires' => Time.now + 60*60*24*365,
     'session_path' => '/'
     )
-  if session.new_session
+  if session.new_session and !session.session_id.to_s.empty?
     # this is a new owner
     query = db.prepare('insert into owners (session_id) values (?)')
     owner_id = query.execute(session.session_id.to_s).insert_id.to_s
     session['owner_id'] = owner_id
-  else
+  elsif !session.session_id.to_s.empty?
     query = db.prepare('insert into owners (session_id) values (?) on duplicate key update session_id = ?, id = last_insert_id(id)')
     query.execute(session.session_id.to_s, session.session_id.to_s)
     owner_id = query.insert_id.to_s

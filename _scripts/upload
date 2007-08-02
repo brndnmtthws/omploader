@@ -78,8 +78,24 @@ FCGI.each_cgi {|cgi|
         next
       end
 
-      query = db.prepare('insert into data (datum) values (?)')
-      datum_id = query.execute(datum).insert_id
+      begin
+        query = db.prepare('insert into data (datum, fingerprint) values (?, sha1(datum))')
+        datum_id = query.execute(datum).insert_id
+      rescue Mysql::Error => err
+        if err.errno == 1062
+          # duplicate key
+          # get id for the dupe one
+          query = db.prepare('select metadata.id from metadata inner join data on data.id = metadata.datum_id where data.fingerprint = sha1(?)')
+          old_id = query.execute(datum).fetch.to_s.to_b64
+          output = output +
+            '      View file: <a href="v' + old_id + '">' + 'v' + old_id + '</a><br />' + "\n" +
+            '      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n"
+          saved += 1
+          next
+        else
+          raise err
+        end
+      end
  
       query = db.prepare('select id from names where name = ?')
       query.execute(name)
