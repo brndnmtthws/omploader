@@ -202,22 +202,22 @@ FCGI.each_cgi {|cgi|
     end
     if paste == 0
       paster = 'ompasta'
-      paster_key = 'p'
     else
       if curl == 0
         paster = 'from file'
-        paster_key = 'c'
       else
         paster = 'from url'
-        paster_key = 'C'
       end
     end
     body =
       '      <div class="content large">' + "\n" +
-      '        <a href="' + simpler_key + '">' + simpler + ' omp</a> | <a href="' + bigger_key + '">' + bigger + ' loader</a> | <a href="' + curler_key + '">from ' + curler + '</a> | <a href="' + paster_key + '">' + paster + '</a> | <a href="l">list</a>' + "\n" +
+      '        <a href="' + simpler_key + '">' + simpler + ' omp</a> | <a href="' + bigger_key + '">' + bigger + ' loader</a> | <a href="l">list</a>' + "\n" +
       '        <div class="powered">powered by web ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
       '      </div>' + "\n" +
-      '      <div class="title">Upload</div>' + "\n" +
+      '      <div class="title">' + "\n" +
+      '        <div class="links"><a href="c">From File</a> ┃ <a href="C">From URL</a> ┃ <a href="p">Pasta!</a></div>' + "\n" +
+      '        <div>Upload</div>' + "\n" +
+      '      </div>' + "\n" +
       '      <div class="content">' + "\n" +
       form + "\n" +
       '      </div>' + "\n" +
