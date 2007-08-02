@@ -64,6 +64,7 @@ begin
       results_sel = results
     end
   
+    db.query('begin')
     if mine_sel != mine_only or results != results_sel or cgi.params['images_only'].to_s =~ /^n{1}$|^y{1}$/
       mine_only = mine_sel
       results = results_sel

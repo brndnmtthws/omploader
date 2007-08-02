@@ -33,6 +33,7 @@ FCGI.each_cgi {|cgi|
       id = cgi['id'].read.to_id
       if !comment_body.empty?
         # Insert our new comment into db
+        db.query('begin') # begin transaction
         query = db.prepare('insert into comments_body (body) values (?)')
         comment_id = query.execute(comment_body).insert_id
         query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
@@ -265,7 +266,6 @@ FCGI.each_cgi {|cgi|
       comment_form + "\n" +
       xhtml_post
     }
-    db.commit
   rescue Mysql::Error => err
     db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {

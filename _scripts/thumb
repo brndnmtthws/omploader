@@ -44,6 +44,7 @@ FCGI.each_cgi {|cgi|
     thumbnail_id = info[2].to_s
     name = info[3].to_s
   
+    db.query('begin')
     if !datum_id.empty? and !content_type_id.empty?
       name = name.insert(name.rindex('.'), '-thumb') if !name.empty? and name =~ /\./
   
@@ -91,6 +92,7 @@ FCGI.each_cgi {|cgi|
         raise 'You are a trad.'
       end
     end
+    db.commit
   rescue Mysql::Error => err
     db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {

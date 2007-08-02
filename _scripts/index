@@ -48,6 +48,7 @@ FCGI.each_cgi {|cgi|
     else
       to_curl = curl
     end
+    db.query('begin')
     if to_big != big or to_simple != simple or to_curl != curl or to_paste != paste
       big = to_big
       simple = to_simple
@@ -225,7 +226,6 @@ FCGI.each_cgi {|cgi|
       top_files_list
     
     cgi.out('text/html') { xhtml_pre + body + xhtml_post }
-
     db.commit
   rescue Mysql::Error => err
     db.rollback if !db.nil? if !db.nil?

@@ -38,6 +38,8 @@ FCGI.each_cgi {|cgi|
     content_type_id = info[1].to_s
     name = info[2].to_s
 
+    db.query('begin')
+
     # Increment vote number if this is first view from visitor.
     query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
     res = query.execute(visitor_id, id)

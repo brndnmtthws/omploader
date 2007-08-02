@@ -35,6 +35,7 @@ FCGI.each_cgi {|cgi|
   
     # Verify that a file parameter is present.
     for i in 1...6
+      db.query('begin')
       if cgi.has_key?('file' + i.to_s)
         file = cgi['file' + i.to_s]
         datum = file.read
@@ -128,6 +129,8 @@ FCGI.each_cgi {|cgi|
       saved = saved + 1
   
       id = query.insert_id.to_s.to_b64
+        
+      db.commit
  
       output = output +
         '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
@@ -147,7 +150,6 @@ FCGI.each_cgi {|cgi|
       '        </div>' + "\n" +
       xhtml_post
     }
-    db.commit
   rescue Mysql::Error => err
     db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {

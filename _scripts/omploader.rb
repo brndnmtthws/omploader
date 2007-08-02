@@ -65,7 +65,6 @@ def db_check(db)
     db = db_connect
   ensure
     raise Sql.error() if db.nil?
-    db.query('begin') # begin transaction
   end
 end
 
