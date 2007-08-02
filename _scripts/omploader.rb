@@ -39,7 +39,7 @@ def xhtml_pre(title = '')
     '  <head>' + "\n" +
     '    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
     '    <link rel="stylesheet" type="text/css" href="_style.css" />' + "\n" +
-    '    <link rel="shortcut icon" href="_omploader.ico" type="image/x-icon" />' + "\n" +
+    '    <link rel="shortcut icon" href="_omploader_icon.png" type="image/x-icon" />' + "\n" +
     '    <title>omploader' + title + '</title>' + "\n" +
     '  </head>' + "\n" +
     '  <body>' + "\n" +
@@ -76,14 +76,9 @@ end
 
 # Update visitors table in database.
 def register_visit(cgi, db)
-  begin
-    query = db.prepare('insert into visitors (address) values (?) on duplicate key update last_visit = current_timestamp, id = last_insert_id(id)')
-    visitor_id = query.execute(cgi.remote_addr.to_s).insert_id.to_s
-  rescue Mysql::Error => err
-    throw :Mysql::Error err
-  ensure
-    return visitor_id
-  end
+  query = db.prepare('insert into visitors (address) values (?) on duplicate key update last_visit = current_timestamp, id = last_insert_id(id)')
+  visitor_id = query.execute(cgi.remote_addr.to_s).insert_id.to_s
+  return visitor_id
 end
 
 def run_cron(db)

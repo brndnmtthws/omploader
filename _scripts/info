@@ -16,16 +16,19 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
   begin
-
+    
     db_check(db)
-    register_visit(cgi, db)
-  
+    visitor_id = register_visit(cgi, db)
+    
+    query = db.prepare('select count from upload_throttle where visitor_id = ?')
+    throttle = query.execute(visitor_id).fetch.to_s
+
     owner_id = get_owner_id(cgi, db)
     
     comment_name = ''
     comment_body = ''
-  
-    if cgi.has_key?('comment')
+
+    if cgi.has_key?('comment') and throttle.to_i < Max_upload_count
       comment_body = cgi['comment'].read.to_s.sanitise
       comment_name = cgi['name'].read.to_s.sanitise
       id = cgi['id'].read.to_id
@@ -34,11 +37,17 @@ FCGI.each_cgi {|cgi|
         query = db.prepare('insert into comments_body (body) values (?)')
         comment_id = query.execute(comment_body).insert_id
         query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
-        query.execute(comment_id, id, owner_id)
+        comment_id = query.execute(comment_id, id, owner_id).insert_id
         query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
         query.execute(id)
         query = db.prepare('update owners set name = ? where id = ?')
         query.execute(comment_name, owner_id)
+        query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
+        query.execute(visitor_id, 1)
+        db.commit
+        redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
+        print cgi.header({'Status' => '302 Moved', 'location' => redirect})
+        next
       end
     else
       id = cgi['id'].to_id
@@ -162,23 +171,33 @@ FCGI.each_cgi {|cgi|
           '        </div>' + "\n"
       end
     end
-    comment_form =
-      '        <a name="comment_post"></a>' + "\n" +
-      '        <div class="content">' + "\n" +
-      '          <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
-      '            <div class="form">' + "\n" +
-      '              <div class="float name left-align">' + "\n" +
-      '                <div class="label">Name</div>' + "\n" +
-      '                <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
-      '              </div>' + "\n" +
-      '              <br class="clear" />' + "\n" +
-      '              <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
-      '              <br class="clear" />' + "\n" +
-      '              <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
-      '              <input type="submit" value="COMMENT!" class="button" />' + "\n" +
-      '            </div>' + "\n" +
-      '          </form>' + "\n" +
-      '        </div>'
+    
+    query = db.prepare('select count from upload_throttle where visitor_id = ?')
+    throttle = query.execute(visitor_id).fetch.to_s
+  
+    if throttle.to_i < Max_upload_count
+      comment_form =
+        '        <a name="comment_post"></a>' + "\n" +
+        '        <div class="content">' + "\n" +
+        '          <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
+        '            <div class="form">' + "\n" +
+        '              <div class="float name left-align">' + "\n" +
+        '                <div class="label">Name</div>' + "\n" +
+        '                <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
+        '              </div>' + "\n" +
+        '              <br class="clear" />' + "\n" +
+        '              <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
+        '              <br class="clear" />' + "\n" +
+        '              <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
+        '              <input type="submit" value="COMMENT!" class="button" />' + "\n" +
+        '            </div>' + "\n" +
+        '          </form>' + "\n" +
+        '        </div>'
+    else
+      comment_form =
+        '        <a name="comment_post"></a>' + "\n" +
+        '        <div class="content large">NO COOKIE!</div>' + "\n"
+    end
 
     meta = ''
     if content_type_main == 'image'
@@ -226,12 +245,7 @@ FCGI.each_cgi {|cgi|
       info_owner_name = '          <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n"
     end
 
-    if !comment_body.empty?
-      expiry = Time.now - 100000
-    else
-      expiry = Time.now + 604800
-    end
-    cgi.out('type' => 'text/html', 'expires' => expiry) {
+    cgi.out('type' => 'text/html') {
       xhtml_pre(' – ' + name + ' (' + content_type + ')') +
       '        <div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
       '        <div class="content">' + "\n" +
@@ -254,27 +268,27 @@ FCGI.each_cgi {|cgi|
     }
     db.commit
   rescue Mysql::Error => err
-    db.rollback if !db.nil?
+    db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
     }
   rescue RuntimeError => err
-    db.rollback if !db.nil?
+    db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  ' + err + '</div>' + xhtml_post
     }
   rescue SyntaxError, NameError => err
-    db.rollback if !db.nil?
+    db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + '</div>' + xhtml_post
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue StandardError => err
-    db.rollback if !db.nil?
+    db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + bang + '</div>' + xhtml_post
+      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue
-    db.rollback if !db.nil?
+    db.rollback if !db.nil? if !db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
     }
