@@ -41,11 +41,11 @@ FCGI.each_cgi {|cgi|
           comment_name = 'some luser'
         end
         query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
-        query.execute(comment_id, id, comment_owner_id)
+        query.execute(comment_id, id, owner_id)
         query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
         query.execute(id)
-        query = db.prepare('update owners set name = ? where owner_id = ?')
-        query.execute(owner_id)
+        query = db.prepare('update owners set name = ? where id = ?')
+        query.execute(comment_name, owner_id)
         db.commit
       end
     rescue
