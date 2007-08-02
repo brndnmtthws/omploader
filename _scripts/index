@@ -12,6 +12,7 @@ db = db_connect
 FCGI.each_cgi {|cgi|
   begin
     db_check(db)
+    db.query('begin')
     visitor_id = register_visit(cgi, db)
   
     owner_id = get_owner_id(cgi, db)
@@ -48,7 +49,6 @@ FCGI.each_cgi {|cgi|
     else
       to_curl = curl
     end
-    db.query('begin')
     if to_big != big or to_simple != simple or to_curl != curl or to_paste != paste
       big = to_big
       simple = to_simple
@@ -228,27 +228,27 @@ FCGI.each_cgi {|cgi|
     cgi.out('text/html') { xhtml_pre + body + xhtml_post }
     db.commit
   rescue Mysql::Error => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
     }
   rescue RuntimeError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue SyntaxError, NameError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue StandardError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
     }

@@ -17,6 +17,7 @@ db = db_connect
 FCGI.each_cgi {|cgi|
   begin
     db_check(db)
+    db.query('begin') # begin transaction
     visitor_id = register_visit(cgi, db)
     
     query = db.prepare('select count from upload_throttle where visitor_id = ?')
@@ -33,7 +34,6 @@ FCGI.each_cgi {|cgi|
       id = cgi['id'].read.to_id
       if !comment_body.empty?
         # Insert our new comment into db
-        db.query('begin') # begin transaction
         query = db.prepare('insert into comments_body (body) values (?)')
         comment_id = query.execute(comment_body).insert_id
         query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
@@ -44,9 +44,9 @@ FCGI.each_cgi {|cgi|
         query.execute(comment_name, owner_id)
         query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
         query.execute(visitor_id, 1)
-        db.commit
         redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
         print cgi.header({'Status' => '302 Moved', 'location' => redirect})
+        db.commit
         next
       end
     else
@@ -270,28 +270,29 @@ FCGI.each_cgi {|cgi|
       comment_form + "\n" +
       xhtml_post
     }
+    db.commit
   rescue Mysql::Error => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
     }
   rescue RuntimeError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue SyntaxError, NameError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue StandardError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
     }

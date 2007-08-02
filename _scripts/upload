@@ -17,6 +17,7 @@ db = db_connect
 FCGI.each_cgi {|cgi|
   begin
     db_check(db)
+    db.query('begin')
     visitor_id = register_visit(cgi, db)
   
     output = ''
@@ -35,7 +36,6 @@ FCGI.each_cgi {|cgi|
   
     # Verify that a file parameter is present.
     for i in 1...6
-      db.query('begin')
       if cgi.has_key?('file' + i.to_s)
         file = cgi['file' + i.to_s]
         datum = file.read
@@ -130,8 +130,6 @@ FCGI.each_cgi {|cgi|
   
       id = query.insert_id.to_s.to_b64
         
-      db.commit
- 
       output = output +
         '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
         '      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n"
@@ -150,28 +148,29 @@ FCGI.each_cgi {|cgi|
       '        </div>' + "\n" +
       xhtml_post
     }
+    db.commit
   rescue Mysql::Error => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
     }
   rescue RuntimeError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue SyntaxError, NameError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue StandardError => err
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
     }
   rescue
-    db.rollback if !db.nil? if !db.nil?
+    db.rollback unless db.nil?
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
     }
