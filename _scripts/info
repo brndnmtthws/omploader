@@ -37,9 +37,6 @@ FCGI.each_cgi {|cgi|
         # Insert our new comment into db
         query = db.prepare('insert into comments_body (body) values (?)')
         comment_id = query.execute(comment_body).insert_id
-        if comment_name.empty?
-          comment_name = 'some luser'
-        end
         query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
         query.execute(comment_id, id, owner_id)
         query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
@@ -159,6 +156,9 @@ FCGI.each_cgi {|cgi|
         date = res[1].to_s
         body = res[2].to_s
         lname = res[3].to_s
+        if lname.empty?
+          lname = 'some luser'
+        end
         cnum += 1
         comments_body +=
           '        <a name="comment_' + cid + '"></a>' + "\n" +
