@@ -81,7 +81,7 @@ FCGI.each_cgi {|cgi|
           5')
       query.execute.num_rows.times do
         result = query.fetch
-        id = to_b64(result.first.to_s)
+        id = result.first.to_s.to_b64
         name = result.last.to_s
   
         top_images_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
@@ -106,7 +106,7 @@ FCGI.each_cgi {|cgi|
           5')
       query.execute.num_rows.times do
         result = query.fetch
-        id = to_b64(result.first.to_s)
+        id = result.first.to_s.to_b64
         name = result.last.to_s
   
         top_files_list += '      <a href="i' + id + '">Info</a> <span style="color: #bbb">┃</span> <a href="v' + id + '">' + name + '</a><br />' + "\n"

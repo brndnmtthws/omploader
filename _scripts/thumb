@@ -16,7 +16,7 @@ FCGI.each_cgi {|cgi|
     db_check(db)
     register_visit(cgi, db)
   
-    id = from_b64(cgi.params['id'].to_s)
+    id = cgi.params['id'].to_s.to_id
   
     # Verify that id is strictly numeric.
     if id !~ /\A\d+\z/

@@ -91,22 +91,6 @@ def run_cron(db)
   q.execute(Max_upload_period)
 end
 
-# Convert string to integer to Base36 to chomped Base64.
-def to_b64(str)
-  str = Base64.encode64(str.to_i.to_s(base=36)).chomp.gsub('=', '')
-  return str
-end
-
-# Convert chomped Base64 to Base36 to integer to string.
-def from_b64(str)
-  while str.length % 4 > 0
-    str += '='
-  end
-
-  str = Base64.decode64(str).to_i(base=36).to_s
-  return str
-end
-
 def get_owner_id(cgi, db)
   session = CGI::Session.new(cgi,
     'database_manager' => CGI::Session::PStore,  # use PStore
@@ -129,3 +113,23 @@ def get_owner_id(cgi, db)
   return owner_id
 end
 
+class String
+  # Convert string to integer to Base36 to chomped Base64.
+  def to_b64
+    Base64.encode64(self.to_i.to_s(base=36)).chomp.gsub('=', '')
+  end
+  
+  # Convert chomped Base64 to Base36 to integer to string.
+  def to_id
+    str = self
+    while self.length % 4 > 0
+      str += '='
+    end
+    Base64.decode64(str).to_i(base=36).to_s
+  end
+
+  # Sanitise HTML code to avoid opening tags.
+  def sanitise
+    self.gsub('<', '&lt;').gsub('>', '&gt;')
+  end
+end

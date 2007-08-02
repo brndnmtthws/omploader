@@ -11,7 +11,6 @@ require 'rubygems'
 require 'id3lib'
 require 'mmap'
 require 'vorbisfile'
-require 'sanitize'
 
 db = db_connect
 
@@ -27,12 +26,9 @@ FCGI.each_cgi {|cgi|
     comment_body = ''
   
     if cgi.has_key?('comment')
-      comment_body = cgi['comment'].read.to_s
-      comment_name = cgi['name'].read.to_s
-      id_b64 = cgi['id'].read
-      id = from_b64(id_b64)
-      comment_body = sanitize(comment_body)
-      comment_name = sanitize(comment_name, '')
+      comment_body = cgi['comment'].read.to_s.sanitise
+      comment_name = cgi['name'].read.to_s.sanitise
+      id = cgi['id'].read.to_id
       if !comment_body.empty?
         # Insert our new comment into db
         query = db.prepare('insert into comments_body (body) values (?)')
@@ -45,12 +41,8 @@ FCGI.each_cgi {|cgi|
         query.execute(comment_name, owner_id)
       end
     else
-      id_b64 = cgi['id']
-      id = from_b64(id_b64)
+      id = cgi['id'].to_id
     end
-  
-  #  cgi.out("text/plain") { id + ' pee ' + id_b64 + comment_name + ' : ' + comment_body }
-  #  next
   
     # Verify that id is strictly numeric.
     if id !~ /\A\d+\z/
@@ -173,7 +165,7 @@ FCGI.each_cgi {|cgi|
     comment_form =
       '        <a name="comment_post"></a>' + "\n" +
       '        <div class="content">' + "\n" +
-      '          <form enctype="multipart/form-data" action="i' + id_b64 + '" method="post">' + "\n" +
+      '          <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
       '            <div class="form">' + "\n" +
       '              <div class="float name left-align">' + "\n" +
       '                <div class="label">Name</div>' + "\n" +
@@ -182,7 +174,7 @@ FCGI.each_cgi {|cgi|
       '              <br class="clear" />' + "\n" +
       '              <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
       '              <br class="clear" />' + "\n" +
-      '              <input type="hidden" name="id" value="' + id_b64 + '" />' + "\n" +
+      '              <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
       '              <input type="submit" value="COMMENT!" class="button" />' + "\n" +
       '            </div>' + "\n" +
       '          </form>' + "\n" +
@@ -190,7 +182,7 @@ FCGI.each_cgi {|cgi|
 
     meta = ''
     if content_type_main == 'image'
-      file_link = '<img src="t' + id_b64 + '" alt="View file!" />'
+      file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
     elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
       query = db.prepare('select
           data.datum
@@ -241,9 +233,9 @@ FCGI.each_cgi {|cgi|
     end
     cgi.out('type' => 'text/html', 'expires' => expiry) {
       xhtml_pre(' – ' + name + ' (' + content_type + ')') +
-      '        <div class="title">Information for ' + id_b64 + '</div>' + "\n" +
+      '        <div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
       '        <div class="content">' + "\n" +
-      '          <div class="thumb automargin"><div class="container"><a href="v' + id_b64 + '">' + file_link + '</a></div></div>' + "\n" +
+      '          <div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
       info_owner_name +
       '          <div class="left"><strong>Name:</strong></div><div class="right">' + name + '</div><br class="clear" />' + "\n" +
       '          <div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +

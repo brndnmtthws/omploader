@@ -11,7 +11,6 @@ require 'rubygems'
 require 'coderay'
 require 'curb'
 require 'uri'
-require 'sanitize'
 
 db = db_connect
 
@@ -90,7 +89,7 @@ FCGI.each_cgi {|cgi|
         name_id = query.execute(name).insert_id
       end
       
-      name = sanitize(name, '')
+      name = name.sanitise
 
       fm = FileMagic.new(FileMagic::MAGIC_MIME)
       content_type = fm.buffer(datum)
@@ -128,7 +127,7 @@ FCGI.each_cgi {|cgi|
 
       saved = saved + 1
   
-      id = to_b64(query.insert_id.to_s)
+      id = query.insert_id.to_s.to_b64
  
       output = output +
         '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
