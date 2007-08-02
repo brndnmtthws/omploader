@@ -19,6 +19,8 @@ FCGI.each_cgi {|cgi|
   db_check(db)
   register_visit(cgi, db)
 
+  owner_id = get_owner_id(cgi, db)
+  
   comment_name = ''
   comment_body = ''
 
@@ -38,10 +40,12 @@ FCGI.each_cgi {|cgi|
         if comment_name.empty?
           comment_name = 'some luser'
         end
-        query = db.prepare('insert into comments (comment_id, metadata_id, name) values (?,?,?)')
-        query.execute(comment_id, id, comment_name)
+        query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
+        query.execute(comment_id, id, comment_owner_id)
         query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
         query.execute(id)
+        query = db.prepare('update owners set name = ? where owner_id = ?')
+        query.execute(owner_id)
         db.commit
       end
     rescue
@@ -120,12 +124,13 @@ FCGI.each_cgi {|cgi|
       else
         size = size.to_s + ' bytes'
       end
-        
+
+      query = db.prepare('select name from owners where id = ?')
+      owner_name = query.execute(owner_id).fetch.to_s
         
       if comment_count > 0
         query = db.prepare('select
             comments.creation_date,
-            comments.name,
             comments_body.body
           from
             comments
@@ -140,11 +145,10 @@ FCGI.each_cgi {|cgi|
         query.execute(id).num_rows.times do
           res = query.fetch
           date = res[0].to_s
-          name = res[1].to_s
-          body = res[2].to_s
+          body = res[1].to_s
           comments_body +=
             '        <div class="content" align="left">' + "\n" +
-            '          <strong>At ' + date + ' ' + name + ' wrote:</strong>' + "\n" +
+            '          <strong>At ' + date + ' ' + owner_name + ' wrote:</strong>' + "\n" +
             '          <p><em><pre>' + body + '</pre></em></p>' + "\n" +
             '        </div>' + "\n"
         end
@@ -154,7 +158,7 @@ FCGI.each_cgi {|cgi|
         '          <div class="form">' + "\n" +
         '            <div class="float name left-align">' + "\n" +
         '              <div class="label">Name</div>' + "\n" +
-        '              <input type="line" name="name" size="25" class="input field" />' + "\n" +
+        '              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
         '            </div>' + "\n" +
         '            </div>' + "\n" +
         '            <br class="clear" />' + "\n" +

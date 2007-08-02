@@ -29,7 +29,7 @@ CREATE TABLE `comments` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `metadata_id` int(10) unsigned NOT NULL,
   `comment_id` int(10) unsigned NOT NULL,
-  `name` varchar(20) collate utf8_unicode_ci default NULL,
+  `owner_id` int(10) unsigned NOT NULL,
   `creation_date` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `metadata_id` (`metadata_id`,`comment_id`),
@@ -134,6 +134,7 @@ CREATE TABLE `owners` (
   `list_results` tinyint(3) unsigned NOT NULL default '20',
   `list_images` tinyint(1) NOT NULL default '0',
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `name` varchar(20) collate utf8_unicode_ci default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `session_id` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
