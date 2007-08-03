@@ -41,7 +41,10 @@ FCGI.each_cgi {|cgi|
         curl = cgi.params['curl'].to_s.to_i
         update_owner = true
       end
-      paste = 0
+      if paste != 0
+        paste = 0
+        update_owner = true
+      end
     end
     if cgi.has_key?('hide_top_files') and hide_top_files != cgi.params['hide_top_files'].to_s.to_i
       hide_top_files = cgi.params['hide_top_files'].to_s.to_i
