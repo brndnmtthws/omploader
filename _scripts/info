@@ -142,9 +142,9 @@ FCGI.each_cgi {|cgi|
     owner_name = query.execute(owner_id).fetch.to_s
     
     if hide_comments == 1
-      hide_link = '<a href="i' + id.to_b64 + '-show">Show (' + comment_count.to_s + ')</a> ┃ <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
+      hide_link = '<a href="i' + id.to_b64 + '-show">Show (' + comment_count.to_s + ')</a> &#x2503; <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
     else
-      hide_link = '<a href="i' + id.to_b64 + '-hide">Hide</a> ┃ <a href="#comment_post">Post</a>'
+      hide_link = '<a href="i' + id.to_b64 + '-hide">Hide</a> &#x2503; <a href="#comment_post">Post</a>'
     end
 
     comments_body =
@@ -184,7 +184,7 @@ FCGI.each_cgi {|cgi|
             '      <a name="comment_' + cid + '"></a>' + "\n" +
             '      <div class="content comment left-align">' + "\n" +
             '        <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
-            '        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">┃</span> <a href="#comment_' + cid + '">#' + cnum.to_s + '</a></div>' + "\n" +
+            '        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">&#x2503;</span> <a href="#comment_' + cid + '">#' + cnum.to_s + '</a></div>' + "\n" +
             '        <br class="clear" />' + "\n" +
             '        <pre>' + body + '</pre>' + "\n" +
             '      </div>' + "\n"
