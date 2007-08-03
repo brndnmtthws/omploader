@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 #
+# $Id$
+#
 # Copyright 2007 David Shakaryan <omp@gentoo.org>
 # Copyright 2007 Brenden Matthews <brenden@rty.ca>
 #
 # Distributed under the terms of the GNU General Public License v3
+#
 
-require 'omploader'
-require 'filemagic'
-require 'rubygems'
 require 'coderay'
 require 'curb'
 require 'uri'

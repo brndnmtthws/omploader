@@ -1,3 +1,13 @@
+--
+-- $Id$
+--
+-- Copyright 2007 David Shakaryan <omp@gentoo.org>
+-- Copyright 2007 Brenden Matthews <brenden@rty.ca>
+--
+-- Distributed under the terms of the GNU General Public License v3
+--
+
+
 -- MySQL dump 10.11
 --
 -- Host: localhost    Database: omploader
