@@ -29,12 +29,12 @@ CREATE TABLE `comments` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `metadata_id` int(10) unsigned NOT NULL,
   `comment_id` int(10) unsigned NOT NULL,
-  `owner_id` int(10) unsigned NOT NULL,
   `creation_date` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `owner_id` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `metadata_id` (`metadata_id`,`comment_id`),
   CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `comments_body`
@@ -42,9 +42,9 @@ CREATE TABLE `comments` (
 
 CREATE TABLE `comments_body` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `body` varchar(750) collate utf8_unicode_ci NOT NULL,
+  `body` varchar(750) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types`
@@ -56,7 +56,7 @@ CREATE TABLE `content_types` (
   `content_type_sub_id` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `content_type_main_id` (`content_type_main_id`,`content_type_sub_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types_main`
@@ -67,7 +67,7 @@ CREATE TABLE `content_types_main` (
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types_sub`
@@ -78,7 +78,7 @@ CREATE TABLE `content_types_sub` (
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `data`
@@ -87,8 +87,10 @@ CREATE TABLE `content_types_sub` (
 CREATE TABLE `data` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `datum` mediumblob NOT NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `fingerprint` varchar(40) NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `fingerprint` (`fingerprint`)
+) ENGINE=InnoDB AUTO_INCREMENT=1707 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `metadata`
@@ -106,7 +108,7 @@ CREATE TABLE `metadata` (
   `owner_id` int(10) unsigned default NULL,
   `comment_count` tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1702 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `names`
@@ -117,7 +119,7 @@ CREATE TABLE `names` (
   `name` varchar(75) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=411 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `owners`
@@ -130,14 +132,15 @@ CREATE TABLE `owners` (
   `show_mine` tinyint(1) NOT NULL default '0',
   `curl` tinyint(1) NOT NULL default '0',
   `paste` tinyint(1) NOT NULL default '0',
+  `hide_comments` tinyint(1) NOT NULL default '0',
   `session_id` varchar(32) character set utf8 collate utf8_unicode_ci default NULL,
   `list_results` tinyint(3) unsigned NOT NULL default '20',
   `list_images` tinyint(1) NOT NULL default '0',
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `name` varchar(20) collate utf8_unicode_ci default NULL,
+  `name` varchar(20) character set utf8 collate utf8_unicode_ci NOT NULL default 'some luser',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `session_id` (`session_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3877 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `referrals`
@@ -151,7 +154,7 @@ CREATE TABLE `referrals` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `referrer_id` (`referrer_id`,`metadata_id`),
   CONSTRAINT `referrals_ibfk_1` FOREIGN KEY (`referrer_id`) REFERENCES `referrers` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=749 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `referrers`
@@ -162,7 +165,7 @@ CREATE TABLE `referrers` (
   `address` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `thumbnails`
@@ -173,7 +176,7 @@ CREATE TABLE `thumbnails` (
   `image` mediumblob NOT NULL,
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=757 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `upload_throttle`
@@ -186,7 +189,7 @@ CREATE TABLE `upload_throttle` (
   `date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `visitor_id` (`visitor_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=206 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `visitors`
@@ -198,7 +201,7 @@ CREATE TABLE `visitors` (
   `last_visit` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=32352 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `votes`
@@ -212,7 +215,7 @@ CREATE TABLE `votes` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `visitor_id` (`visitor_id`,`metadata_id`),
   CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=446 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping routines for database 'omploader'
@@ -241,4 +244,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-08-02  0:27:06
+-- Dump completed on 2007-08-03  1:31:14
