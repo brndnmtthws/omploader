@@ -34,7 +34,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `metadata_id` (`metadata_id`,`comment_id`),
   CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `comments_body`
@@ -44,7 +44,7 @@ CREATE TABLE `comments_body` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `body` varchar(750) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types`
