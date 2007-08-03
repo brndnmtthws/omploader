@@ -169,25 +169,34 @@ FCGI.each_cgi {|cgi|
             metadata.id = ?
           order by comments.creation_date asc
             ')
+        comment_array = Array.new
         query.execute(id).num_rows.times do
-          res = query.fetch
-          cid = res[0].to_s
-          date = res[1].to_s
-          body = res[2].to_s
-          lname = res[3].to_s
-          if lname.empty?
-            lname = 'some luser'
-          end
           cnum += 1
+          res = query.fetch
+          array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
+          comment_array << array
+        end
+        comment_array.each { |array|
+          num = array[0]
+          cid = array[1]
+          date = array[2]
+          body = array[3]
+          lname = array[4]
+          if body =~ /^\[thumb\]([A-Za-z0-9+\/]+)\[\/thumb\]/
+            if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
+              body = body.sub(/^\[thumb\]([A-Za-z0-9+\/]+)\[\/thumb\]/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+              body += '<br class="clear" />'
+            end
+          end
           comments_body +=
             '      <a name="comment_' + cid + '"></a>' + "\n" +
             '      <div class="content comment left-align">' + "\n" +
             '        <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
-            '        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">&#x2503;</span> <a href="#comment_' + cid + '">#' + cnum.to_s + '</a></div>' + "\n" +
+            '        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">&#x2503;</span> <a href="#comment_' + cid + '">#' + num + '</a></div>' + "\n" +
             '        <br class="clear" />' + "\n" +
             '        <pre>' + body + '</pre>' + "\n" +
             '      </div>' + "\n"
-        end
+        }
       end
       query = db.prepare('select count from upload_throttle where visitor_id = ?')
       throttle = query.execute(visitor_id).fetch.to_s
@@ -254,9 +263,9 @@ FCGI.each_cgi {|cgi|
       meta += '        <div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
       meta += '        <div class="left"><strong>Year:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
       meta = meta.insert(0, '          <br />' + "\n") if !meta.empty?
-      file_link = '<img src="_omploader_thumb.png" alt="View file!" />'
+      file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
     else
-      file_link = '<img src="_omploader_thumb.png" alt="View file!" />'
+      file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
     end
     
     cgi.out('type' => 'text/html') {

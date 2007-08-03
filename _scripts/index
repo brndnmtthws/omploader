@@ -51,28 +51,6 @@ FCGI.each_cgi {|cgi|
       query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
       query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
     end
-#    if cgi.has_key?('paste') and paste != cgi.params['paste'].to_s.to_i
-#      paste = cgi.params['paste'].to_s.to_i
-#      update_owner = true
-#    end
-#    if cgi.has_key?('big') and big != cgi.params['paste'].to_s.to_i
-#      big = cgi.params['big'].to_s.to_i
-#      update_owner = true
-#      paste = 0
-#    end
-#    if cgi.has_key?('hide_top_files') and paste != cgi.params['paste'].to_s.to_i
-#      hide_top_files = cgi.params['hide_top_files'].to_s.to_i
-#      update_owner = true
-#    end
-#    if cgi.has_key?('curl') and paste != cgi.params['paste'].to_s.to_i
-#      curl = cgi.params['curl'].to_s.to_i
-#      update_owner = true
-#      paste = 0
-#    end
-#    if update_owner
-#      query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
-#      res = query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
-#    end
   
     if hide_top_files == 1
       top_files = '      <div class="title">' + "\n" +
