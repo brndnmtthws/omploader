@@ -24,6 +24,21 @@ FCGI.each_cgi {|cgi|
     throttle = query.execute(visitor_id).fetch.to_s
 
     owner_id = get_owner_id(cgi, db)
+
+    query = db.prepare('select hide_comments from owners where id = ?')
+    hide_comments = query.execute(owner_id).fetch.to_s.to_i
+
+    if cgi.has_key?('show')
+      has_comment_key = 1
+      hide_comments = 0
+    elsif cgi.has_key?('hide')
+      has_comment_key = 1
+      hide_comments = 1
+    end
+    if has_comment_key == 1
+      query = db.prepare('update owners set hide_comments = ? where id = ?')
+      res = query.execute(hide_comments.to_s, owner_id)
+    end
     
     comment_name = ''
     comment_body = ''
@@ -129,20 +144,20 @@ FCGI.each_cgi {|cgi|
     query = db.prepare('select name from owners where id = ?')
     owner_name = query.execute(owner_id).fetch.to_s
     
-    if cgi.has_key?('hide')
-      hide_link = '<a href="i' + id.to_b64 + '">Show Comments</a>'
+    if hide_comments == 1
+      hide_link = '<a href="i' + id.to_b64 + '-show">Show Comments (' + comment_count.to_s + ')</a> ┃ <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
     else
-      hide_link = '<a href="i' + id.to_b64 + '-hide">Hide Comments</a>'
+      hide_link = '<a href="i' + id.to_b64 + '-hide">Hide Comments</a> ┃ <a href="#comment_post">Post</a>'
     end
 
     comments_body =
       '        <div class="title">' + "\n" + 
-      '          <div class="links">' + hide_link + ' ┃ <a href="#comment_post">Post</a></div>' + "\n" +
+      '          <div class="links">' + hide_link + '</div>' + "\n" +
       '          <div>Comments</div>' + "\n" +
       '        </div>' + "\n"
     cnum = 0
     
-    if !cgi.has_key?('hide')
+    if hide_comments == 0
       if comment_count > 0
         query = db.prepare('select
             comments.id,
@@ -178,33 +193,32 @@ FCGI.each_cgi {|cgi|
             '        </div>' + "\n"
         end
       end
-    end
+      query = db.prepare('select count from upload_throttle where visitor_id = ?')
+      throttle = query.execute(visitor_id).fetch.to_s
     
-    query = db.prepare('select count from upload_throttle where visitor_id = ?')
-    throttle = query.execute(visitor_id).fetch.to_s
-  
-    if throttle.to_i < Max_upload_count
-      comment_form =
-        '        <a name="comment_post"></a>' + "\n" +
-        '        <div class="content">' + "\n" +
-        '          <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
-        '            <div class="form">' + "\n" +
-        '              <div class="float name left-align">' + "\n" +
-        '                <div class="label">Name</div>' + "\n" +
-        '                <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
-        '              </div>' + "\n" +
-        '              <br class="clear" />' + "\n" +
-        '              <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
-        '              <br class="clear" />' + "\n" +
-        '              <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
-        '              <input type="submit" value="COMMENT!" class="button" />' + "\n" +
-        '            </div>' + "\n" +
-        '          </form>' + "\n" +
-        '        </div>'
-    else
-      comment_form =
-        '        <a name="comment_post"></a>' + "\n" +
-        '        <div class="content large">NO COOKIE!</div>' + "\n"
+      if throttle.to_i < Max_upload_count
+        comment_body +=
+          '        <a name="comment_post"></a>' + "\n" +
+          '        <div class="content">' + "\n" +
+          '          <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
+          '            <div class="form">' + "\n" +
+          '              <div class="float name left-align">' + "\n" +
+          '                <div class="label">Name</div>' + "\n" +
+          '                <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
+          '              </div>' + "\n" +
+          '              <br class="clear" />' + "\n" +
+          '              <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
+          '              <br class="clear" />' + "\n" +
+          '              <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
+          '              <input type="submit" value="COMMENT!" class="button" />' + "\n" +
+          '            </div>' + "\n" +
+          '          </form>' + "\n" +
+          '        </div>' + "\n"
+      else
+        comment_body +=
+          '        <a name="comment_post"></a>' + "\n" +
+          '        <div class="content large">NO COOKIE!</div>' + "\n"
+      end
     end
 
     meta = ''
@@ -267,7 +281,6 @@ FCGI.each_cgi {|cgi|
       referrers +
       '        </div>' + "\n" +
       comments_body +
-      comment_form + "\n" +
       xhtml_post
     }
     db.commit
