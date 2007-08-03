@@ -27,6 +27,7 @@ def db_connect
   db = Sql.real_connect(db_params['host'], db_params['user'], db_params['pass'], db_params['name'])
   query = db.prepare('set time_zone = ?')
   query.execute(db_params['timezone'])
+  db.autocommit(false)
   return db
 end
 
@@ -114,7 +115,7 @@ class String
   # Convert chomped Base64 to Base36 to integer to string.
   def to_id
     str = self
-    while self.length % 4 > 0
+    while str.length % 4 > 0
       str += '='
     end
     Base64.decode64(str).to_i(base=36).to_s

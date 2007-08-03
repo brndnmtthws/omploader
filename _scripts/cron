@@ -12,7 +12,6 @@ require 'omploader'
 
 begin
   db = db_connect
-  db.query('begin')
   run_cron(db)
   db.commit
 rescue Mysql::Error => err

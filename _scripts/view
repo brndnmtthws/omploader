@@ -16,7 +16,6 @@ db = db_connect
 FCGI.each_cgi {|cgi|
   begin
     db_check(db)
-    db.query('begin')
     visitor_id = register_visit(cgi, db)
   
     id = cgi.params['id'].to_s.to_id
@@ -97,7 +96,7 @@ FCGI.each_cgi {|cgi|
   rescue RuntimeError => err
     db.rollback unless db.nil?
     cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+      xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
     }
   rescue SyntaxError, NameError => err
     db.rollback unless db.nil?
