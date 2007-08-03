@@ -140,7 +140,6 @@ begin
     elsif !my_where_clause.empty?
       where_clause = my_where_clause
     end
-  #  cgi.out('text/plain'){where_clause}
   
     query = db.prepare('select
         count(*)
@@ -175,16 +174,25 @@ begin
         ' limit
         ?,' + results.to_s)
     if images_only
-      files_list = '      <div class="content">' + "\n"
+      files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
       files_list_info = ''
     else
-      files_list = '      <div class="content left-align">' + "\n"
+      files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
+        '        <table>' + "\n" +
+        '          <tr>' + "\n" +
+        '            <th>Name<a href="l' + results.to_s + 'an' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dn' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</th>' + "\n" +
+        '            <th>Info</th>' + "\n" +
+        '            <th>Hits<a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+        '            <th>&ldquo;&rdquo;<a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+        '            <th>Time<a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+        '          </tr>' + "\n"
+      row_number = 0
     end
     file_number = 0
     query.execute((page - 1) * results).num_rows.times do
       result = query.fetch
       id = result[0].to_s
-      date = result[1].to_s
+      time = result[1].to_s
       hits = result[2].to_s
       comment_count = result[3].to_s
       name = result[4].to_s
@@ -203,27 +211,28 @@ begin
           files_list_info = ''
         end
       else
-        if file_number%2 == 0
-          files_list += '        <div class="list"><div class = "even">'
+        row_number += 1
+        if row_number % 2 == 1
+          files_list +=
+            '          <tr>' + "\n"
         else
-          files_list += '        <div class="list"><div class="odd">'
+          files_list +=
+            '          <tr class="even">' + "\n"
         end
+
+        if name.length > 30
+          name_displayed = name[0..28] + '…'
+        else
+          name_displayed = name
+        end
+
         files_list +=
-          '<div class="list col1">' +
-           date +
-           '</div> | <div class="list col2"><a href="i' +
-           id +
-           '"><center>info</center></a></div>' +
-           ' | <div class="list col3">' +
-           hits +
-           '</div> | <div class="list col3">' +
-           comment_count +
-           '</div> | <div class="list col4"><a href="v' +
-           id +
-           '">' +
-           name +
-           '</div></a><br />' + 
-           '</div></div><br />' + "\n"
+          '            <td><a href="v' + id + '" title="' + name + '">' + name_displayed + '</a></td>' + "\n" +
+          '            <td><a href="i' + id + '">Info</td>' + "\n" +
+          '            <td>' + hits + '</td>' + "\n" +
+          '            <td>' + comment_count + '</td>' + "\n" +
+          '            <td>' + time + '</td>' + "\n" +
+          '          </tr>' +  "\n"
       end
     end
   
@@ -233,20 +242,16 @@ begin
         files_list += files_list_info
         files_list += '        <br class="clear" />' + "\n"
       end
-    end
-    files_list += '      </div>'
-  
-    headers =
-      '        <strong>Creation Date</strong> [ <a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n" +
-      '        <strong>Names</strong> [ <a href="l' + results.to_s + 'an' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dn' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n" +
-      '        <strong>Hits</strong> [ <a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n" +
-      '        <strong>Comments</strong> [ <a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Ascending</a> | <a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">Descending</a> ]<br />' + "\n"
-  
-    page_links = ''
-    if page > 1
-      page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + 1.to_s + param_search + '">First Page</a> | <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous Page</a>'
     else
-      page_links += "        First Page | Previous Page"
+      files_list += '        </table>' + "\n"
+    end
+    files_list += '      </div>' + "\n"
+  
+    page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
+    if page > 1
+      page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous Page</a>'
+    else
+      page_links += "        Previous Page"
     end
     query = db.prepare('select
                     metadata.id
@@ -265,6 +270,7 @@ begin
     else
       page_links += ' | Next Page'
     end
+    page_links += "\n" + '      </div>' + "\n"
     
     if mine_only == 1
       mine_only_msg = '<a href="l' + results.to_s + order_short + column_short + 'n' + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">show anyone\'s</a> [ <span class="pink">showing mine</span> ]'
@@ -294,9 +300,13 @@ begin
     end
   
     if shown.to_i == 0
-      files_list = '      <div class="content large">No results.</div>'
+      files_list_title = ''
+      files_list = '      <div class="content large">No results.</div>' + "\n"
     else
-      files_list = files_list.insert(0, '      <div class="title">Page ' + page.to_s + ' (files ' + ((page - 1) * results + 1).to_s + ' to ' + shown + ')</div>' + "\n")
+      files_list_title = '      <div class="title">' + "\n" +
+        '<div class="links">' + results_html + '</div>' + "\n" +
+        'Page ' + page.to_s + ' (files ' + ((page - 1) * results + 1).to_s + ' to ' + shown + ')' + "\n" +
+        '</div>' + "\n"
     end
   
     cgi.out('text/html') {
@@ -305,13 +315,10 @@ begin
       '        ' + mine_only_msg + '<br />' + "\n" +
       '        ' + images_only_msg + "\n" +
       '      </div>' + "\n" +
-      '      <div class="title">Poos</div>' + "\n" +
-      '      <div class="content">' + "\n" +
-      page_links + '<br />' + "\n" +
-      results_html +
-      headers +
-      '      </div>' + "\n" +
+      files_list_title +
+      page_links +
       files_list +
+      page_links +
       xhtml_post
     }
     db.commit

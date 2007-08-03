@@ -200,8 +200,8 @@ div#container div.content div.right {
 
 div#container div.content div.filelist {
 	text-align: left;
-	margin: auto;
 	display: table;
+	margin: auto;
 }
 
 div#container div.content div.filelist span.filename {
@@ -211,6 +211,31 @@ div#container div.content div.filelist span.filename {
 div#container div.content div.filelist span.fileinfo {
 	color: #bbb;
 	float: right;
+}
+
+div#container div.content table {
+	border-collapse: collapse;
+	text-align: left;
+	width: 100%;
+}
+
+div#container div.content th {
+	color: #a8002b;
+	background-color: #f0e1e5;
+	padding: 0 3px 0 3px;
+}
+
+div#container div.content td {
+	padding: 0 3px 0 3px;
+}
+
+div#container div.content td a {
+	width: 100%;
+	display: block;
+}
+
+div#container div.content tr.even {
+	background-color: #e6e6e6;
 }
 
 div#container div.left-align {
@@ -241,51 +266,3 @@ div#container div.comment pre {
 div#container div.content div.form textarea.comment {
 	height: 100px;
 }
-
-div#container div.list {
-	height: 1px;
-}
-
-div#container div.list div.even {
-	display: -moz-inline-box;
-	display: inline-block;
-}
-
-div#container div.list div.odd {
-	background-color: #f0e1e5;
-	display: -moz-inline-box;
-	display: inline-block;
-	width: 609px;
-}
-
-div#container div.list div.col1 { 
-	width: 150px; 
-	float: left; 
-	margin-left: 5px;
-	margin-right: 5px;
-	text-align: center;
-} 
-
-div#container div.list div.col2 {
-	width: 25px; 
-#	margin-left: 5px;
-	margin-right: 5px;
-	float: left;
-	text-align: center;
-}
-
-div#container div.list div.col3 {
-	width: 35px; 
-#	margin-left: 5px;
-	margin-right: 5px;
-	float: left;
-	text-align: right;
-} 
-
-div#container div.list div.col4 { 
-	width: 100%; 
-	float: left; 
-	margin-left: 5px;
-	margin-right: 5px;
-} 
-
