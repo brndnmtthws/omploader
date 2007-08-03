@@ -229,6 +229,10 @@ div#container div.content td {
 	padding: 0 3px 0 3px;
 }
 
+div#container div.content .small {
+	width: 1px;
+}
+
 div#container div.content td a {
 	width: 100%;
 	display: block;

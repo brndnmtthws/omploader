@@ -181,10 +181,10 @@ begin
         '        <table>' + "\n" +
         '          <tr>' + "\n" +
         '            <th>Name<a href="l' + results.to_s + 'an' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dn' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</th>' + "\n" +
-        '            <th>Info</th>' + "\n" +
-        '            <th>Hits<a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
-        '            <th>&ldquo;&rdquo;<a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
-        '            <th>Time<a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+        '            <th class="small">Info</th>' + "\n" +
+        '            <th class="small">Hits<a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+        '            <th class="small">&ldquo;&rdquo;<a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+        '            <th class="small">Time<a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
         '          </tr>' + "\n"
       row_number = 0
     end
@@ -228,10 +228,10 @@ begin
 
         files_list +=
           '            <td><a href="v' + id + '" title="' + name + '">' + name_displayed + '</a></td>' + "\n" +
-          '            <td><a href="i' + id + '">Info</td>' + "\n" +
-          '            <td>' + hits + '</td>' + "\n" +
-          '            <td>' + comment_count + '</td>' + "\n" +
-          '            <td>' + time + '</td>' + "\n" +
+          '            <td class="small"><a href="i' + id + '">Info</td>' + "\n" +
+          '            <td class="small">' + hits + '</td>' + "\n" +
+          '            <td class="small">' + comment_count + '</td>' + "\n" +
+          '            <td class="small">' + time.sub(' ', '&nbsp;') + '</td>' + "\n" +
           '          </tr>' +  "\n"
       end
     end
