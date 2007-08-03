@@ -31,14 +31,8 @@ FCGI.each_cgi {|cgi|
     query = db.prepare('select hide_comments from owners where id = ?')
     hide_comments = query.execute(owner_id).fetch.to_s.to_i
 
-    if cgi.has_key?('show')
-      has_comment_key = 1
-      hide_comments = 0
-    elsif cgi.has_key?('hide')
-      has_comment_key = 1
-      hide_comments = 1
-    end
-    if has_comment_key == 1
+    if cgi.has_key?('hide_comments') and hide_comments != cgi.params['hide_comments'].to_s.to_i
+      hide_comments = cgi.params['hide_comments'].to_s.to_i
       query = db.prepare('update owners set hide_comments = ? where id = ?')
       res = query.execute(hide_comments.to_s, owner_id)
     end
@@ -148,9 +142,9 @@ FCGI.each_cgi {|cgi|
     owner_name = query.execute(owner_id).fetch.to_s
     
     if hide_comments == 1
-      hide_link = '<a href="i' + id.to_b64 + '-show">Show Comments (' + comment_count.to_s + ')</a> ┃ <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
+      hide_link = '<a href="i' + id.to_b64 + '-show">Show (' + comment_count.to_s + ')</a> ┃ <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
     else
-      hide_link = '<a href="i' + id.to_b64 + '-hide">Hide Comments</a> ┃ <a href="#comment_post">Post</a>'
+      hide_link = '<a href="i' + id.to_b64 + '-hide">Hide</a> ┃ <a href="#comment_post">Post</a>'
     end
 
     comments_body =

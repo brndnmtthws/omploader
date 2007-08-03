@@ -137,7 +137,7 @@ CREATE TABLE `names` (
 
 CREATE TABLE `owners` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `simple` tinyint(1) NOT NULL default '0',
+  `hide_top_files` tinyint(1) NOT NULL default '0',
   `big` tinyint(1) NOT NULL default '0',
   `show_mine` tinyint(1) NOT NULL default '0',
   `curl` tinyint(1) NOT NULL default '0',

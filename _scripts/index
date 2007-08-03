@@ -28,37 +28,52 @@ FCGI.each_cgi {|cgi|
     curl = res[2].to_i
     paste = res[3].to_i
   
-    if !cgi.params['paste'].empty?
-      to_paste = cgi.params['paste'].to_s.to_i
-    else
-      to_paste = paste
+    update_owner = false
+    if cgi.has_key?('paste') and paste != cgi.params['paste'].to_s.to_i
+      paste = cgi.params['paste'].to_s.to_i
+      update_owner = true
     end
-    if !cgi.params['big'].empty?
-      to_big = cgi.params['big'].to_s.to_i
-      paste = 1
-      to_paste = 0
-    else
-      to_big = big
+    if cgi.has_key?('big') and big != cgi.params['big'].to_s.to_i
+      big = cgi.params['big'].to_s.to_i
+      update_owner = true
     end
-    if !cgi.params['hide_top_files'].empty?
+    if cgi.has_key?('curl')
+      if curl != cgi.params['curl'].to_s.to_i
+        curl = cgi.params['curl'].to_s.to_i
+        update_owner = true
+      end
+      paste = 0
+    end
+    if cgi.has_key?('hide_top_files') and hide_top_files != cgi.params['hide_top_files'].to_s.to_i
       hide_top_files = cgi.params['hide_top_files'].to_s.to_i
+      update_owner = true
     end
-    if !cgi.params['curl'].empty?
-      to_curl = cgi.params['curl'].to_s.to_i
-      paste = 1
-      to_paste = 0
-    else
-      to_curl = curl
-    end
-    if to_big != big or !cgi.params['hide_top_files'].empty? or to_curl != curl or to_paste != paste
-      big = to_big
-      curl = to_curl
-      paste = to_paste
+    if update_owner
       query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
-      res = query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
-  #    print cgi.header({ 'Status' => '302 Moved', 'location' => '/'})
-  #    next
+      query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
     end
+#    if cgi.has_key?('paste') and paste != cgi.params['paste'].to_s.to_i
+#      paste = cgi.params['paste'].to_s.to_i
+#      update_owner = true
+#    end
+#    if cgi.has_key?('big') and big != cgi.params['paste'].to_s.to_i
+#      big = cgi.params['big'].to_s.to_i
+#      update_owner = true
+#      paste = 0
+#    end
+#    if cgi.has_key?('hide_top_files') and paste != cgi.params['paste'].to_s.to_i
+#      hide_top_files = cgi.params['hide_top_files'].to_s.to_i
+#      update_owner = true
+#    end
+#    if cgi.has_key?('curl') and paste != cgi.params['paste'].to_s.to_i
+#      curl = cgi.params['curl'].to_s.to_i
+#      update_owner = true
+#      paste = 0
+#    end
+#    if update_owner
+#      query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
+#      res = query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
+#    end
   
     if hide_top_files == 1
       top_files = '      <div class="title">' + "\n" +
@@ -139,7 +154,7 @@ FCGI.each_cgi {|cgi|
       end
       if big == 1 and paste != 1
         form =
-          '        <form enctype="multipart/form-data" action="u" method="post">' + "\n" +
+          '        <form enctype="multipart/form-data" action="upload" method="post">' + "\n" +
           '           <div class="form">' + "\n" +
           '            <input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
           '            <input type="' + input_type + '" name="' + input_name + '2" size="25" class="input field" /><br />' + "\n" +
@@ -151,7 +166,7 @@ FCGI.each_cgi {|cgi|
           '        </form>'
       elsif paste == 1
         form =
-          '        <form enctype="multipart/form-data" action="u" method="post">' + "\n" +
+          '        <form enctype="multipart/form-data" action="upload" method="post">' + "\n" +
           '          <div class="form">' + "\n" +
           '            <div class="float name left-align">' + "\n" +
           '              <div class="label">Name</div>' + "\n" +
@@ -177,7 +192,7 @@ FCGI.each_cgi {|cgi|
           '        </form>'
       else
         form =
-          '        <form enctype="multipart/form-data" action="u" method="post">' + "\n" +
+          '        <form enctype="multipart/form-data" action="upload" method="post">' + "\n" +
           '          <div class="form">' + "\n" +
           '            <input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
           '            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
@@ -190,18 +205,16 @@ FCGI.each_cgi {|cgi|
   
     if big == 0
       bigger = 'big'
-      bigger_key = 'B'
     else
       bigger = 'small'
-      bigger_key = 'b'
     end
     xhtml =
       '      <div class="content large">' + "\n" +
-      '        <a href="' + bigger_key + '">' + bigger + ' loader</a> | <a href="l">list</a>' + "\n" +
+      '        <a href="' + bigger + '">' + bigger + ' loader</a> | <a href="l">list</a>' + "\n" +
       '        <div class="powered">powered by web ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
       '      </div>' + "\n" +
       '      <div class="title">' + "\n" +
-      '        <div class="links"><a href="c">From File</a> ┃ <a href="C">From URL</a> ┃ <a href="p">Pasta!</a></div>' + "\n" +
+      '        <div class="links"><a href="file">From File</a> ┃ <a href="curl">From URL</a> ┃ <a href="paste">Pasta!</a></div>' + "\n" +
       '        <div>Upload</div>' + "\n" +
       '      </div>' + "\n" +
       '      <div class="content">' + "\n" +
