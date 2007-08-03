@@ -209,6 +209,7 @@ div#container div.comment {
 }
 
 div#container div.comment pre {
+	font-size: 1.2em;
 	text-align: left;
 	margin: 5px 0px 5px 0px;
 }
