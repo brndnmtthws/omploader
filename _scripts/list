@@ -188,10 +188,10 @@ begin
       next if id.to_i < 1
       id = id.to_b64
   
+      file_number = file_number + 1
       if images_only
         files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
         files_list_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
-        file_number = file_number + 1
         if file_number == 5
           file_number = 0
           files_list += '        <br class="clear" />' + "\n"
@@ -200,7 +200,27 @@ begin
           files_list_info = ''
         end
       else
-        files_list += '        ' + date + ' | <a href="i' + id + '">info</a>' + ' | ' + hits + ' | ' + comment_count + ' | <a href="v' + id + '">' + name + '</a><br />' + "\n"
+        if file_number%2 == 0
+          files_list += '        <div class="list"><div class = "even">'
+        else
+          files_list += '        <div class="list"><div class="odd">'
+        end
+        files_list +=
+          '<div class="list col1">' +
+           date +
+           '</div> | <div class="list col2"><a href="i' +
+           id +
+           '"><center>info</center></a></div>' +
+           ' | <div class="list col3">' +
+           hits +
+           '</div> | <div class="list col3">' +
+           comment_count +
+           '</div> | <div class="list col4"><a href="v' +
+           id +
+           '">' +
+           name +
+           '</div></a><br />' + 
+           '</div></div><br />' + "\n"
       end
     end
   
