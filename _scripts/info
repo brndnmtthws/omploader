@@ -211,6 +211,7 @@ FCGI.each_cgi {|cgi|
           '              <div class="label">Name</div>' + "\n" +
           '              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
           '            </div>' + "\n" +
+          '            <div style="color: #999; text-align: right; float: right">Link to another file with <strong>[thumb]id[/thumb]</strong><br />at the beginning of your comment.</div>' + "\n" +
           '            <br class="clear" />' + "\n" +
           '            <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
           '            <br class="clear" />' + "\n" +
