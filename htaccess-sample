@@ -17,8 +17,8 @@ RewriteEngine on
 
 RewriteRule ^b(.*)$ _scripts/index?big=0 [L]
 RewriteRule ^B(.*)$ _scripts/index?big=1 [L]
-RewriteRule ^s(.*)$ _scripts/index?simple=0 [L]
-RewriteRule ^S(.*)$ _scripts/index?simple=1 [L]
+RewriteRule ^show$ _scripts/index?hide_top_files=0 [L]
+RewriteRule ^hide$ _scripts/index?hide_top_files=1 [L]
 RewriteRule ^c(.*)$ _scripts/index?curl=0 [L]
 RewriteRule ^C(.*)$ _scripts/index?curl=1 [L]
 RewriteRule ^p(.*)$ _scripts/index?paste=1 [L]

@@ -1,11 +1,11 @@
-#
-# $Id$
-#
-# Copyright 2007 David Shakaryan <omp@gentoo.org>
-# Copyright 2007 Brenden Matthews <brenden@rty.ca>
-#
-# Distributed under the terms of the GNU General Public License v3
-#
+/*
+$Id$
+
+Copyright 2007 David Shakaryan <omp@gentoo.org>
+Copyright 2007 Brenden Matthews <brenden@rty.ca>
+
+Distributed under the terms of the GNU General Public License v3
+*/
 
 body {
 	color: #333;
@@ -195,6 +195,21 @@ div#container div.content div.right {
 	text-align: left;
 	overflow: hidden;
 	width: 488px;
+	float: right;
+}
+
+div#container div.content div.filelist {
+	text-align: left;
+	margin: auto;
+	display: table;
+}
+
+div#container div.content div.filelist span.filename {
+	float: left;
+}
+
+div#container div.content div.filelist span.fileinfo {
+	color: #bbb;
 	float: right;
 }
 

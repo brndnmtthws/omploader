@@ -192,7 +192,7 @@ FCGI.each_cgi {|cgi|
             '        <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
             '        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">┃</span> <a href="#comment_' + cid + '">#' + cnum.to_s + '</a></div>' + "\n" +
             '        <br class="clear" />' + "\n" +
-            '        <pre style="margin-bottom: 0; text-align: left"">' + body + '</pre>' + "\n" +
+            '        <pre>' + body + '</pre>' + "\n" +
             '      </div>' + "\n"
         end
       end

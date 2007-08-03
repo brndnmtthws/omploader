@@ -20,11 +20,11 @@ FCGI.each_cgi {|cgi|
   
     owner_id = get_owner_id(cgi, db)
   
-    query = db.prepare('select big, simple, curl, paste from owners where id = ?')
+    query = db.prepare('select big, hide_top_files, curl, paste from owners where id = ?')
     res = query.execute(owner_id).fetch
     
     big = res[0].to_i
-    simple = res[1].to_i
+    hide_top_files = res[1].to_i
     curl = res[2].to_i
     paste = res[3].to_i
   
@@ -40,10 +40,8 @@ FCGI.each_cgi {|cgi|
     else
       to_big = big
     end
-    if !cgi.params['simple'].empty?
-      to_simple = cgi.params['simple'].to_s.to_i
-    else
-      to_simple = simple
+    if !cgi.params['hide_top_files'].empty?
+      hide_top_files = cgi.params['hide_top_files'].to_s.to_i
     end
     if !cgi.params['curl'].empty?
       to_curl = cgi.params['curl'].to_s.to_i
@@ -52,23 +50,28 @@ FCGI.each_cgi {|cgi|
     else
       to_curl = curl
     end
-    if to_big != big or to_simple != simple or to_curl != curl or to_paste != paste
+    if to_big != big or !cgi.params['hide_top_files'].empty? or to_curl != curl or to_paste != paste
       big = to_big
-      simple = to_simple
       curl = to_curl
       paste = to_paste
-      query = db.prepare('update owners set big = ?, simple = ?, curl = ?, paste = ? where id = ?')
-      res = query.execute(big.to_s, simple.to_s, curl.to_s, paste.to_s, owner_id)
+      query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
+      res = query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
   #    print cgi.header({ 'Status' => '302 Moved', 'location' => '/'})
   #    next
     end
   
-    if simple == 1
-      top_images_list = ''
-      top_files_list = ''
+    if hide_top_files == 1
+      top_files = '      <div class="title">' + "\n" +
+        '        <div class="links"><a href="show">Show</a></div>' + "\n" +
+        '        Top Files' + "\n" +
+        '      </div>'
     else
-      top_images_list = '      <div class="title">Top Images</div>' + "\n" + '      <div class="content">' + "\n"
-      top_images_list_info = ''
+      top_files = '      <div class="title">' + "\n" +
+        '        <div class="links"><a href="hide">Hide</a></div>' + "\n" +
+        '        Top Files' + "\n" +
+        '      </div>' + "\n" +
+        '      <div class="content">' + "\n"
+      top_files_info = ''
       query = db.prepare('select
           metadata.id,
           names.name from metadata
@@ -88,12 +91,12 @@ FCGI.each_cgi {|cgi|
         id = result.first.to_s.to_b64
         name = result.last.to_s
   
-        top_images_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
-        top_images_list_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
+        top_files += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+        top_files_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
       end
-      top_images_list += '        <br class="clear" />' + "\n" + top_images_list_info + '        <br class="clear" />' + "\n" + '      </div>' + "\n"
-  
-      top_files_list = '      <div class="title">Top Files</div>' + "\n" + '      <div class="content left-align">' + "\n"
+      top_files += '        <br class="clear" />' + "\n" + top_files_info + '        <br class="clear" />' + "\n" +
+        '        <br />' + "\n" +
+        '        <div class="filelist">' + "\n"
       query = db.prepare('select
           metadata.id,
           names.name from metadata
@@ -113,9 +116,11 @@ FCGI.each_cgi {|cgi|
         id = result.first.to_s.to_b64
         name = result.last.to_s
   
-        top_files_list += '      <a href="i' + id + '">Info</a> <span style="color: #bbb">┃</span> <a href="v' + id + '">' + name + '</a><br />' + "\n"
+        top_files += '          <span class="filename"><a href="v' + id + '">' + name + '</a></span>' + "\n" +
+          '          <span class="fileinfo">&nbsp;┃&nbsp;<a href="i' + id + '">Info</a></span><br class="clear" />' + "\n"
       end
-      top_files_list += '      </div>' + "\n"
+      top_files += '        </div>' + "\n" +
+        '      </div>' + "\n"
     end
   
     query = db.prepare('select count(*) from metadata')
@@ -183,13 +188,6 @@ FCGI.each_cgi {|cgi|
       form = '        <div class="content large">NO COOKIE!</div>'
     end
   
-    if simple == 0
-      simpler = 'less'
-      simpler_key = 'S'
-    else
-      simpler = 'more'
-      simpler_key = 's'
-    end
     if big == 0
       bigger = 'big'
       bigger_key = 'B'
@@ -197,25 +195,9 @@ FCGI.each_cgi {|cgi|
       bigger = 'small'
       bigger_key = 'b'
     end
-    if curl == 0
-      curler = 'url'
-      curler_key = 'C'
-    else
-      curler = 'file'
-      curler_key = 'c'
-    end
-    if paste == 0
-      paster = 'ompasta'
-    else
-      if curl == 0
-        paster = 'from file'
-      else
-        paster = 'from url'
-      end
-    end
-    body =
+    xhtml =
       '      <div class="content large">' + "\n" +
-      '        <a href="' + simpler_key + '">' + simpler + ' omp</a> | <a href="' + bigger_key + '">' + bigger + ' loader</a> | <a href="l">list</a>' + "\n" +
+      '        <a href="' + bigger_key + '">' + bigger + ' loader</a> | <a href="l">list</a>' + "\n" +
       '        <div class="powered">powered by web ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
       '      </div>' + "\n" +
       '      <div class="title">' + "\n" +
@@ -225,10 +207,9 @@ FCGI.each_cgi {|cgi|
       '      <div class="content">' + "\n" +
       form + "\n" +
       '      </div>' + "\n" +
-      top_images_list +
-      top_files_list
-    
-    cgi.out('text/html') { xhtml_pre + body + xhtml_post }
+      top_files
+ 
+    cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
     db.commit
   rescue Mysql::Error => err
     db.rollback unless db.nil?

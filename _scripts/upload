@@ -8,6 +8,9 @@
 # Distributed under the terms of the GNU General Public License v3
 #
 
+require 'omploader'
+require 'filemagic'
+require 'rubygems'
 require 'coderay'
 require 'curb'
 require 'uri'
