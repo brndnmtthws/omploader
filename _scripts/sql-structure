@@ -1,13 +1,3 @@
---
--- $Id$
---
--- Copyright 2007 David Shakaryan <omp@gentoo.org>
--- Copyright 2007 Brenden Matthews <brenden@rty.ca>
---
--- Distributed under the terms of the GNU General Public License v3
---
-
-
 -- MySQL dump 10.11
 --
 -- Host: localhost    Database: omploader
@@ -66,7 +56,7 @@ CREATE TABLE `content_types` (
   `content_type_sub_id` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `content_type_main_id` (`content_type_main_id`,`content_type_sub_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types_main`
@@ -77,7 +67,7 @@ CREATE TABLE `content_types_main` (
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types_sub`
@@ -88,7 +78,7 @@ CREATE TABLE `content_types_sub` (
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `data`
@@ -100,7 +90,7 @@ CREATE TABLE `data` (
   `fingerprint` varchar(40) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `fingerprint` (`fingerprint`)
-) ENGINE=InnoDB AUTO_INCREMENT=1707 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `metadata`
@@ -117,8 +107,12 @@ CREATE TABLE `metadata` (
   `thumbnail_id` int(10) unsigned default NULL,
   `owner_id` int(10) unsigned default NULL,
   `comment_count` tinyint(4) NOT NULL default '0',
+  `artist_id` int(10) unsigned default NULL,
+  `title_id` int(10) unsigned default NULL,
+  `album_id` int(10) unsigned default NULL,
+  `year_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1702 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `names`
@@ -129,7 +123,7 @@ CREATE TABLE `names` (
   `name` varchar(75) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=411 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `owners`
@@ -147,10 +141,10 @@ CREATE TABLE `owners` (
   `list_results` tinyint(3) unsigned NOT NULL default '20',
   `list_images` tinyint(1) NOT NULL default '0',
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `name` varchar(20) character set utf8 collate utf8_unicode_ci NOT NULL default 'some luser',
+  `name_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `session_id` (`session_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3877 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `referrals`
@@ -164,7 +158,7 @@ CREATE TABLE `referrals` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `referrer_id` (`referrer_id`,`metadata_id`),
   CONSTRAINT `referrals_ibfk_1` FOREIGN KEY (`referrer_id`) REFERENCES `referrers` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=749 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `referrers`
@@ -175,7 +169,7 @@ CREATE TABLE `referrers` (
   `address` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `thumbnails`
@@ -186,7 +180,7 @@ CREATE TABLE `thumbnails` (
   `image` mediumblob NOT NULL,
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=757 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `upload_throttle`
@@ -199,7 +193,7 @@ CREATE TABLE `upload_throttle` (
   `date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `visitor_id` (`visitor_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=206 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `visitors`
@@ -211,7 +205,7 @@ CREATE TABLE `visitors` (
   `last_visit` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=32352 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `votes`
@@ -225,7 +219,7 @@ CREATE TABLE `votes` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `visitor_id` (`visitor_id`,`metadata_id`),
   CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=446 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping routines for database 'omploader'
@@ -254,4 +248,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-08-03  1:31:14
+-- Dump completed on 2007-08-04 21:22:50
