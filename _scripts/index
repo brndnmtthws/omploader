@@ -111,8 +111,11 @@ FCGI.each_cgi {|cgi|
         id = result.first.to_s.to_b64
         name = result.last.to_s
   
-        top_files += '          <span class="filename"><a href="v' + id + '">' + name + '</a></span>' + "\n" +
-          '          <span class="fileinfo">&nbsp;&#x2503;&nbsp;<a href="i' + id + '">Info</a></span><br class="clear" />' + "\n"
+        top_files += 
+          '          <div class="file" />' + "\n" +
+          '          <span class="filename"><a href="v' + id + '">' + name + '</a></span>' + "\n" +
+          '          <span class="fileinfo"><a href="i' + id + '">Info</a></span>' + "\n" +
+          '          </div>' + "\n"
       end
       top_files += '        </div>' + "\n" +
         '      </div>' + "\n"

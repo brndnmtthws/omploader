@@ -66,8 +66,13 @@ div#footer {
 	background-color: #f0e1e5;
 	border: 1px solid #cc5271;
 	font-size: 0.8em;
+	text-align: left;
 	padding: 5px;
 	margin: 20px 0 10px 0;
+}
+
+div#footer div.right {
+	float: right;
 }
 
 div#container div.title a, div#footer a {
@@ -204,13 +209,22 @@ div#container div.content div.filelist {
 	margin: auto;
 }
 
-div#container div.content div.filelist span.filename {
-	float: left;
+div#container div.content div.filelist div.file {
+	display: table-row;
 }
 
-div#container div.content div.filelist span.fileinfo {
+div#container div.content div.filelist div.file span.filename {
+	display: table-cell;
+}
+
+div#container div.content div.filelist div.file span.filename a {
+	display: block;
+}
+
+div#container div.content div.filelist div.file span.fileinfo {
 	color: #bbb;
-	float: right;
+	display: table-cell;
+	padding-left: 15px;
 }
 
 div#container div.content table {
