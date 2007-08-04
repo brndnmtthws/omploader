@@ -56,9 +56,9 @@ begin
     end
     
     if images_only
-      maxres = 20
+      maxres = 30
     else
-      maxres = 50
+      maxres = 60
     end
   
     if !cgi.params['results'].to_s.empty?
