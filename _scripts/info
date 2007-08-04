@@ -182,9 +182,9 @@ FCGI.each_cgi {|cgi|
           date = array[2]
           body = array[3]
           lname = array[4]
-          if body =~ /^\[thumb\]([A-Za-z0-9+\/]+)\[\/thumb\]/
+          if body =~ /^\[thumb\]([\w+\/]+)\[\/thumb\]/
             if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-              body = body.sub(/^\[thumb\]([A-Za-z0-9+\/]+)\[\/thumb\]/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+              body.sub!(/^\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
               body += '<br class="clear" />'
             end
           end
