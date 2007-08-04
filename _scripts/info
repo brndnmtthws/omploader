@@ -26,14 +26,20 @@ FCGI.each_cgi {|cgi|
     throttle = query.execute(visitor_id).fetch.to_s
 
     owner_id = get_owner_id(cgi, db)
-
-    query = db.prepare('select hide_comments from owners where id = ?')
-    hide_comments = query.execute(owner_id).fetch.to_s.to_i
+    
+    if owner_id != -1
+      query = db.prepare('select hide_comments from owners where id = ?')
+      hide_comments = query.execute(owner_id).fetch.to_s.to_i
+    else
+      hide_comments = 0
+    end
 
     if cgi.has_key?('hide_comments') and hide_comments != cgi.params['hide_comments'].to_s.to_i
       hide_comments = cgi.params['hide_comments'].to_s.to_i
-      query = db.prepare('update owners set hide_comments = ? where id = ?')
-      res = query.execute(hide_comments.to_s, owner_id)
+      if owner_id != -1
+        query = db.prepare('update owners set hide_comments = ? where id = ?')
+        res = query.execute(hide_comments.to_s, owner_id)
+      end
     end
     
     comment_name = ''
@@ -51,8 +57,10 @@ FCGI.each_cgi {|cgi|
         comment_id = query.execute(comment_id, id, owner_id).insert_id
         query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
         query.execute(id)
-        query = db.prepare('update owners set name = ? where id = ?')
-        query.execute(comment_name, owner_id)
+        if owner_id != -1
+          query = db.prepare('update owners set name = ? where id = ?')
+          query.execute(comment_name, owner_id)
+        end
         query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
         query.execute(visitor_id, 1)
         redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
@@ -137,8 +145,12 @@ FCGI.each_cgi {|cgi|
       size = size.to_s + ' bytes'
     end
 
-    query = db.prepare('select name from owners where id = ?')
-    owner_name = query.execute(owner_id).fetch.to_s
+    if owner_id != -1
+      query = db.prepare('select name from owners where id = ?')
+      owner_name = query.execute(owner_id).fetch.to_s
+    else
+      owner_name = 'some luser'
+    end
     
     if hide_comments == 1
       hide_link = '<a href="i' + id.to_b64 + '-show">Show (' + comment_count.to_s + ')</a> &#x2503; <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'

@@ -87,25 +87,38 @@ def run_cron(db)
   q.execute(Max_upload_period)
 end
 
-def get_owner_id(cgi, db)
+def session(cgi, new)
   session = CGI::Session.new(cgi,
     'database_manager' => CGI::Session::PStore,  # use PStore
     'session_key' => '_rb_sess_id',              # custom session key
     'prefix' => 'pstore_sid_',                   # PStore option
     'session_expires' => Time.now + 60*60*24*365,
-    'session_path' => '/'
+    'session_path' => '/',
+    'new_session' => new
     )
-  if session.new_session and !session.session_id.to_s.empty?
-    # this is a new owner
-    query = db.prepare('insert into owners (session_id) values (?)')
-    owner_id = query.execute(session.session_id.to_s).insert_id.to_s
-    session['owner_id'] = owner_id
-  elsif !session.session_id.to_s.empty?
+end
+
+def get_owner_id(cgi, db)
+  begin
+    s = session(cgi, false)
     query = db.prepare('insert into owners (session_id) values (?) on duplicate key update session_id = ?, id = last_insert_id(id)')
-    query.execute(session.session_id.to_s, session.session_id.to_s)
+    query.execute(s.session_id.to_s, s.session_id.to_s)
     owner_id = query.insert_id.to_s
+  rescue ArgumentError
+    # need to make new session
+    s = session(cgi, true)
+    s.close
+    begin
+      s = session(cgi, false)
+      # this is a new owner
+      query = db.prepare('insert into owners (session_id) values (?)')
+      owner_id = query.execute(s.session_id.to_s).insert_id.to_s
+      s['owner_id'] = owner_id
+    rescue ArgumentError
+      # browser won't allow or doesn't support cookies
+      owner_id = -1
+    end
   end
-  session.close
   return owner_id
 end
 

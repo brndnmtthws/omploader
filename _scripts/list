@@ -18,12 +18,18 @@ begin
     register_visit(cgi, db)
     
     owner_id = get_owner_id(cgi, db)
-  
-    query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
-    res = query.execute(owner_id).fetch
-    mine_only = res[0].to_s.to_i
-    list_images = res[1].to_s.to_i
-    results = res[2].to_s.to_i
+ 
+    if owner_id != -1
+      query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
+      res = query.execute(owner_id).fetch
+      mine_only = res[0].to_s.to_i
+      list_images = res[1].to_s.to_i
+      results = res[2].to_s.to_i
+    else
+      mine_only = 0
+      list_images = 0
+      results = 20
+    end
    
     mine_sel = cgi.params['mine_only'].to_s
     if mine_sel == 'y'
@@ -75,8 +81,10 @@ begin
       elsif results < 5
         results = 5
       end
-      query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
-      res = query.execute(mine_only.to_s, results.to_s, list_images, owner_id)
+      if owner_id != -1
+        query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
+        res = query.execute(mine_only.to_s, results.to_s, list_images, owner_id)
+      end
     end
   
     order_short = cgi.params['order'].to_s
@@ -117,10 +125,10 @@ begin
     param_search = 's-' + search
     
     my_where_clause = ''
-    if mine_only != 0
+    if mine_only != 0 and owner_id != -1
       my_where_clause = 'where metadata.owner_id = ' + owner_id + ' '
     end
-    if images_only and mine_only != 0
+    if images_only and !my_where_clause.empty?
       my_where_clause += ' and content_types_main.type like "image" '
     elsif images_only
       my_where_clause = ' where content_types_main.type like "image" '

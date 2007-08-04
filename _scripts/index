@@ -18,14 +18,21 @@ FCGI.each_cgi {|cgi|
     visitor_id = register_visit(cgi, db)
   
     owner_id = get_owner_id(cgi, db)
-  
-    query = db.prepare('select big, hide_top_files, curl, paste from owners where id = ?')
-    res = query.execute(owner_id).fetch
-    
-    big = res[0].to_i
-    hide_top_files = res[1].to_i
-    curl = res[2].to_i
-    paste = res[3].to_i
+ 
+    if owner_id != -1
+      query = db.prepare('select big, hide_top_files, curl, paste from owners where id = ?')
+      res = query.execute(owner_id).fetch
+
+      big = res[0].to_i
+      hide_top_files = res[1].to_i
+      curl = res[2].to_i
+      paste = res[3].to_i
+    else
+      big = 0
+      hide_top_files = 0
+      curl = 0
+      paste = 0
+    end
   
     update_owner = false
     if cgi.has_key?('paste') and paste != cgi.params['paste'].to_s.to_i
@@ -50,7 +57,7 @@ FCGI.each_cgi {|cgi|
       hide_top_files = cgi.params['hide_top_files'].to_s.to_i
       update_owner = true
     end
-    if update_owner
+    if update_owner and owner_id != -1
       query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
       query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
     end
