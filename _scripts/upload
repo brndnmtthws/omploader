@@ -43,6 +43,7 @@ FCGI.each_cgi {|cgi|
         datum = file.read
         next if datum.length > 2**24 or datum.empty?
         name = file.original_filename.chomp
+        name = 'ompload' if name !~ /\S/
       elsif cgi.has_key?('url' + i.to_s)
         begin
             url = cgi['url' + i.to_s]
@@ -54,7 +55,7 @@ FCGI.each_cgi {|cgi|
               next if host == cgi.host
               path = split[5]
               name = URI.unescape(File.basename(path))
-              name = url if name.empty? or name == '/'
+              name = url if name !~ /\S/ or name == '/'
             rescue
               next
             end
@@ -68,7 +69,7 @@ FCGI.each_cgi {|cgi|
           datum = cgi['paste'].read
           next if datum.empty?
           name = cgi['name'].read
-          name = 'pasta' if name.empty?
+          name = 'pasta' if name !~ /\S/
           if syntax != 'raw' and !syntax.empty?
             datum = CodeRay::Duo[syntax.downcase, :page].highlight(datum).sub('lang="de"', 'lang="en"')
             datum = datum.sub('CodeRay HTML Encoder Example', 'omploader – ' + name + ' (' + syntax + ')')
