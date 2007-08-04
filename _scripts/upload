@@ -45,7 +45,7 @@ FCGI.each_cgi {|cgi|
         name = file.original_filename.chomp
       elsif cgi.has_key?('url' + i.to_s)
         begin
-            url = cgi['url' + i.to_s].read
+            url = cgi['url' + i.to_s]
             begin
               # do some checking on our url
               url = URI.extract(url).first
@@ -70,9 +70,9 @@ FCGI.each_cgi {|cgi|
           name = cgi['name'].read
           name = 'pasta' if name.empty?
           if syntax != 'raw' and !syntax.empty?
-          datum = CodeRay::Duo[syntax.downcase, :page].highlight(datum).sub('lang="de"', 'lang="en"')
-          datum = datum.sub('CodeRay HTML Encoder Example', 'omploader – ' + name + ' (' + syntax + ')')
-        end
+            datum = CodeRay::Duo[syntax.downcase, :page].highlight(datum).sub('lang="de"', 'lang="en"')
+            datum = datum.sub('CodeRay HTML Encoder Example', 'omploader – ' + name + ' (' + syntax + ')')
+          end
         stop = true
       elsif stop
         break

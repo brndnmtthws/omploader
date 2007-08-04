@@ -128,13 +128,15 @@ FCGI.each_cgi {|cgi|
       if curl == 1
         input_type = 'field'
         input_name = 'url'
+        encoding = ''
       else
         input_type = 'file'
         input_name = 'file'
+        encoding = ' enctype="multipart/form-data"'
       end
       if big == 1 and paste != 1
         form =
-          '        <form enctype="multipart/form-data" action="upload" method="post">' + "\n" +
+          '        <form' + encoding + ' action="upload" method="post">' + "\n" +
           '           <div class="form">' + "\n" +
           '            <input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
           '            <input type="' + input_type + '" name="' + input_name + '2" size="25" class="input field" /><br />' + "\n" +
@@ -146,7 +148,7 @@ FCGI.each_cgi {|cgi|
           '        </form>'
       elsif paste == 1
         form =
-          '        <form enctype="multipart/form-data" action="upload" method="post">' + "\n" +
+          '        <form' + encoding + ' action="upload" method="post">' + "\n" +
           '          <div class="form">' + "\n" +
           '            <div class="float name left-align">' + "\n" +
           '              <div class="label">Name</div>' + "\n" +
@@ -172,7 +174,7 @@ FCGI.each_cgi {|cgi|
           '        </form>'
       else
         form =
-          '        <form enctype="multipart/form-data" action="upload" method="post">' + "\n" +
+          '        <form' + encoding + ' action="upload" method="post">' + "\n" +
           '          <div class="form">' + "\n" +
           '            <input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
           '            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
