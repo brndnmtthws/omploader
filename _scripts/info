@@ -11,8 +11,6 @@
 require 'omploader'
 require 'tempfile'
 require 'rubygems'
-require 'id3lib'
-require 'mmap'
 require 'vorbisfile'
 
 db = db_connect
@@ -27,7 +25,7 @@ FCGI.each_cgi {|cgi|
 
     owner_id = get_owner_id(cgi, db)
     
-    if owner_id != -1
+    if !owner_id.nil?
       query = db.prepare('select hide_comments from owners where id = ?')
       hide_comments = query.execute(owner_id).fetch.to_s.to_i
     else
@@ -36,7 +34,7 @@ FCGI.each_cgi {|cgi|
 
     if cgi.has_key?('hide_comments') and hide_comments != cgi.params['hide_comments'].to_s.to_i
       hide_comments = cgi.params['hide_comments'].to_s.to_i
-      if owner_id != -1
+      if !owner_id.nil?
         query = db.prepare('update owners set hide_comments = ? where id = ?')
         res = query.execute(hide_comments.to_s, owner_id)
       end
@@ -57,9 +55,11 @@ FCGI.each_cgi {|cgi|
         comment_id = query.execute(comment_id, id, owner_id).insert_id
         query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
         query.execute(id)
-        if owner_id != -1
-          query = db.prepare('update owners set name = ? where id = ?')
-          query.execute(comment_name, owner_id)
+        if !owner_id.nil?
+          query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+          name_id = query.execute(comment_name).insert_id
+          query = db.prepare('update owners set name_id = ? where id = ?')
+          query.execute(name_id, owner_id)
         end
         query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
         query.execute(visitor_id, 1)
@@ -77,21 +77,22 @@ FCGI.each_cgi {|cgi|
       raise 'You are a trad.'
     end
     query = db.prepare('select
-        names.name,
+        n1.name,
         metadata.size,
         metadata.hits,
         metadata.comment_count,
         metadata.creation_time,
         content_types_main.type,
         content_types_sub.type,
-        owners.name
+        n2.name
     from
       metadata
-      inner join names on names.id = metadata.name_id
+      inner join names as n1 on n1.id = metadata.name_id
       inner join content_types on content_types.id = metadata.content_type_id
       inner join content_types_main on content_types_main.id = content_types.content_type_main_id
       inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
       left join owners on owners.id = metadata.owner_id
+      left join names as n2 on n2.id = owners.name_id
     where
       metadata.id = ?')
     query.execute(id)
@@ -110,6 +111,10 @@ FCGI.each_cgi {|cgi|
     content_type_sub = info[6].to_s
     info_owner_name = info[7].to_s
     content_type = content_type_main + '/' + content_type_sub
+
+    if info_owner_name.nil? or info_owner_name.empty?
+      info_owner_name = 'some luser'
+    end
 
     # get and process referrers
     query = db.prepare('select
@@ -145,10 +150,11 @@ FCGI.each_cgi {|cgi|
       size = size.to_s + ' bytes'
     end
 
-    if owner_id != -1
-      query = db.prepare('select name from owners where id = ?')
+    if !owner_id.nil?
+      query = db.prepare('select names.name from owners left join names on names.id = owners.name_id where owners.id = ?')
       owner_name = query.execute(owner_id).fetch.to_s
-    else
+    end
+    if owner_name.nil? or owner_name.empty?
       owner_name = 'some luser'
     end
     
@@ -171,12 +177,13 @@ FCGI.each_cgi {|cgi|
             comments.id,
             comments.creation_date,
             comments_body.body,
-            owners.name
+            names.name
           from
             comments
             inner join metadata on metadata.id = comments.metadata_id
             inner join comments_body on comments_body.id = comments.comment_id
-            inner join owners on owners.id = comments.owner_id
+            left join owners on owners.id = comments.owner_id
+            left join names on names.id = owners.name_id
           where
             metadata.id = ?
           order by comments.creation_date asc
@@ -194,6 +201,9 @@ FCGI.each_cgi {|cgi|
           date = array[2]
           body = array[3].sub(/\A[\r\n]+/, '').sub(/[\r\n]+\z/, '')
           lname = array[4]
+          if lname.nil? or lname.empty?
+            lname = 'some luser'
+          end
           if body =~ /\A\[thumb\]([\w+\/]+)\[\/thumb\]/
             if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
               body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
@@ -244,33 +254,20 @@ FCGI.each_cgi {|cgi|
       file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
     elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
       query = db.prepare('select
-          data.datum
+          n1.name, n2.name, n3.name, n4.name
         from
-          metadata inner join data on data.id = metadata.datum_id
+          metadata
+          left join names as n1 on n1.id = metadata.artist_id
+          left join names as n2 on n2.id = metadata.title_id
+          left join names as n3 on n3.id = metadata.album_id
+          left join names as n4 on n4.id = metadata.year_id
         where
           metadata.id = ?')
       res = query.execute(id).fetch
-      tmpfile = Tempfile.new(name)
-      tmpfile.close
-      mmap = Mmap.new(tmpfile.path, 'rw')
-      mmap.insert(0, res[0])
-      if content_type == 'audio/mpeg'
-        tag = ID3Lib::Tag.new(tmpfile.path)
-        artist = tag.artist
-        title = tag.title
-        album = tag.album
-        year = tag.year
-      elsif content_type == 'application/ogg'
-        vf = Ogg::VorbisFile.new
-        tmpfile.open
-        if vf.open(tmpfile)
-          comments = vf.comments(-1)
-          artist = comments['artist']
-          title = comments['title']
-          album = comments['album']
-          year = comments['date']
-        end
-      end
+      artist = res[0].to_s
+      title = res[1].to_s
+      album = res[2].to_s
+      year = res[3].to_s
       meta += '        <div class="left"><strong>Artist:</strong></div><div class="right">' + artist + '</div><br class="clear" />' + "\n" if artist and !artist.empty?
       meta += '        <div class="left"><strong>Title:</strong></div><div class="right">' + title + '</div><br class="clear" />' + "\n" if title and !title.empty?
       meta += '        <div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
@@ -327,7 +324,5 @@ FCGI.each_cgi {|cgi|
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
     }
-  ensure
-    tmpfile.close! unless tmpfile.nil?
   end
 }

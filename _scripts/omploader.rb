@@ -116,7 +116,6 @@ def get_owner_id(cgi, db)
       s['owner_id'] = owner_id
     rescue ArgumentError
       # browser won't allow or doesn't support cookies
-      owner_id = -1
     end
   end
   return owner_id

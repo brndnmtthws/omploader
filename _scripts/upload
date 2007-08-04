@@ -14,6 +14,8 @@ require 'rubygems'
 require 'coderay'
 require 'curb'
 require 'uri'
+require 'id3lib'
+require 'mmap'
 
 db = db_connect
 
@@ -80,6 +82,7 @@ FCGI.each_cgi {|cgi|
       else
         next
       end
+      name = name.sanitise
 
       begin
         query = db.prepare('insert into data (datum, fingerprint) values (?, sha1(datum))')
@@ -100,54 +103,64 @@ FCGI.each_cgi {|cgi|
         end
       end
  
-      query = db.prepare('select id from names where name = ?')
-      query.execute(name)
-      if query.num_rows > 0
-        name_id = query.fetch.to_s
-      else
-        query = db.prepare('insert into names (name) values (?)')
-        name_id = query.execute(name).insert_id
-      end
+      query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+      name_id = query.execute(name).insert_id
       
       name = name.sanitise
 
       fm = FileMagic.new(FileMagic::MAGIC_MIME)
       content_type = fm.buffer(datum)
   
-      content_type = content_type.chomp.split('/', 2)
-      content_type_main = content_type.first
-      content_type_sub = content_type.last
-      query = db.prepare('select id from content_types_main where type = ?')
-      query.execute(content_type_main)
-      if query.num_rows > 0
-        content_type_main_id = query.fetch.to_s
-      else
-        query = db.prepare('insert into content_types_main (type) values (?)')
-        content_type_main_id = query.execute(content_type_main).insert_id
-      end
-      query = db.prepare('select id from content_types_sub where type = ?')
-      query.execute(content_type_sub)
-      if query.num_rows > 0
-        content_type_sub_id = query.fetch.to_s
-      else
-        query = db.prepare('insert into content_types_sub (type) values (?)')
-        content_type_sub_id = query.execute(content_type_sub).insert_id
-      end
-      query = db.prepare('select id from content_types where content_type_main_id = ? and content_type_sub_id = ?')
-      res = query.execute(content_type_main_id, content_type_sub_id)
-      if query.num_rows > 0
-        content_type_id = res.fetch.to_s
-      else
-        query = db.prepare('insert into content_types (content_type_main_id, content_type_sub_id) values (?,?)')
-        content_type_id = query.execute(content_type_main_id, content_type_sub_id).insert_id
+      content_type_split = content_type.chomp.split('/', 2)
+      content_type_main = content_type_split.first
+      content_type_sub = content_type_split.last
+      query = db.prepare('insert into content_types_main (type) values (?) on duplicate key update id = last_insert_id(id)')
+      content_type_main_id = query.execute(content_type_main).insert_id
+      query = db.prepare('insert into content_types_sub (type) values (?) on duplicate key update id = last_insert_id(id)')
+      content_type_sub_id = query.execute(content_type_sub).insert_id
+      query = db.prepare('insert into content_types (content_type_main_id, content_type_sub_id) values (?,?) on duplicate key update id = last_insert_id(id)')
+      content_type_id = query.execute(content_type_main_id, content_type_sub_id).insert_id
+    
+      query = db.prepare('insert into metadata (content_type_id, name_id, size, datum_id, owner_id) values (?,?,?,?,?)')
+      id = query.execute(content_type_id, name_id, datum.length, datum_id, owner_id).insert_id
+
+      if content_type == 'audio/mpeg' or content_type == 'application/ogg'
+        tmpfile = Tempfile.new(name)
+        tmpfile.close
+        mmap = Mmap.new(tmpfile.path, 'rw')
+        mmap.insert(0, datum)
+        if content_type == 'audio/mpeg'
+          tag = ID3Lib::Tag.new(tmpfile.path)
+          artist = tag.artist.to_s.sanitise
+          title = tag.title.to_s.sanitise
+          album = tag.album.to_s.sanitise
+          year = tag.year.to_s.sanitise
+        elsif content_type == 'application/ogg'
+          vf = Ogg::VorbisFile.new
+          tmpfile.open
+          if vf.open(tmpfile)
+            comments = vf.comments(-1)
+            artist = comments['artist'].to_s.sanitise
+            title = comments['title'].to_s.sanitise
+            album = comments['album'].to_s.sanitise
+            year = comments['date'].to_s.sanitise
+          end
+        end
+        query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+        artist_id = query.execute(artist).insert_id
+        query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+        title_id = query.execute(title).insert_id
+        query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+        album_id = query.execute(album).insert_id
+        query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+        year_id = query.execute(year).insert_id
+        query = db.prepare('update metadata set artist_id = ?, title_id = ?, album_id = ?, year_id = ? where metadata.id = ?')
+        query.execute(artist_id, title_id, album_id, year_id, id)
       end
   
-      query = db.prepare('insert into metadata (content_type_id, name_id, size, datum_id, owner_id) values (?,?,?,?,?)')
-      query.execute(content_type_id, name_id, datum.length, datum_id, owner_id)
-
       saved = saved + 1
   
-      id = query.insert_id.to_s.to_b64
+      id = id.to_s.to_b64
         
       output = output +
         '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
@@ -193,5 +206,7 @@ FCGI.each_cgi {|cgi|
     cgi.out('text/html') {
       xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
     }
+  ensure
+    tmpfile.close! unless tmpfile.nil?
   end
  }

@@ -19,7 +19,7 @@ FCGI.each_cgi {|cgi|
   
     owner_id = get_owner_id(cgi, db)
  
-    if owner_id != -1
+    if !owner_id.nil?
       query = db.prepare('select big, hide_top_files, curl, paste from owners where id = ?')
       res = query.execute(owner_id).fetch
 
@@ -57,7 +57,7 @@ FCGI.each_cgi {|cgi|
       hide_top_files = cgi.params['hide_top_files'].to_s.to_i
       update_owner = true
     end
-    if update_owner and owner_id != -1
+    if update_owner and !owner_id.nil?
       query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
       query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
     end

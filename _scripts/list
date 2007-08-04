@@ -19,7 +19,7 @@ begin
     
     owner_id = get_owner_id(cgi, db)
  
-    if owner_id != -1
+    if !owner_id.nil?
       query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
       res = query.execute(owner_id).fetch
       mine_only = res[0].to_s.to_i
@@ -81,7 +81,7 @@ begin
       elsif results < 5
         results = 5
       end
-      if owner_id != -1
+      if !owner_id.nil?
         query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
         res = query.execute(mine_only.to_s, results.to_s, list_images, owner_id)
       end
@@ -125,7 +125,7 @@ begin
     param_search = 's-' + search
     
     my_where_clause = ''
-    if mine_only != 0 and owner_id != -1
+    if mine_only != 0 and !owner_id.nil?
       my_where_clause = 'where metadata.owner_id = ' + owner_id + ' '
     end
     if images_only and !my_where_clause.empty?
