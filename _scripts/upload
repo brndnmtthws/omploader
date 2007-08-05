@@ -11,11 +11,9 @@
 require 'omploader'
 require 'filemagic'
 require 'rubygems'
-require 'vimcolour'
 require 'curb'
 require 'uri'
 require 'id3lib'
-require 'mmap'
 
 db = db_connect
 
