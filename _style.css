@@ -273,6 +273,7 @@ div#container div.large div.powered {
 
 div#container div.comment {
 	margin-bottom: 5px;
+	overflow: hidden;
 }
 
 div#container div.comment pre {
