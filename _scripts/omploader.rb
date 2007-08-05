@@ -154,6 +154,7 @@ def vimcolour(datum, filetype, title)
   # disk.
   mmap = Mmap.new(tempfile.path, 'rw')
   mmap.insert(0, datum)
+  mmap.munmap
 
   # Set terminal colours to 88 to allow us to use the Inkpot theme.
   # The bdelete command is to delete the first buffer, so the generated HTML
@@ -174,7 +175,7 @@ def vimcolour(datum, filetype, title)
   # Read the temporary file and split it into three parts, splitting from the
   # first <pre> tag and the last </pre> tag. This creates an array consisting
   # of the pre-code HTML, the code HTML, and the post-code HTML.
-  datum = File.read(tempfile.path)
+  datum = Mmap.new(tempfile.path, 'r')
   datum = datum.split(/<pre>\n/, 2)
   datum = [ datum[0],
     datum[1].reverse.split(/\n>erp\/</, 2)[1].reverse,
