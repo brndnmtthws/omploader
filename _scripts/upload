@@ -11,7 +11,7 @@
 require 'omploader'
 require 'filemagic'
 require 'rubygems'
-require 'coderay'
+require 'vimcolour'
 require 'curb'
 require 'uri'
 require 'id3lib'
@@ -68,13 +68,12 @@ FCGI.each_cgi {|cgi|
           end
         elsif cgi.has_key?('paste')
           syntax = cgi['syntax'].read
-          datum = cgi['paste'].read
+          datum = cgi['paste'].read.gsub("\r", '')
           next if datum.empty?
           name = cgi['name'].read
           name = 'pasta' if name !~ /\S/
-          if syntax != 'raw' and !syntax.empty?
-            datum = CodeRay::Duo[syntax.downcase, :page].highlight(datum).sub('lang="de"', 'lang="en"')
-            datum = datum.sub('CodeRay HTML Encoder Example', 'omploader – ' + name + ' (' + syntax + ')')
+          if syntax != 'raw'
+            datum = vimcolour(datum, syntax, name)
           end
         stop = true
       elsif stop
