@@ -15,7 +15,6 @@ require 'curb'
 require 'uri'
 require 'id3lib'
 require 'digest/sha1'
-require 'mmap'
 
 db = db_connect
 

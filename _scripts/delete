@@ -9,6 +9,7 @@
 #
 
 require 'omploader'
+require 'find'
 
 if ARGV.size < 1 or ARGV.to_s =~ /-h|--help/
   $stderr.puts 'Usage:  delete [-h|--help] [options] ID [ID ID ID ...]'
@@ -24,7 +25,7 @@ end
 db = db_connect
 
 ARGV.each do |arg|
-  if ARGV.to_s =~ /-h|--help/ or ARGV.to_s =~ /-c|--comments/
+  if ARGV.to_s =~ /-h|--help/ or ARGV.to_s =~ /-c|--comments|-C|--cleanup/
     next
   end
   begin
@@ -196,6 +197,24 @@ if ARGV.to_s =~ /-C|--cleanup/
       puts "Found #{count} lonely rows in names"
     end
     db.commit
+    Find.find(Paths['data']) do |path|
+      next if path == Paths['data']
+      base = File.basename(path)
+      if base.to_id == 0 or base != base.to_id.to_b64
+        # junk
+        print "Trying to remove '#{path}'..."
+        File.unlink(path)
+        puts 'done.'
+      else
+        query = db.prepare('select id from metadata where id = ?')
+        if query.execute(base.to_id).num_rows < 1
+          # junk
+          print "Trying to remove '#{path}'..."
+          File.unlink(path)
+          puts 'done.'
+        end
+      end
+    end
   rescue Mysql::Error => err
     db.rollback unless db.nil?
     $stderr.puts 'Error in delete script'
