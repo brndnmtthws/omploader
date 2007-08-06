@@ -81,24 +81,11 @@ CREATE TABLE `content_types_sub` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Table structure for table `data`
---
-
-CREATE TABLE `data` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `datum` mediumblob NOT NULL,
-  `fingerprint` varchar(40) NOT NULL,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `fingerprint` (`fingerprint`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
 -- Table structure for table `metadata`
 --
 
 CREATE TABLE `metadata` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `datum_id` int(10) unsigned NOT NULL,
   `content_type_id` int(10) unsigned NOT NULL,
   `name_id` int(10) unsigned NOT NULL,
   `hits` int(10) unsigned NOT NULL default '0',
@@ -111,7 +98,9 @@ CREATE TABLE `metadata` (
   `title_id` int(10) unsigned default NULL,
   `album_id` int(10) unsigned default NULL,
   `year_id` int(10) unsigned default NULL,
-  PRIMARY KEY  (`id`)
+  `fingerprint` varchar(40) NOT NULL,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `fingerprint` (`fingerprint`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -248,4 +237,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-08-04 21:22:50
+-- Dump completed on 2007-08-06  8:33:15
