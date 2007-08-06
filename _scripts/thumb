@@ -26,7 +26,6 @@ FCGI.each_cgi {|cgi|
       raise 'You are a trad.'
     end
     query = db.prepare('select
-        metadata.datum_id,
         metadata.content_type_id,
         metadata.thumbnail_id,
         names.name
@@ -42,12 +41,11 @@ FCGI.each_cgi {|cgi|
       raise 'Nothing to pee here.'
     end
     info = query.fetch
-    datum_id = info[0].to_s
-    content_type_id = info[1].to_s
-    thumbnail_id = info[2].to_s
-    name = info[3].to_s
+    content_type_id = info[0].to_s
+    thumbnail_id = info[1].to_s
+    name = info[2].to_s
   
-    if !datum_id.empty? and !content_type_id.empty?
+    if !content_type_id.empty?
       name = name.insert(name.rindex('.'), '-thumb') if !name.empty? and name =~ /\./
   
       query = db.prepare('select
@@ -64,8 +62,7 @@ FCGI.each_cgi {|cgi|
       content_type = result[0]+ '/' + result[1]
   
       if result[0] == 'image' and thumbnail_id.empty?
-        query = db.prepare('select datum from data where id = ?')
-        datum = query.execute(datum_id).fetch.to_s
+        datum = Mmap.new(Paths['data'] + id.to_b64, 'r').to_str
         thumb = Image.from_blob(datum)[0]
   
         # Determine best thumbnail size.
