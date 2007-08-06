@@ -14,3 +14,10 @@ SetHandler fcgid-script
 
 # In case you want to use plain cgi
 # SetHandler cgi-script
+
+# Don't allow anyone to run our cron or delete scripts
+<FilesMatch "cron|delete">
+  Order deny,allow
+  deny from all
+</FilesMatch>
+

@@ -1,0 +1,198 @@
+#!/usr/bin/env ruby
+#
+# $Id: info 77 2007-08-04 21:16:54Z brenden $
+#
+# Copyright 2007 David Shakaryan <omp@gentoo.org>
+# Copyright 2007 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+#
+
+require 'omploader'
+
+if ARGV.size < 1 or ARGV.to_s =~ /-h|--help/
+  $stderr.puts 'Usage:  delete [-h|--help] [options] ID [ID ID ID ...]'
+  $stderr.puts '  -c, --comments  take arguments as comment IDs'
+  $stderr.puts '  -C, --cleanup   cleanup other elements, such as the names and'
+  $stderr.puts '                  content_types tables to make sure there is no extra cruft'
+  $stderr.puts
+  $stderr.puts '  You can supply as many id\'s as arguments as you want.'
+  $stderr.puts '  Use this script only when necessary, as it can put a'
+  $stderr.puts '  significant load on the database.'
+end
+
+db = db_connect
+
+ARGV.each do |arg|
+  if ARGV.to_s =~ /-h|--help/ or ARGV.to_s =~ /-c|--comments/
+    next
+  end
+  begin
+    id = arg.to_id
+    # Verify that id is strictly numeric.
+    if id !~ /\A\d+\z/
+      raise 'Ignoring argument "' + arg + '"'
+    end
+    query = db.prepare('delete
+        from
+          comments, comments_body
+        using
+          comments
+          inner join comments_body on comments_body.id = comments.comment_id
+        where
+          comments.metadata_id = ?')
+    query.execute(id)
+    query = db.prepare('delete
+        from
+          data, thumbnails, votes, metadata
+        using
+          metadata
+          inner join data on data.id = metadata.datum_id
+          left join thumbnails on thumbnails.id = metadata.thumbnail_id
+          left join votes on votes.metadata_id = metadata.id
+        where
+          metadata.id = ?')
+    query.execute(id)
+    db.commit
+  rescue Mysql::Error => err
+    db.rollback unless db.nil?
+    $stderr.puts 'Error in delete script'
+    $stderr.puts err
+  rescue RuntimeError => err
+    db.rollback unless db.nil?
+    $stderr.puts err
+  end
+end
+
+if ARGV.to_s !~ /-h|--help/ and ARGV.to_s =~ /-c|--comments/
+  ARGV.each do |arg|
+    begin
+      id = arg.to_i
+      if id < 1
+        raise 'Ignoring argument "' + arg + '"'
+      end
+      query = db.prepare('delete
+          from
+            comments, comments_body
+          using
+            comments
+            inner join comments_body on comments_body.id = comments.comment_id
+          where
+            comments.metadata_id = ?')
+      query.execute(id)
+    rescue Mysql::Error => err
+      db.rollback unless db.nil?
+      $stderr.puts 'Error in delete script'
+      $stderr.puts err
+    rescue RuntimeError => err
+      db.rollback unless db.nil?
+      $stderr.puts err
+    end
+  end
+end
+
+if ARGV.to_s =~ /-C|--cleanup/
+  begin
+    query = db.prepare('delete
+      from
+        content_types_main
+      using
+        content_types_main
+        left join content_types on content_types.content_type_main_id = content_types_main.id
+      where
+        content_types.id is null')
+    query.execute
+    count = db.affected_rows
+    if count > 0
+      puts "Found #{count} lonely rows in content_types_main..."
+    end
+    query = db.prepare('delete
+      from
+        content_types_sub
+      using
+        content_types_sub
+        left join content_types on content_types.content_type_sub_id = content_types_sub.id
+      where
+        content_types.id is null')
+    query.execute
+    count = db.affected_rows
+    if count > 0
+      puts "Found #{count} lonely rows in content_types_sub..."
+    end
+    query = db.prepare('delete
+      from
+        content_types
+      using
+        content_types
+        left join metadata on metadata.content_type_id = content_types.id
+      where
+        metadata.id is null')
+    query.execute
+    count = db.affected_rows
+    if count > 0
+      puts "Found #{count} lonely rows in content_types..."
+    end
+    query = db.prepare('delete
+      from
+        thumbnails
+      using
+        thumbnails
+        left join metadata on metadata.thumbnail_id = thumbnails.id
+      where
+        metadata.id is null')
+    query.execute
+    count = db.affected_rows
+    if count > 0
+      puts "Found #{count} lonely rows in thumbnails..."
+    end
+    query = db.prepare('delete
+      from
+        comments_body
+      using
+        comments_body
+        left join comments on comments.comment_id = comments_body.id
+        left join metadata on metadata.id = comments.metadata_id
+      where
+        metadata.id is null')
+    query.execute
+    count = db.affected_rows
+    if count > 0
+      puts "Found #{count} lonely rows in comments_body..."
+    end
+    query = db.prepare('delete
+      from
+        comments
+     using
+        comments
+        left join metadata on metadata.id = comments.metadata_id
+      where
+        metadata.id is null')
+      query.execute
+    count = db.affected_rows
+    if count > 0
+      puts "Found #{count} lonely rows in comments..."
+    end
+    query = db.prepare('delete
+      from
+        data
+      using
+        data
+        left join metadata on metadata.datum_id = data.id
+      where
+        metadata.id is null')
+    query.execute
+    count = db.affected_rows
+    if count > 0
+      puts "Found #{count} lonely rows in comments..."
+    end
+    db.commit
+  rescue Mysql::Error => err
+    db.rollback unless db.nil?
+    $stderr.puts 'Error in delete script'
+    $stderr.puts err
+  rescue RuntimeError => err
+    db.rollback unless db.nil?
+    $stderr.puts err
+  end
+end
+
