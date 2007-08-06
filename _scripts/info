@@ -10,8 +10,6 @@
 
 require 'omploader'
 require 'tempfile'
-require 'rubygems'
-require 'vorbisfile'
 
 db = db_connect
 

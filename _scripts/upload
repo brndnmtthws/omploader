@@ -15,6 +15,7 @@ require 'curb'
 require 'uri'
 require 'id3lib'
 require 'digest/sha1'
+require 'vorbisfile'
 
 db = db_connect
 
