@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# $Id: info 77 2007-08-04 21:16:54Z brenden $
+# $Id$
 #
 # Copyright 2007 David Shakaryan <omp@gentoo.org>
 # Copyright 2007 Brenden Matthews <brenden@rty.ca>
@@ -104,7 +104,7 @@ if ARGV.to_s =~ /-C|--cleanup/
     query.execute
     count = db.affected_rows
     if count > 0
-      puts "Found #{count} lonely rows in content_types_main..."
+      puts "Found #{count} lonely rows in content_types_main"
     end
     query = db.prepare('delete
       from
@@ -117,7 +117,7 @@ if ARGV.to_s =~ /-C|--cleanup/
     query.execute
     count = db.affected_rows
     if count > 0
-      puts "Found #{count} lonely rows in content_types_sub..."
+      puts "Found #{count} lonely rows in content_types_sub"
     end
     query = db.prepare('delete
       from
@@ -130,7 +130,7 @@ if ARGV.to_s =~ /-C|--cleanup/
     query.execute
     count = db.affected_rows
     if count > 0
-      puts "Found #{count} lonely rows in content_types..."
+      puts "Found #{count} lonely rows in content_types"
     end
     query = db.prepare('delete
       from
@@ -143,7 +143,7 @@ if ARGV.to_s =~ /-C|--cleanup/
     query.execute
     count = db.affected_rows
     if count > 0
-      puts "Found #{count} lonely rows in thumbnails..."
+      puts "Found #{count} lonely rows in thumbnails"
     end
     query = db.prepare('delete
       from
@@ -157,7 +157,7 @@ if ARGV.to_s =~ /-C|--cleanup/
     query.execute
     count = db.affected_rows
     if count > 0
-      puts "Found #{count} lonely rows in comments_body..."
+      puts "Found #{count} lonely rows in comments_body"
     end
     query = db.prepare('delete
       from
@@ -170,7 +170,7 @@ if ARGV.to_s =~ /-C|--cleanup/
       query.execute
     count = db.affected_rows
     if count > 0
-      puts "Found #{count} lonely rows in comments..."
+      puts "Found #{count} lonely rows in comments"
     end
     query = db.prepare('delete
       from
@@ -183,7 +183,30 @@ if ARGV.to_s =~ /-C|--cleanup/
     query.execute
     count = db.affected_rows
     if count > 0
-      puts "Found #{count} lonely rows in comments..."
+      puts "Found #{count} lonely rows in comments"
+    end
+    query = db.prepare('delete
+      from
+        names
+      using
+        names
+        left join metadata as m1 on m1.name_id = names.id
+        left join metadata as m2 on m2.artist_id = names.id
+        left join metadata as m3 on m3.title_id = names.id
+        left join metadata as m4 on m4.album_id = names.id
+        left join metadata as m5 on m5.year_id = names.id
+        left join owners on owners.name_id = names.id
+      where
+        m1.id is null
+        and m2.id is null
+        and m3.id is null
+        and m4.id is null
+        and m5.id is null
+        and owners.id is null')
+    query.execute
+    count = db.affected_rows
+    if count > 0
+      puts "Found #{count} lonely rows in names"
     end
     db.commit
   rescue Mysql::Error => err
