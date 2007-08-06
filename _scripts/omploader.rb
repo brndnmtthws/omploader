@@ -22,6 +22,8 @@ ConfigFile = YAML::load(File.open('config'))
 Max_upload_count = ConfigFile['limits']['upload_count']
 Max_upload_period = ConfigFile['limits']['upload_period'] * 60
 
+Paths = ConfigFile['paths']
+
 Sql = Mysql.init
 
 def db_connect

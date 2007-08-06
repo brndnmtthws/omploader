@@ -29,3 +29,6 @@ limits:
 # for this to work properly
   upload_count: 10
   upload_period: 2
+paths:
+# Path of data store (relative to scripts)
+  data: ../data/

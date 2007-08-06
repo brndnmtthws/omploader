@@ -25,9 +25,15 @@ FCGI.each_cgi {|cgi|
       raise 'You are a trad.'
     end
     query = db.prepare('select
-        metadata.datum_id,
-        metadata.content_type_id,
-        names.name from metadata inner join names on names.id = metadata.name_id
+        names.name,
+        content_types_main.type,
+        content_types_sub.type
+      from
+        metadata
+        inner join names on names.id = metadata.name_id
+        inner join content_types on content_types.id = metadata.content_type_id
+        inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+        inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
       where
         metadata.id = ?')
     query.execute(id)
@@ -37,9 +43,8 @@ FCGI.each_cgi {|cgi|
       raise 'Nothing to pee here.'
     end
     info = query.fetch
-    datum_id = info[0].to_s
-    content_type_id = info[1].to_s
-    name = info[2].to_s
+    name = info[0].to_s
+    content_type = info[1]+ '/' + info[2]
 
     # Increment vote number if this is first view from visitor.
     query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
@@ -70,21 +75,7 @@ FCGI.each_cgi {|cgi|
       end
     end
 
-    query = db.prepare('select
-        data.datum,
-        content_types_main.type,
-        content_types_sub.type
-      from
-        data
-        inner join content_types on content_types.id = ?
-        inner join content_types_main on content_types_main.id = content_types.content_type_main_id
-        inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
-      where
-        data.id = ?')
-    result = query.execute(content_type_id, datum_id).fetch
-
-    datum = result[0]
-    content_type = result[1]+ '/' + result[2]
+    datum = Mmap.new(Paths['data'] + cgi.params['id'].to_s, 'r').to_str
 
     cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { datum }
     db.commit
