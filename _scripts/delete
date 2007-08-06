@@ -44,15 +44,15 @@ ARGV.each do |arg|
     query.execute(id)
     query = db.prepare('delete
         from
-          data, thumbnails, votes, metadata
+          thumbnails, votes, metadata
         using
           metadata
-          inner join data on data.id = metadata.datum_id
           left join thumbnails on thumbnails.id = metadata.thumbnail_id
           left join votes on votes.metadata_id = metadata.id
         where
           metadata.id = ?')
     query.execute(id)
+    File.unlink(Paths['data'] + '/' + id.to_b64)
     db.commit
   rescue Mysql::Error => err
     db.rollback unless db.nil?
@@ -168,19 +168,6 @@ if ARGV.to_s =~ /-C|--cleanup/
       where
         metadata.id is null')
       query.execute
-    count = db.affected_rows
-    if count > 0
-      puts "Found #{count} lonely rows in comments"
-    end
-    query = db.prepare('delete
-      from
-        data
-      using
-        data
-        left join metadata on metadata.datum_id = data.id
-      where
-        metadata.id is null')
-    query.execute
     count = db.affected_rows
     if count > 0
       puts "Found #{count} lonely rows in comments"

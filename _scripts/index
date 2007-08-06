@@ -135,7 +135,7 @@ FCGI.each_cgi {|cgi|
     throttle = query.execute(visitor_id).fetch.to_s
   
     if throttle.to_i < Max_upload_count
-      if curl == 1
+      if curl == 1 and paste != 1
         input_type = 'field'
         input_name = 'url'
         encoding = ''
