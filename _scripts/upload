@@ -145,7 +145,7 @@ FCGI.each_cgi {|cgi|
     
         id = id.to_s.to_b64
   
-        file = File.new(Paths['data'] + id, File::CREAT|File::TRUNC|File::RDWR, 0664)
+        file = File.new(Paths['data'] + '/' + id, File::CREAT|File::TRUNC|File::RDWR, 0664)
         mmap = Mmap.new(file.path, 'rw')
         mmap.insert(0, datum)
           
