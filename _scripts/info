@@ -210,6 +210,12 @@ FCGI.each_cgi {|cgi|
               body += '<br class="clear" />'
             end
           end
+          while body =~ /\[i\](.*)\[\/i\]/
+            body.sub!(/\[i\](.*)\[\/i\]/, '<em>\1</em>')
+          end
+          while body =~ /\[b\].+\[\/b\]/
+            body.sub!(/\[b\](.+)\[\/b\]/, '<strong>\1</strong>')
+          end
           comments_body +=
             '      <a name="comment_' + cid + '"></a>' + "\n" +
             '      <div class="content comment left-align">' + "\n" +
@@ -233,7 +239,7 @@ FCGI.each_cgi {|cgi|
           '              <div class="label">Name</div>' + "\n" +
           '              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
           '            </div>' + "\n" +
-          '            <div style="color: #999; text-align: right; float: right">Link to another file with <strong>[thumb]id[/thumb]</strong><br />at the beginning of your comment.</div>' + "\n" +
+          '            <div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i] - Italics.</strong></div>' + "\n" +
           '            <br class="clear" />' + "\n" +
           '            <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
           '            <br class="clear" />' + "\n" +
