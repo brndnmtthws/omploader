@@ -15,8 +15,9 @@ help = false
 skip = false
 filename = 'pasta'
 
-stdin = $stdin.read
-unless stdin.empty?
+$stdin.fcntl(4, File::NONBLOCK)
+stdin = $stdin.read if !$stdin.eof
+unless stdin.nil?
 	argv << ''
 end
 
@@ -68,7 +69,7 @@ used_stdin = false
 
 argv.each do |arg|
 
-	if stdin.empty? and !used_stdin and !File.exists?(arg)
+	if stdin.nil? and !used_stdin and !File.exists?(arg)
 		$stderr.puts "Invalid argument '#{arg}': file does not exist"
 		errors += 1
 		next
@@ -77,10 +78,11 @@ argv.each do |arg|
 	# no more than 1 every 15 seconds is common courtesy
 	turd = Time.now - poop
 	if turd < wait
+		puts wait - turd
 		sleep(wait - turd)
 	end
 
-	if !stdin.empty? and !used_stdin
+	if !stdin.nil? and !used_stdin
 		# upload from stdin
 		output = %x{echo '#{stdin}' | curl -s -F "file1=@-;filename=#{filename}" #{Url}upload}
 		used_stdin = true
@@ -96,7 +98,7 @@ argv.each do |arg|
 	end
 
 	# parse for an ID
-	if output =~ /View file: <a href="v(\w*)">/
+	if output =~ /View file: <a href="v([A-Za-z0-9+\/]+)">/
 		id = $1
 		puts "Omploaded '#{arg}' to #{Url}v#{id}" if !quiet
 	elsif output =~ /Slow down there, cowboy\./
