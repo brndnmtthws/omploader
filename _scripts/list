@@ -256,7 +256,7 @@ begin
   
     page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
     if page > 1
-      page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + 1.to_s + param_search + '>First</a> &#x2503; <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous</a>'
+      page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + 1.to_s + param_search + '">First</a> &#x2503; <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous</a>'
     else
       page_links += "        First &#x2503; Previous"
     end
