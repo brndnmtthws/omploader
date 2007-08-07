@@ -33,7 +33,9 @@ CREATE TABLE `comments` (
   `owner_id` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `metadata_id` (`metadata_id`,`comment_id`),
-  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`)
+  KEY `comment_id` (`comment_id`),
+  CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments_body` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -55,7 +57,10 @@ CREATE TABLE `content_types` (
   `content_type_main_id` int(10) unsigned NOT NULL,
   `content_type_sub_id` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `content_type_main_id` (`content_type_main_id`,`content_type_sub_id`)
+  KEY `content_type_main_id` (`content_type_main_id`),
+  KEY `content_type_sub_id` (`content_type_sub_id`),
+  CONSTRAINT `content_types_ibfk_2` FOREIGN KEY (`content_type_sub_id`) REFERENCES `content_types_sub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `content_types_ibfk_1` FOREIGN KEY (`content_type_main_id`) REFERENCES `content_types_main` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -100,7 +105,19 @@ CREATE TABLE `metadata` (
   `year_id` int(10) unsigned default NULL,
   `fingerprint` varchar(40) NOT NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `fingerprint` (`fingerprint`)
+  UNIQUE KEY `fingerprint` (`fingerprint`),
+  KEY `name_id` (`name_id`),
+  KEY `artist_id` (`artist_id`),
+  KEY `year_id` (`year_id`),
+  KEY `album_id` (`album_id`),
+  KEY `title_id` (`title_id`),
+  KEY `thumbnail_id` (`thumbnail_id`),
+  CONSTRAINT `metadata_ibfk_19` FOREIGN KEY (`name_id`) REFERENCES `names` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `metadata_ibfk_14` FOREIGN KEY (`thumbnail_id`) REFERENCES `thumbnails` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `metadata_ibfk_15` FOREIGN KEY (`artist_id`) REFERENCES `names` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `metadata_ibfk_16` FOREIGN KEY (`title_id`) REFERENCES `names` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `metadata_ibfk_17` FOREIGN KEY (`album_id`) REFERENCES `names` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `metadata_ibfk_18` FOREIGN KEY (`year_id`) REFERENCES `names` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -132,7 +149,9 @@ CREATE TABLE `owners` (
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `name_id` int(10) unsigned default NULL,
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `session_id` (`session_id`)
+  UNIQUE KEY `session_id` (`session_id`),
+  KEY `name_id` (`name_id`),
+  CONSTRAINT `owners_ibfk_1` FOREIGN KEY (`name_id`) REFERENCES `names` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -237,4 +256,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-08-06  8:33:15
+-- Dump completed on 2007-08-07  9:59:28
