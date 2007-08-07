@@ -149,11 +149,15 @@ FCGI.each_cgi {|cgi|
 				file.close
 				mmap = Mmap.new(file.path, 'rw')
 				mmap.insert(0, datum)
-
+				if name.length > 15
+					name_displayed = name[0..13] + '…'
+				else
+					name_displayed = name
+				end
 				output = output +
 					'      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
 					'      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n" +
-					'      With name: <a href="v' + id + '-/' + name + '">' + 'v' + id + '-/...</a><br /><br />' + "\n"
+					'      With name: <a href="v' + id + '/' + name + '">' + 'v' + id + '/' + name_displayed + '</a><br /><br />' + "\n"
 			rescue Mysql::Error => err
 				db.rollback
 				if err.errno == 1062
@@ -163,10 +167,15 @@ FCGI.each_cgi {|cgi|
 					res = query.execute(fingerprint).fetch
 					old_id = res[0].to_s.to_b64
 					name = res[1].to_s
+					if name.length > 15
+						name_displayed = name[0..13] + '…'
+					else
+						name_displayed = name
+					end
 					output = output +
 						'      View file: <a href="v' + old_id + '">' + 'v' + old_id + '</a><br />' + "\n" +
 						'      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n" +
-						'      With name: <a href="v' + old_id + '-/' + name + '">' + 'v' + old_id + '-/...</a><br /><br />' + "\n"
+						'      With name: <a href="v' + old_id + '/' + name + '">' + 'v' + old_id + '/' + name_displayed + '</a><br /><br />' + "\n"
 					saved += 1
 					next
 				else

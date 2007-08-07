@@ -125,18 +125,28 @@ def get_owner_id(cgi, db)
 end
 
 class String
-	# Convert string to integer to Base36 to chomped Base64.
+	# Convert string to integer to Base36 to modified Base64.
 	def to_b64
-		Base64.encode64(self.to_i.to_s(base=36)).chomp.gsub('=', '')
+		str = self
+		str.gsub!('/', '-/')
+		str.gsub!('_', '/')
+		str = str.to_i.to_s(base=36)
+		str = Base64.encode64(str)
+		str.chomp!
+		str.gsub!('=', '')
+		return str
 	end
 
-	# Convert chomped Base64 to Base36 to integer to string.
+	# Convert modified Base64 to Base36 to integer to string.
 	def to_id
 		str = self
 		while str.length % 4 > 0
 			str += '='
 		end
-		Base64.decode64(str).to_i(base=36).to_s
+		str = Base64.decode64(str)
+		str = str.to_i(base=36).to_s
+		str.gsub!('/', '_')
+		return str
 	end
 
 	# Sanitise HTML code to avoid opening tags.
