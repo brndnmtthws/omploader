@@ -20,201 +20,201 @@ require 'vorbisfile'
 db = db_connect
 
 FCGI.each_cgi {|cgi|
-  begin
-    db_check(db)
-    visitor_id = register_visit(cgi, db)
-  
-    output = ''
-    
-    owner_id = get_owner_id(cgi, db)
-    
-  
-    query = db.prepare('select count from upload_throttle where visitor_id = ?')
-    throttle = query.execute(visitor_id).fetch.to_s
-    if throttle.to_i > Max_upload_count
-      raise 'Slow down there, cowboy.'
-    end
-  
-    saved = 0
-    stop = true
-  
-    # Verify that a file parameter is present.
-    for i in 1...6
-      if cgi.has_key?('file' + i.to_s)
-        file = cgi['file' + i.to_s]
-        datum = file.read
-        next if datum.length > 2**24 or datum.empty?
-        name = file.original_filename.chomp
-        name = 'ompload' if name !~ /\S/
-      elsif cgi.has_key?('url' + i.to_s)
-        begin
-            url = cgi['url' + i.to_s]
-            begin
-              # do some checking on our url
-              url = URI.extract(url).first
-              split = URI.split(url)
-              host = split[2]
-              next if host == cgi.host
-              path = split[5]
-              name = URI.unescape(File.basename(path))
-              name = url if name !~ /\S/ or name == '/'
-            rescue
-              next
-            end
-            next if url == 'URL'
-            datum = Curl::Easy.perform(url).body_str
-          rescue
-            next
-          end
-        elsif cgi.has_key?('paste')
-          syntax = cgi['syntax'].read
-          datum = cgi['paste'].read.gsub("\r", '')
-          next if datum.empty?
-          name = cgi['name'].read
-          name = 'pasta' if name !~ /\S/
-          if syntax != 'raw'
-            datum = vimcolour(datum, syntax, name)
-          end
-        stop = true
-      elsif stop
-        break
-      else
-        next
-      end
-      name = name.sanitise
+	begin
+		db_check(db)
+		visitor_id = register_visit(cgi, db)
 
-      begin
-        query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-        name_id = query.execute(name).insert_id
-        
-        name = name.sanitise
-  
-        fm = FileMagic.new(FileMagic::MAGIC_MIME)
-        content_type = fm.buffer(datum)
-    
-        content_type_split = content_type.chomp.split('/', 2)
-        content_type_main = content_type_split.first
-        content_type_sub = content_type_split.last
-        query = db.prepare('insert into content_types_main (type) values (?) on duplicate key update id = last_insert_id(id)')
-        content_type_main_id = query.execute(content_type_main).insert_id
-        query = db.prepare('insert into content_types_sub (type) values (?) on duplicate key update id = last_insert_id(id)')
-        content_type_sub_id = query.execute(content_type_sub).insert_id
-        query = db.prepare('insert into content_types (content_type_main_id, content_type_sub_id) values (?,?) on duplicate key update id = last_insert_id(id)')
-        content_type_id = query.execute(content_type_main_id, content_type_sub_id).insert_id
-  
-        fingerprint = Digest::SHA1.hexdigest(datum)
-      
-        query = db.prepare('insert into metadata (content_type_id, name_id, size, owner_id, fingerprint) values (?,?,?,?,?)')
-        id = query.execute(content_type_id, name_id, datum.length, owner_id, fingerprint).insert_id
-  
-        if content_type == 'audio/mpeg' or content_type == 'application/ogg'
-          tmpfile = Tempfile.new(name)
-          tmpfile.close
-          mmap = Mmap.new(tmpfile.path, 'rw')
-          mmap.insert(0, datum)
-          if content_type == 'audio/mpeg'
-            tag = ID3Lib::Tag.new(tmpfile.path)
-            artist = tag.artist.to_s.sanitise
-            title = tag.title.to_s.sanitise
-            album = tag.album.to_s.sanitise
-            year = tag.year.to_s.sanitise
-          elsif content_type == 'application/ogg'
-            vf = Ogg::VorbisFile.new
-            tmpfile.open
-            if vf.open(tmpfile)
-              comments = vf.comments(-1)
-              artist = comments['artist'].to_s.sanitise
-              title = comments['title'].to_s.sanitise
-              album = comments['album'].to_s.sanitise
-              year = comments['date'].to_s.sanitise
-            end
-          end
-          query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-          artist_id = query.execute(artist).insert_id
-          query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-          title_id = query.execute(title).insert_id
-          query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-          album_id = query.execute(album).insert_id
-          query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-          year_id = query.execute(year).insert_id
-          query = db.prepare('update metadata set artist_id = ?, title_id = ?, album_id = ?, year_id = ? where metadata.id = ?')
-          query.execute(artist_id, title_id, album_id, year_id, id)
-        end
-    
-        saved = saved + 1
-    
-        id = id.to_s.to_b64
-  
-        file = File.new(Paths['data'] + '/' + id, File::CREAT|File::TRUNC|File::RDWR, 0664)
-        file.close
-        mmap = Mmap.new(file.path, 'rw')
-        mmap.insert(0, datum)
-          
-        output = output +
-          '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
-          '      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n" +
-          '      With name: <a href="v' + id + '-/' + name + '">' + 'v' + id + '-/...</a><br /><br />' + "\n"
-      rescue Mysql::Error => err
-        db.rollback
-        if err.errno == 1062
-          # duplicate key
-          # get id for the dupe one
-          query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.fingerprint = ?')
-          res = query.execute(fingerprint).fetch
-          old_id = res[0].to_s.to_b64
-          name = res[1].to_s
-          output = output +
-            '      View file: <a href="v' + old_id + '">' + 'v' + old_id + '</a><br />' + "\n" +
-            '      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n" +
-            '      With name: <a href="v' + old_id + '-/' + name + '">' + 'v' + old_id + '-/...</a><br /><br />' + "\n"
-          saved += 1
-          next
-        else
-          raise err
-        end
-      end
-    end
-    if saved < 1
-      raise 'You are a trad.'
-    end
-    query = db.prepare('insert into upload_throttle (visitor_id, count) values (?,?) on duplicate key update count = count + ?')
-    query.execute(visitor_id, saved, saved)
-    cgi.out {
-      xhtml_pre +
-      '        <div class="content large">' + "\n" +
-      '          omploaded!<br />' + "\n" +
-      '          <br />' + "\n" +
-      output +
-      '        </div>' + "\n" +
-      xhtml_post
-    }
-    db.commit
-  rescue Mysql::Error => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
-    }
-  rescue RuntimeError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
-    }
-  rescue SyntaxError, NameError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
-    }
-  rescue StandardError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
-    }
-  rescue
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
-    }
-  ensure
-    tmpfile.close! unless tmpfile.nil?
-  end
- }
+		output = ''
+
+		owner_id = get_owner_id(cgi, db)
+
+
+		query = db.prepare('select count from upload_throttle where visitor_id = ?')
+		throttle = query.execute(visitor_id).fetch.to_s
+		if throttle.to_i > Max_upload_count
+			raise 'Slow down there, cowboy.'
+		end
+
+		saved = 0
+		stop = true
+
+		# Verify that a file parameter is present.
+		for i in 1...6
+			if cgi.has_key?('file' + i.to_s)
+				file = cgi['file' + i.to_s]
+				datum = file.read
+				next if datum.length > 2**24 or datum.empty?
+				name = file.original_filename.chomp
+				name = 'ompload' if name !~ /\S/
+			elsif cgi.has_key?('url' + i.to_s)
+				begin
+					url = cgi['url' + i.to_s]
+					begin
+						# do some checking on our url
+						url = URI.extract(url).first
+						split = URI.split(url)
+						host = split[2]
+						next if host == cgi.host
+						path = split[5]
+						name = URI.unescape(File.basename(path))
+						name = url if name !~ /\S/ or name == '/'
+					rescue
+						next
+					end
+					next if url == 'URL'
+					datum = Curl::Easy.perform(url).body_str
+				rescue
+					next
+				end
+			elsif cgi.has_key?('paste')
+				syntax = cgi['syntax'].read
+				datum = cgi['paste'].read.gsub("\r", '')
+				next if datum.empty?
+				name = cgi['name'].read
+				name = 'pasta' if name !~ /\S/
+					if syntax != 'raw'
+						datum = vimcolour(datum, syntax, name)
+					end
+				stop = true
+			elsif stop
+				break
+			else
+				next
+			end
+			name = name.sanitise
+
+			begin
+				query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+				name_id = query.execute(name).insert_id
+
+				name = name.sanitise
+
+				fm = FileMagic.new(FileMagic::MAGIC_MIME)
+				content_type = fm.buffer(datum)
+
+				content_type_split = content_type.chomp.split('/', 2)
+				content_type_main = content_type_split.first
+				content_type_sub = content_type_split.last
+				query = db.prepare('insert into content_types_main (type) values (?) on duplicate key update id = last_insert_id(id)')
+				content_type_main_id = query.execute(content_type_main).insert_id
+				query = db.prepare('insert into content_types_sub (type) values (?) on duplicate key update id = last_insert_id(id)')
+				content_type_sub_id = query.execute(content_type_sub).insert_id
+				query = db.prepare('insert into content_types (content_type_main_id, content_type_sub_id) values (?,?) on duplicate key update id = last_insert_id(id)')
+				content_type_id = query.execute(content_type_main_id, content_type_sub_id).insert_id
+
+				fingerprint = Digest::SHA1.hexdigest(datum)
+
+				query = db.prepare('insert into metadata (content_type_id, name_id, size, owner_id, fingerprint) values (?,?,?,?,?)')
+				id = query.execute(content_type_id, name_id, datum.length, owner_id, fingerprint).insert_id
+
+				if content_type == 'audio/mpeg' or content_type == 'application/ogg'
+					tmpfile = Tempfile.new(name)
+					tmpfile.close
+					mmap = Mmap.new(tmpfile.path, 'rw')
+					mmap.insert(0, datum)
+					if content_type == 'audio/mpeg'
+						tag = ID3Lib::Tag.new(tmpfile.path)
+						artist = tag.artist.to_s.sanitise
+						title = tag.title.to_s.sanitise
+						album = tag.album.to_s.sanitise
+						year = tag.year.to_s.sanitise
+					elsif content_type == 'application/ogg'
+						vf = Ogg::VorbisFile.new
+						tmpfile.open
+						if vf.open(tmpfile)
+							comments = vf.comments(-1)
+							artist = comments['artist'].to_s.sanitise
+							title = comments['title'].to_s.sanitise
+							album = comments['album'].to_s.sanitise
+							year = comments['date'].to_s.sanitise
+						end
+					end
+					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+					artist_id = query.execute(artist).insert_id
+					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+					title_id = query.execute(title).insert_id
+					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+					album_id = query.execute(album).insert_id
+					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+					year_id = query.execute(year).insert_id
+					query = db.prepare('update metadata set artist_id = ?, title_id = ?, album_id = ?, year_id = ? where metadata.id = ?')
+					query.execute(artist_id, title_id, album_id, year_id, id)
+				end
+
+				saved = saved + 1
+
+				id = id.to_s.to_b64
+
+				file = File.new(Paths['data'] + '/' + id, File::CREAT|File::TRUNC|File::RDWR, 0664)
+				file.close
+				mmap = Mmap.new(file.path, 'rw')
+				mmap.insert(0, datum)
+
+				output = output +
+			 '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
+			 '      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n" +
+			 '      With name: <a href="v' + id + '-/' + name + '">' + 'v' + id + '-/...</a><br /><br />' + "\n"
+			rescue Mysql::Error => err
+				db.rollback
+				if err.errno == 1062
+					# duplicate key
+					# get id for the dupe one
+					query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.fingerprint = ?')
+					res = query.execute(fingerprint).fetch
+					old_id = res[0].to_s.to_b64
+					name = res[1].to_s
+					output = output +
+				'      View file: <a href="v' + old_id + '">' + 'v' + old_id + '</a><br />' + "\n" +
+				'      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n" +
+				'      With name: <a href="v' + old_id + '-/' + name + '">' + 'v' + old_id + '-/...</a><br /><br />' + "\n"
+				saved += 1
+					next
+				else
+					raise err
+				end
+			end
+		end
+		if saved < 1
+			raise 'You are a trad.'
+		end
+		query = db.prepare('insert into upload_throttle (visitor_id, count) values (?,?) on duplicate key update count = count + ?')
+		query.execute(visitor_id, saved, saved)
+		cgi.out {
+			xhtml_pre +
+		'        <div class="content large">' + "\n" +
+		'          omploaded!<br />' + "\n" +
+		'          <br />' + "\n" +
+		output +
+		'        </div>' + "\n" +
+		xhtml_post
+		}
+		db.commit
+	rescue Mysql::Error => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+		}
+	rescue RuntimeError => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+		}
+	rescue SyntaxError, NameError => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+		}
+	rescue StandardError => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+		}
+	rescue
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+		}
+	ensure
+		tmpfile.close! unless tmpfile.nil?
+	end
+}

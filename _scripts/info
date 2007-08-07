@@ -14,319 +14,319 @@ require 'tempfile'
 db = db_connect
 
 FCGI.each_cgi {|cgi|
-  begin
-    db_check(db)
-    visitor_id = register_visit(cgi, db)
-    
-    query = db.prepare('select count from upload_throttle where visitor_id = ?')
-    throttle = query.execute(visitor_id).fetch.to_s
+	begin
+		db_check(db)
+		visitor_id = register_visit(cgi, db)
 
-    owner_id = get_owner_id(cgi, db)
-    
-    if !owner_id.nil?
-      query = db.prepare('select hide_comments from owners where id = ?')
-      hide_comments = query.execute(owner_id).fetch.to_s.to_i
-    else
-      hide_comments = 0
-    end
+		query = db.prepare('select count from upload_throttle where visitor_id = ?')
+		throttle = query.execute(visitor_id).fetch.to_s
 
-    if cgi.has_key?('hide_comments') and hide_comments != cgi.params['hide_comments'].to_s.to_i
-      hide_comments = cgi.params['hide_comments'].to_s.to_i
-      if !owner_id.nil?
-        query = db.prepare('update owners set hide_comments = ? where id = ?')
-        res = query.execute(hide_comments.to_s, owner_id)
-      end
-    end
-    
-    comment_name = ''
-    comment_body = ''
+		owner_id = get_owner_id(cgi, db)
 
-    if cgi.has_key?('comment') and throttle.to_i < Max_upload_count
-      comment_body = cgi['comment'].read.to_s.sanitise
-      comment_name = cgi['name'].read.to_s.sanitise
-      id = cgi['id'].read.to_id
-      if !comment_body.empty?
-        # Insert our new comment into db
-        query = db.prepare('insert into comments_body (body) values (?)')
-        comment_id = query.execute(comment_body).insert_id
-        query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
-        comment_id = query.execute(comment_id, id, owner_id).insert_id
-        query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
-        query.execute(id)
-        if !owner_id.nil?
-          query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-          name_id = query.execute(comment_name).insert_id
-          query = db.prepare('update owners set name_id = ? where id = ?')
-          query.execute(name_id, owner_id)
-        end
-        query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
-        query.execute(visitor_id, 1)
-        redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
-        print cgi.header({'Status' => '302 Moved', 'location' => redirect})
-        db.commit
-        next
-      end
-    else
-      id = cgi['id'].to_id
-    end
-  
-    # Verify that id is strictly numeric.
-    if id !~ /\A\d+\z/
-      raise 'You are a trad.'
-    end
-    query = db.prepare('select
-        n1.name,
-        metadata.size,
-        metadata.hits,
-        metadata.comment_count,
-        metadata.creation_time,
-        content_types_main.type,
-        content_types_sub.type,
-        n2.name
-    from
-      metadata
-      inner join names as n1 on n1.id = metadata.name_id
-      inner join content_types on content_types.id = metadata.content_type_id
-      inner join content_types_main on content_types_main.id = content_types.content_type_main_id
-      inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
-      left join owners on owners.id = metadata.owner_id
-      left join names as n2 on n2.id = owners.name_id
-    where
-      metadata.id = ?')
-    query.execute(id)
+		if !owner_id.nil?
+			query = db.prepare('select hide_comments from owners where id = ?')
+			hide_comments = query.execute(owner_id).fetch.to_s.to_i
+		else
+			hide_comments = 0
+		end
 
-    # Verify that id exists in database.
-    if query.num_rows < 1
-      raise 'Nothing to pee here.'
-    end
-    info = query.fetch
-    name = info[0]
-    size = info[1]
-    hits = info[2].to_s
-    comment_count = info[3].to_i
-    creation_time = info[4].to_s
-    content_type_main = info[5].to_s
-    content_type_sub = info[6].to_s
-    info_owner_name = info[7].to_s
-    content_type = content_type_main + '/' + content_type_sub
+		if cgi.has_key?('hide_comments') and hide_comments != cgi.params['hide_comments'].to_s.to_i
+			hide_comments = cgi.params['hide_comments'].to_s.to_i
+			if !owner_id.nil?
+				query = db.prepare('update owners set hide_comments = ? where id = ?')
+				res = query.execute(hide_comments.to_s, owner_id)
+			end
+		end
 
-    if info_owner_name.nil? or info_owner_name.empty?
-      info_owner_name = 'some luser'
-    end
+		comment_name = ''
+		comment_body = ''
 
-    # get and process referrers
-    query = db.prepare('select
-        referrers.address,
-    	  referrals.count
-      from
-        metadata
-        inner join referrals on referrals.metadata_id = metadata.id
-    	  inner join referrers on referrers.id = referrals.referrer_id
-      where
-        metadata.id = ?
-    	order by referrals.count desc
-    	limit 3  
+		if cgi.has_key?('comment') and throttle.to_i < Max_upload_count
+			comment_body = cgi['comment'].read.to_s.sanitise
+			comment_name = cgi['name'].read.to_s.sanitise
+			id = cgi['id'].read.to_id
+			if !comment_body.empty?
+				# Insert our new comment into db
+				query = db.prepare('insert into comments_body (body) values (?)')
+				comment_id = query.execute(comment_body).insert_id
+				query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
+				comment_id = query.execute(comment_id, id, owner_id).insert_id
+				query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
+				query.execute(id)
+				if !owner_id.nil?
+					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+					name_id = query.execute(comment_name).insert_id
+					query = db.prepare('update owners set name_id = ? where id = ?')
+					query.execute(name_id, owner_id)
+				end
+				query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
+				query.execute(visitor_id, 1)
+				redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
+				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
+				db.commit
+				next
+			end
+		else
+			id = cgi['id'].to_id
+		end
+
+		# Verify that id is strictly numeric.
+		if id !~ /\A\d+\z/
+			raise 'You are a trad.'
+		end
+		query = db.prepare('select
+		  n1.name,
+		  metadata.size,
+		  metadata.hits,
+		  metadata.comment_count,
+		  metadata.creation_time,
+		  content_types_main.type,
+		  content_types_sub.type,
+		  n2.name
+	 from
+		metadata
+		inner join names as n1 on n1.id = metadata.name_id
+		inner join content_types on content_types.id = metadata.content_type_id
+		inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+		inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
+		left join owners on owners.id = metadata.owner_id
+		left join names as n2 on n2.id = owners.name_id
+	 where
+		metadata.id = ?')
+	 query.execute(id)
+
+	 # Verify that id exists in database.
+	 if query.num_rows < 1
+		raise 'Nothing to pee here.'
+	 end
+	 info = query.fetch
+	 name = info[0]
+	 size = info[1]
+	 hits = info[2].to_s
+	 comment_count = info[3].to_i
+	 creation_time = info[4].to_s
+	 content_type_main = info[5].to_s
+	 content_type_sub = info[6].to_s
+	 info_owner_name = info[7].to_s
+	 content_type = content_type_main + '/' + content_type_sub
+
+		if info_owner_name.nil? or info_owner_name.empty?
+			info_owner_name = 'some luser'
+		end
+
+		# get and process referrers
+		query = db.prepare('select
+		  referrers.address,
+		  referrals.count
+		from
+		  metadata
+		  inner join referrals on referrals.metadata_id = metadata.id
+		  inner join referrers on referrers.id = referrals.referrer_id
+		where
+		  metadata.id = ?
+		order by referrals.count desc
+		limit 3  
 	  ')
-    referrers = ''
-    query.execute(id).num_rows.times do
-      res = query.fetch
-      address = res[0].to_s
-      count = res[1].to_s
-      referrers += '        <div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
-    end
-    referrers = '        No referrers!' + "\n" if referrers.empty?
+	  referrers = ''
+	  query.execute(id).num_rows.times do
+		  res = query.fetch
+		  address = res[0].to_s
+		  count = res[1].to_s
+		  referrers += '        <div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
+	  end
+	  referrers = '        No referrers!' + "\n" if referrers.empty?
 
-    if size > 1024*1024
-      n = (size.to_i/1024.0/1024.0).to_s
-      size = n.split('.')[0] + '.' + n.split('.')[1][0...2] + ' MiB'
-    elsif size > 1024
-      n = (size.to_i/1024.0).to_s
-      size = n.split('.')[0] + '.' + n.split('.')[1][0...2] + ' KiB'
-    elsif size == 1
-      size = size.to_s + ' byte'
-    else
-      size = size.to_s + ' bytes'
-    end
+	  if size > 1024*1024
+		  n = (size.to_i/1024.0/1024.0).to_s
+		  size = n.split('.')[0] + '.' + n.split('.')[1][0...2] + ' MiB'
+	  elsif size > 1024
+		  n = (size.to_i/1024.0).to_s
+		  size = n.split('.')[0] + '.' + n.split('.')[1][0...2] + ' KiB'
+	  elsif size == 1
+		  size = size.to_s + ' byte'
+	  else
+		  size = size.to_s + ' bytes'
+	  end
 
-    if !owner_id.nil?
-      query = db.prepare('select names.name from owners left join names on names.id = owners.name_id where owners.id = ?')
-      owner_name = query.execute(owner_id).fetch.to_s
-    end
-    if owner_name.nil? or owner_name.empty?
-      owner_name = 'some luser'
-    end
-    
-    if hide_comments == 1
-      hide_link = '<a href="i' + id.to_b64 + '-show">Show (' + comment_count.to_s + ')</a> &#x2503; <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
-    else
-      hide_link = '<a href="i' + id.to_b64 + '-hide">Hide</a> &#x2503; <a href="#comment_post">Post</a>'
-    end
+	  if !owner_id.nil?
+		  query = db.prepare('select names.name from owners left join names on names.id = owners.name_id where owners.id = ?')
+		  owner_name = query.execute(owner_id).fetch.to_s
+	  end
+	  if owner_name.nil? or owner_name.empty?
+		  owner_name = 'some luser'
+	  end
 
-    comments_body =
-      '      <div class="title">' + "\n" + 
-      '        <div class="links">' + hide_link + '</div>' + "\n" +
-      '        <div>Comments</div>' + "\n" +
-      '      </div>' + "\n"
-    cnum = 0
-    
-    if hide_comments == 0
-      if comment_count > 0
-        query = db.prepare('select
-            comments.id,
-            comments.creation_date,
-            comments_body.body,
-            names.name
-          from
-            comments
-            inner join metadata on metadata.id = comments.metadata_id
-            inner join comments_body on comments_body.id = comments.comment_id
-            left join owners on owners.id = comments.owner_id
-            left join names on names.id = owners.name_id
-          where
-            metadata.id = ?
-          order by comments.creation_date asc
-            ')
-        comment_array = Array.new
-        query.execute(id).num_rows.times do
-          cnum += 1
-          res = query.fetch
-          array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
-          comment_array << array
-        end
-        comment_array.each { |array|
-          num = array[0]
-          cid = array[1]
-          date = array[2]
-          body = array[3].sub(/\A[\r\n]+/, '').sub(/[\r\n]+\z/, '')
-          lname = array[4]
-          if lname.nil? or lname.empty?
-            lname = 'some luser'
-          end
-          if body =~ /\A\[thumb\]([\w+\/]+)\[\/thumb\]/
-            if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-              body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
-              body += '<br class="clear" />'
-            end
-          end
-          while body =~ /\[i\].+\[\/i\]/
-            body.sub!(/\[i\](.+?)\[\/i\]/, '<em>\1</em>')
-          end
-          while body =~ /\[b\].+\[\/b\]/
-            body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
-          end
-          comments_body +=
-            '      <a name="comment_' + cid + '"></a>' + "\n" +
-            '      <div class="content comment left-align">' + "\n" +
-            '        <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
-            '        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">&#x2503;</span> <a href="#comment_' + cid + '">#' + num + '</a></div>' + "\n" +
-            '        <br class="clear" />' + "\n" +
-            '        <pre>' + body + '</pre>' + "\n" +
-            '      </div>' + "\n"
-        }
-      end
-      query = db.prepare('select count from upload_throttle where visitor_id = ?')
-      throttle = query.execute(visitor_id).fetch.to_s
-    
-      if throttle.to_i < Max_upload_count
-        comments_body +=
-          '      <a name="comment_post"></a>' + "\n" +
-          '      <div class="content">' + "\n" +
-          '        <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
-          '          <div class="form">' + "\n" +
-          '            <div class="float name left-align">' + "\n" +
-          '              <div class="label">Name</div>' + "\n" +
-          '              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
-          '            </div>' + "\n" +
-          '            <div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
-          '            <br class="clear" />' + "\n" +
-          '            <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
-          '            <br class="clear" />' + "\n" +
-          '            <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
-          '            <input type="submit" value="COMMENT!" class="button" />' + "\n" +
-          '          </div>' + "\n" +
-          '        </form>' + "\n" +
-          '      </div>' + "\n"
-      else
-        comments_body +=
-          '      <a name="comment_post"></a>' + "\n" +
-          '      <div class="content large">NO COOKIE!</div>' + "\n"
-      end
-    end
+	  if hide_comments == 1
+		  hide_link = '<a href="i' + id.to_b64 + '-show">Show (' + comment_count.to_s + ')</a> &#x2503; <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
+	  else
+		  hide_link = '<a href="i' + id.to_b64 + '-hide">Hide</a> &#x2503; <a href="#comment_post">Post</a>'
+	  end
 
-    meta = ''
-    if content_type_main == 'image'
-      file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
-    elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
-      query = db.prepare('select
-          n1.name, n2.name, n3.name, n4.name
-        from
-          metadata
-          left join names as n1 on n1.id = metadata.artist_id
-          left join names as n2 on n2.id = metadata.title_id
-          left join names as n3 on n3.id = metadata.album_id
-          left join names as n4 on n4.id = metadata.year_id
-        where
-          metadata.id = ?')
-      res = query.execute(id).fetch
-      artist = res[0].to_s
-      title = res[1].to_s
-      album = res[2].to_s
-      year = res[3].to_s
-      meta += '        <div class="left"><strong>Artist:</strong></div><div class="right">' + artist + '</div><br class="clear" />' + "\n" if artist and !artist.empty?
-      meta += '        <div class="left"><strong>Title:</strong></div><div class="right">' + title + '</div><br class="clear" />' + "\n" if title and !title.empty?
-      meta += '        <div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
-      meta += '        <div class="left"><strong>Year:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
-      meta = meta.insert(0, '          <br />' + "\n") if !meta.empty?
-      file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
-    else
-      file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
-    end
-    
-    cgi.out('type' => 'text/html') {
-      xhtml_pre(' – ' + name + ' (' + content_type + ')') +
-      '      <div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
-      '      <div class="content">' + "\n" +
-      '        <div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
-      '        <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n" +
-      '        <div class="left"><strong>Name:</strong></div><div class="right">' + name + '</div><br class="clear" />' + "\n" +
-      '        <div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
-      '        <div class="left"><strong>Hits:</strong></div><div class="right">' + hits + '</div><br class="clear" />' + "\n" +
-      '        <div class="left"><strong>Upload Time:</strong></div><div class="right">' + creation_time + '</div><br class="clear" />' + "\n" +
-      '        <div class="left"><strong>Content Type:</strong></div><div class="right">' + content_type + '</div><br class="clear" />' + "\n" +
-      meta +
-      '      </div>' + "\n" +
-      '      <div class="title">Top referrers</div>' + "\n" +
-      '      <div class="content">' + "\n" +
-      referrers +
-      '      </div>' + "\n" +
-      comments_body +
-      xhtml_post
-    }
-    db.commit
+	  comments_body =
+		'      <div class="title">' + "\n" + 
+		'        <div class="links">' + hide_link + '</div>' + "\n" +
+		'        <div>Comments</div>' + "\n" +
+		'      </div>' + "\n"
+	 cnum = 0
+
+	 if hide_comments == 0
+		if comment_count > 0
+		  query = db.prepare('select
+				comments.id,
+				comments.creation_date,
+				comments_body.body,
+				names.name
+			 from
+				comments
+				inner join metadata on metadata.id = comments.metadata_id
+				inner join comments_body on comments_body.id = comments.comment_id
+				left join owners on owners.id = comments.owner_id
+				left join names on names.id = owners.name_id
+			 where
+				metadata.id = ?
+			 order by comments.creation_date asc
+				')
+		  comment_array = Array.new
+		  query.execute(id).num_rows.times do
+			 cnum += 1
+			 res = query.fetch
+			 array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
+			 comment_array << array
+		  end
+		  comment_array.each { |array|
+			 num = array[0]
+			 cid = array[1]
+			 date = array[2]
+			 body = array[3].sub(/\A[\r\n]+/, '').sub(/[\r\n]+\z/, '')
+			 lname = array[4]
+			 if lname.nil? or lname.empty?
+				lname = 'some luser'
+			 end
+			 if body =~ /\A\[thumb\]([\w+\/]+)\[\/thumb\]/
+				if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
+				  body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+				  body += '<br class="clear" />'
+				end
+			 end
+			 while body =~ /\[i\].+\[\/i\]/
+				body.sub!(/\[i\](.+?)\[\/i\]/, '<em>\1</em>')
+			 end
+			 while body =~ /\[b\].+\[\/b\]/
+				body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
+			 end
+			 comments_body +=
+				'      <a name="comment_' + cid + '"></a>' + "\n" +
+				'      <div class="content comment left-align">' + "\n" +
+				'        <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
+				'        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc">&#x2503;</span> <a href="#comment_' + cid + '">#' + num + '</a></div>' + "\n" +
+				'        <br class="clear" />' + "\n" +
+				'        <pre>' + body + '</pre>' + "\n" +
+				'      </div>' + "\n"
+		  }
+		end
+		query = db.prepare('select count from upload_throttle where visitor_id = ?')
+		throttle = query.execute(visitor_id).fetch.to_s
+
+		if throttle.to_i < Max_upload_count
+		  comments_body +=
+			 '      <a name="comment_post"></a>' + "\n" +
+			 '      <div class="content">' + "\n" +
+			 '        <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
+			 '          <div class="form">' + "\n" +
+			 '            <div class="float name left-align">' + "\n" +
+			 '              <div class="label">Name</div>' + "\n" +
+			 '              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
+			 '            </div>' + "\n" +
+			 '            <div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
+			 '            <br class="clear" />' + "\n" +
+			 '            <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
+			 '            <br class="clear" />' + "\n" +
+			 '            <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
+			 '            <input type="submit" value="COMMENT!" class="button" />' + "\n" +
+			 '          </div>' + "\n" +
+			 '        </form>' + "\n" +
+			 '      </div>' + "\n"
+		else
+		  comments_body +=
+			 '      <a name="comment_post"></a>' + "\n" +
+			 '      <div class="content large">NO COOKIE!</div>' + "\n"
+		end
+	 end
+
+	 meta = ''
+	 if content_type_main == 'image'
+		file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
+	 elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
+		query = db.prepare('select
+			 n1.name, n2.name, n3.name, n4.name
+		  from
+			 metadata
+			 left join names as n1 on n1.id = metadata.artist_id
+			 left join names as n2 on n2.id = metadata.title_id
+			 left join names as n3 on n3.id = metadata.album_id
+			 left join names as n4 on n4.id = metadata.year_id
+		  where
+			 metadata.id = ?')
+		res = query.execute(id).fetch
+		artist = res[0].to_s
+		title = res[1].to_s
+		album = res[2].to_s
+		year = res[3].to_s
+		meta += '        <div class="left"><strong>Artist:</strong></div><div class="right">' + artist + '</div><br class="clear" />' + "\n" if artist and !artist.empty?
+		meta += '        <div class="left"><strong>Title:</strong></div><div class="right">' + title + '</div><br class="clear" />' + "\n" if title and !title.empty?
+		meta += '        <div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
+		meta += '        <div class="left"><strong>Year:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
+		meta = meta.insert(0, '          <br />' + "\n") if !meta.empty?
+		file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
+	 else
+		file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
+	 end
+
+	 cgi.out('type' => 'text/html') {
+		xhtml_pre(' – ' + name + ' (' + content_type + ')') +
+		'      <div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
+		'      <div class="content">' + "\n" +
+		'        <div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
+		'        <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n" +
+		'        <div class="left"><strong>Name:</strong></div><div class="right">' + name + '</div><br class="clear" />' + "\n" +
+		'        <div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
+		'        <div class="left"><strong>Hits:</strong></div><div class="right">' + hits + '</div><br class="clear" />' + "\n" +
+		'        <div class="left"><strong>Upload Time:</strong></div><div class="right">' + creation_time + '</div><br class="clear" />' + "\n" +
+		'        <div class="left"><strong>Content Type:</strong></div><div class="right">' + content_type + '</div><br class="clear" />' + "\n" +
+		meta +
+		'      </div>' + "\n" +
+		'      <div class="title">Top referrers</div>' + "\n" +
+		'      <div class="content">' + "\n" +
+		referrers +
+		'      </div>' + "\n" +
+		comments_body +
+		xhtml_post
+	 }
+	 db.commit
   rescue Mysql::Error => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+	 }
   rescue RuntimeError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+	 }
   rescue SyntaxError, NameError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+	 }
   rescue StandardError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+	 }
   rescue
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+	 }
   end
 }

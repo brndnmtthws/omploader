@@ -11,13 +11,13 @@
 require 'omploader'
 
 begin
-  db = db_connect
-  run_cron(db)
-  db.commit
+	db = db_connect
+	run_cron(db)
+	db.commit
 rescue Mysql::Error => err
-  db.rollback unless db.nil?
-  $stderr.puts 'MySQL error in cron script: ' + err
+	db.rollback unless db.nil?
+	$stderr.puts 'MySQL error in cron script: ' + err
 rescue
-  db.rollback unless db.nil?
-  $stderr.puts 'Error in cron script'
+	db.rollback unless db.nil?
+	$stderr.puts 'Error in cron script'
 end

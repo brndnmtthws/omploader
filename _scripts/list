@@ -13,346 +13,346 @@ require 'omploader'
 db = db_connect
 
 FCGI.each_cgi {|cgi|
-begin
-    db_check(db)
-    register_visit(cgi, db)
-    
-    owner_id = get_owner_id(cgi, db)
- 
-    if !owner_id.nil?
-      query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
-      res = query.execute(owner_id).fetch
-      mine_only = res[0].to_s.to_i
-      list_images = res[1].to_s.to_i
-      results = res[2].to_s.to_i
-    else
-      mine_only = 0
-      list_images = 0
-      results = 20
-    end
-   
-    mine_sel = cgi.params['mine_only'].to_s
-    if mine_sel == 'y'
-      mine_sel = 1
-      mine_only_opt = 'y'
-    elsif mine_sel == 'n'
-      mine_sel = 0
-      mine_only_opt = 'n'
-    else
-      mine_sel = mine_only
-      mine_only_opt = 'n'
-    end
-  
-    if cgi.params['images_only'].to_s == 'y'
-      images_only = true
-      images_only_opt = 'y'
-      list_images = 1
-    elsif cgi.params['images_only'].to_s == 'n'
-      images_only = false
-      images_only_opt = 'n'
-      list_images = 0
-    else
-      if list_images == 0
-        images_only = false
-        images_only_opt = 'n'
-      else
-        images_only = true
-        images_only_opt = 'y'
-      end
-    end
-    
-    if images_only
-      maxres = 30
-    else
-      maxres = 60
-    end
-  
-    if !cgi.params['results'].to_s.empty?
-      results_sel = cgi.params['results'].to_s.to_i
-    else
-      results_sel = results
-    end
-  
-    if mine_sel != mine_only or results != results_sel or cgi.params['images_only'].to_s =~ /^n{1}$|^y{1}$/
-      mine_only = mine_sel
-      results = results_sel
-      if results > maxres
-        results = maxres
-      elsif results < 5
-        results = 5
-      end
-      if !owner_id.nil?
-        query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
-        res = query.execute(mine_only.to_s, results.to_s, list_images, owner_id)
-      end
-    end
-  
-    order_short = cgi.params['order'].to_s
-    if order_short == 'a'
-      order = 'asc'
-    elsif order_short == 'd'
-      order = 'desc'
-    else
-      order_short = 'd'
-      order = 'desc'
-    end
-  
-    column_short = cgi.params['column'].to_s
-    if column_short == 't'
-      column = 'metadata.creation_time'
-    elsif column_short == 'n'
-      column = 'names.name'
-    elsif column_short == 'h'
-      column = 'metadata.hits'
-    elsif column_short == 'c'
-      column = 'metadata.comment_count'
-    else
-      column_short = 't'
-      column = 'metadata.creation_time'
-    end
-  
-    page = cgi.params['page'].to_s.to_i
-    page = 1 if page == 0
-  
-    search = ''
-    if cgi.has_key?('search_post')
-      search = cgi['search_post'].read.to_s
-    elsif cgi.params['search'].to_s.length > 2
-      search = cgi.params['search'].to_s
-      search = search.reverse.chop.chop.reverse
-    end
-  
-    param_search = 's-' + search
-    
-    my_where_clause = ''
-    if mine_only != 0 and !owner_id.nil?
-      my_where_clause = 'where metadata.owner_id = ' + owner_id + ' '
-    end
-    if images_only and !my_where_clause.empty?
-      my_where_clause += ' and content_types_main.type like "image" '
-    elsif images_only
-      my_where_clause = ' where content_types_main.type like "image" '
-    end
-    where_clause = ' '
-    wheres = search.split(' ')
-    for item in wheres
-      where_clause += 'names.name like "%' + item + '%" or '
-    end
-    where_clause = where_clause.chop.chop.chop
-    if my_where_clause.empty? and !where_clause.empty?
-      where_clause = 'where ' + where_clause
-    end
-    if !my_where_clause.empty? and !where_clause.empty?
-      where_clause = my_where_clause + ' and (' + where_clause + ') '
-    elsif !my_where_clause.empty?
-      where_clause = my_where_clause
-    end
-  
-    query = db.prepare('select
-        count(*)
-      from metadata
-        inner join names on names.id = metadata.name_id
-        inner join content_types on content_types.id = metadata.content_type_id
-        inner join content_types_main on content_types_main.id = content_types.content_type_main_id
-        inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' +
-        where_clause)
-    count = query.execute.fetch.to_s.to_i
-    if page > count / results + 1
-      page = 1
-    end
-  
-    query = db.prepare('select
-        metadata.id,
-        metadata.creation_time,
-        metadata.hits,
-        metadata.comment_count,
-        names.name,
-        content_types_main.type,
-        content_types_sub.type
-      from
-        metadata
-        inner join names on names.id = metadata.name_id
-        inner join content_types on content_types.id = metadata.content_type_id
-        inner join content_types_main on content_types_main.id = content_types.content_type_main_id
-        inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' +
-        where_clause +
-        'order by ' +
-        column + ' ' + order +
-        ' limit
-        ?,' + results.to_s)
-    if images_only
-      files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
-      files_list_info = ''
-    else
-      files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
-        '        <table>' + "\n" +
-        '          <tr>' + "\n" +
-        '            <th>Name<a href="l' + results.to_s + 'an' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dn' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</th>' + "\n" +
-        '            <th class="small">Info</th>' + "\n" +
-        '            <th class="small">Hits<a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
-        '            <th class="small">&ldquo;&rdquo;<a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
-        '            <th class="small">Time<a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
-        '          </tr>' + "\n"
-      row_number = 0
-    end
-    file_number = 0
-    query.execute((page - 1) * results).num_rows.times do
-      result = query.fetch
-      id = result[0].to_s
-      time = result[1].to_s
-      hits = result[2].to_s
-      comment_count = result[3].to_s
-      name = result[4].to_s
-      next if id.to_i < 1
-      id = id.to_b64
-  
-      file_number = file_number + 1
-      if images_only
-        files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
-        files_list_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
-        if file_number == 5
-          file_number = 0
-          files_list += '        <br class="clear" />' + "\n"
-          files_list += files_list_info
-          files_list += '        <br class="clear" />' + "\n"
-          files_list_info = ''
-        end
-      else
-        row_number += 1
-        if row_number % 2 == 1
-          files_list +=
-            '          <tr>' + "\n"
-        else
-          files_list +=
-            '          <tr class="even">' + "\n"
-        end
+	begin
+		db_check(db)
+		register_visit(cgi, db)
 
-        if name.length > 30
-          name_displayed = name[0..28] + '…'
-        else
-          name_displayed = name
-        end
+		owner_id = get_owner_id(cgi, db)
 
-        files_list +=
-          '            <td><a href="v' + id + '" title="' + name + '">' + name_displayed + '</a></td>' + "\n" +
-          '            <td class="small"><a href="i' + id + '">Info</td>' + "\n" +
-          '            <td class="small">' + hits + '</td>' + "\n" +
-          '            <td class="small">' + comment_count + '</td>' + "\n" +
-          '            <td class="small">' + time.sub(' ', '&nbsp;') + '</td>' + "\n" +
-          '          </tr>' +  "\n"
-      end
-    end
-  
-    if images_only
-      if file_number != 0
-        files_list += '        <br class="clear" />' + "\n"
-        files_list += files_list_info
-        files_list += '        <br class="clear" />' + "\n"
-      end
-    else
-      files_list += '        </table>' + "\n"
-    end
-    files_list += '      </div>' + "\n"
-  
-    page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
-    if page > 1
-      page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + 1.to_s + param_search + '">First</a> &#x2503; <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous</a>'
-    else
-      page_links += "        First &#x2503; Previous"
-    end
-    query = db.prepare('select
-                    metadata.id
-        from metadata
-        inner join names on names.id = metadata.name_id
-        inner join content_types on content_types.id = metadata.content_type_id
-        inner join content_types_main on content_types_main.id = content_types.content_type_main_id
-        inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' +
-        where_clause +
-        'order by ' +
-        column + ' ' + order +
-        ' limit
-        ?,' + results.to_s)
-    if query.execute(page * results).num_rows > 0
-      page_links += ' &#x2503; <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
-    else
-      page_links += ' &#x2503; Next'
-    end
-    page_links += "\n" + '      </div>' + "\n"
-    
-    if mine_only == 1
-      mine_only_msg = '<a href="l' + results.to_s + order_short + column_short + 'n' + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">show anyone\'s</a> [ <span class="pink">showing mine</span> ]'
-    else
-      mine_only_msg = '<a href="l' + results.to_s + order_short + column_short + 'y' + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">show mine</a> [ <span class="pink">showing anyone\'s</span> ]'
-    end
-  
-    if images_only
-      images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'n' + page.to_s + param_search + '" style="text-decoration: none">show all files</a> [ <span class="pink">showing images</span> ]'
-    else
-      images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'y' + page.to_s + param_search + '" style="text-decoration: none">show images</a> [ <span class="pink">showing all files</span> ]'
-    end
-  
-    if count > (page - 1) * results + results
-      shown = ((page - 1) * results + results).to_s
-    else
-      shown = ((page - 1) * results + count - ((page - 1) * results)).to_s
-    end
-     
-    results_html = ''
-    if results < maxres and results > 5
-     results_html = '        <a href="l' + (results + 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">More Results</a> | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Less Results</a><br />' + "\n"
-    elsif results < maxres
-     results_html = '        <a href="l' + (results + 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">More Results</a> | Less Results<br />' + "\n"
-    elsif results > 5
-     results_html = '        More Results | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Less Results</a><br />' + "\n"
-    end
-  
-    if shown.to_i == 0
-      files_list_title = ''
-      files_list = '      <div class="content large">No results.</div>' + "\n"
-    else
-      files_list_title = '      <div class="title">' + "\n" +
-        '<div class="links">' + results_html + '</div>' + "\n" +
-        'Page ' + page.to_s + ' (files ' + ((page - 1) * results + 1).to_s + ' to ' + shown + ')' + "\n" +
-        '</div>' + "\n"
-    end
-  
-    cgi.out('text/html') {
-      xhtml_pre +
-      '      <div class="content large">' + "\n" +
-      '        ' + mine_only_msg + '<br />' + "\n" +
-      '        ' + images_only_msg + "\n" +
-      '      </div>' + "\n" +
-      files_list_title +
-      page_links +
-      files_list +
-      page_links +
-      xhtml_post
-    }
-    db.commit
+		if !owner_id.nil?
+			query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
+			res = query.execute(owner_id).fetch
+			mine_only = res[0].to_s.to_i
+			list_images = res[1].to_s.to_i
+			results = res[2].to_s.to_i
+		else
+			mine_only = 0
+			list_images = 0
+			results = 20
+		end
+
+		mine_sel = cgi.params['mine_only'].to_s
+		if mine_sel == 'y'
+			mine_sel = 1
+			mine_only_opt = 'y'
+		elsif mine_sel == 'n'
+			mine_sel = 0
+			mine_only_opt = 'n'
+		else
+			mine_sel = mine_only
+			mine_only_opt = 'n'
+		end
+
+		if cgi.params['images_only'].to_s == 'y'
+			images_only = true
+			images_only_opt = 'y'
+			list_images = 1
+		elsif cgi.params['images_only'].to_s == 'n'
+			images_only = false
+			images_only_opt = 'n'
+			list_images = 0
+		else
+			if list_images == 0
+				images_only = false
+				images_only_opt = 'n'
+			else
+				images_only = true
+				images_only_opt = 'y'
+			end
+		end
+
+		if images_only
+			maxres = 30
+		else
+			maxres = 60
+		end
+
+		if !cgi.params['results'].to_s.empty?
+			results_sel = cgi.params['results'].to_s.to_i
+		else
+			results_sel = results
+		end
+
+		if mine_sel != mine_only or results != results_sel or cgi.params['images_only'].to_s =~ /^n{1}$|^y{1}$/
+			mine_only = mine_sel
+			results = results_sel
+			if results > maxres
+				results = maxres
+			elsif results < 5
+				results = 5
+			end
+			if !owner_id.nil?
+				query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
+				res = query.execute(mine_only.to_s, results.to_s, list_images, owner_id)
+			end
+		end
+
+		order_short = cgi.params['order'].to_s
+		if order_short == 'a'
+			order = 'asc'
+		elsif order_short == 'd'
+			order = 'desc'
+		else
+			order_short = 'd'
+			order = 'desc'
+		end
+
+		column_short = cgi.params['column'].to_s
+		if column_short == 't'
+			column = 'metadata.creation_time'
+		elsif column_short == 'n'
+			column = 'names.name'
+		elsif column_short == 'h'
+			column = 'metadata.hits'
+		elsif column_short == 'c'
+			column = 'metadata.comment_count'
+		else
+			column_short = 't'
+			column = 'metadata.creation_time'
+		end
+
+		page = cgi.params['page'].to_s.to_i
+		page = 1 if page == 0
+
+		search = ''
+		if cgi.has_key?('search_post')
+			search = cgi['search_post'].read.to_s
+		elsif cgi.params['search'].to_s.length > 2
+			search = cgi.params['search'].to_s
+			search = search.reverse.chop.chop.reverse
+		end
+
+		param_search = 's-' + search
+
+		my_where_clause = ''
+		if mine_only != 0 and !owner_id.nil?
+			my_where_clause = 'where metadata.owner_id = ' + owner_id + ' '
+		end
+		if images_only and !my_where_clause.empty?
+			my_where_clause += ' and content_types_main.type like "image" '
+		elsif images_only
+			my_where_clause = ' where content_types_main.type like "image" '
+		end
+		where_clause = ' '
+		wheres = search.split(' ')
+		for item in wheres
+			where_clause += 'names.name like "%' + item + '%" or '
+		end
+		where_clause = where_clause.chop.chop.chop
+		if my_where_clause.empty? and !where_clause.empty?
+			where_clause = 'where ' + where_clause
+		end
+		if !my_where_clause.empty? and !where_clause.empty?
+			where_clause = my_where_clause + ' and (' + where_clause + ') '
+		elsif !my_where_clause.empty?
+			where_clause = my_where_clause
+		end
+
+		query = db.prepare('select
+		  count(*)
+		from metadata
+		  inner join names on names.id = metadata.name_id
+		  inner join content_types on content_types.id = metadata.content_type_id
+		  inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+		  inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' +
+		  where_clause)
+	 count = query.execute.fetch.to_s.to_i
+	 if page > count / results + 1
+		page = 1
+	 end
+
+	 query = db.prepare('select
+	 metadata.id,
+		 metadata.creation_time,
+		 metadata.hits,
+		 metadata.comment_count,
+		 names.name,
+		 content_types_main.type,
+		 content_types_sub.type
+	 from
+	 metadata
+	 inner join names on names.id = metadata.name_id
+	 inner join content_types on content_types.id = metadata.content_type_id
+	 inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+	 inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' +
+		  where_clause +
+		  'order by ' +
+		  column + ' ' + order +
+		  ' limit
+		  ?,' + results.to_s)
+		  if images_only
+			  files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
+				  files_list_info = ''
+		  else
+			  files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
+		  '        <table>' + "\n" +
+		  '          <tr>' + "\n" +
+		  '            <th>Name<a href="l' + results.to_s + 'an' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dn' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</th>' + "\n" +
+		  '            <th class="small">Info</th>' + "\n" +
+		  '            <th class="small">Hits<a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+		  '            <th class="small">&ldquo;&rdquo;<a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+		  '            <th class="small">Time<a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+		  '          </tr>' + "\n"
+		  row_number = 0
+	 end
+	 file_number = 0
+	 query.execute((page - 1) * results).num_rows.times do
+		result = query.fetch
+		id = result[0].to_s
+		time = result[1].to_s
+		hits = result[2].to_s
+		comment_count = result[3].to_s
+		name = result[4].to_s
+		next if id.to_i < 1
+		id = id.to_b64
+
+		file_number = file_number + 1
+		if images_only
+		  files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+		  files_list_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
+		  if file_number == 5
+			 file_number = 0
+			 files_list += '        <br class="clear" />' + "\n"
+			 files_list += files_list_info
+			 files_list += '        <br class="clear" />' + "\n"
+			 files_list_info = ''
+		  end
+		else
+		  row_number += 1
+		  if row_number % 2 == 1
+			 files_list +=
+				'          <tr>' + "\n"
+		  else
+			 files_list +=
+				'          <tr class="even">' + "\n"
+		  end
+
+		  if name.length > 30
+			 name_displayed = name[0..28] + '…'
+		  else
+			 name_displayed = name
+		  end
+
+		  files_list +=
+			 '            <td><a href="v' + id + '" title="' + name + '">' + name_displayed + '</a></td>' + "\n" +
+			 '            <td class="small"><a href="i' + id + '">Info</td>' + "\n" +
+			 '            <td class="small">' + hits + '</td>' + "\n" +
+			 '            <td class="small">' + comment_count + '</td>' + "\n" +
+			 '            <td class="small">' + time.sub(' ', '&nbsp;') + '</td>' + "\n" +
+			 '          </tr>' +  "\n"
+		end
+	 end
+
+	 if images_only
+		if file_number != 0
+		  files_list += '        <br class="clear" />' + "\n"
+		  files_list += files_list_info
+		  files_list += '        <br class="clear" />' + "\n"
+		end
+	 else
+		files_list += '        </table>' + "\n"
+	 end
+	 files_list += '      </div>' + "\n"
+
+	 page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
+	 if page > 1
+		page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + 1.to_s + param_search + '">First</a> &#x2503; <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous</a>'
+	 else
+		page_links += "        First &#x2503; Previous"
+	 end
+	 query = db.prepare('select
+						  metadata.id
+		  from metadata
+		  inner join names on names.id = metadata.name_id
+		  inner join content_types on content_types.id = metadata.content_type_id
+		  inner join content_types_main on content_types_main.id = content_types.content_type_main_id
+		  inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' +
+		  where_clause +
+		  'order by ' +
+		  column + ' ' + order +
+		  ' limit
+		  ?,' + results.to_s)
+	 if query.execute(page * results).num_rows > 0
+		page_links += ' &#x2503; <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
+	 else
+		page_links += ' &#x2503; Next'
+	 end
+	 page_links += "\n" + '      </div>' + "\n"
+
+	 if mine_only == 1
+		mine_only_msg = '<a href="l' + results.to_s + order_short + column_short + 'n' + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">show anyone\'s</a> [ <span class="pink">showing mine</span> ]'
+	 else
+		mine_only_msg = '<a href="l' + results.to_s + order_short + column_short + 'y' + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">show mine</a> [ <span class="pink">showing anyone\'s</span> ]'
+	 end
+
+	 if images_only
+		images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'n' + page.to_s + param_search + '" style="text-decoration: none">show all files</a> [ <span class="pink">showing images</span> ]'
+	 else
+		images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'y' + page.to_s + param_search + '" style="text-decoration: none">show images</a> [ <span class="pink">showing all files</span> ]'
+	 end
+
+	 if count > (page - 1) * results + results
+		shown = ((page - 1) * results + results).to_s
+	 else
+		shown = ((page - 1) * results + count - ((page - 1) * results)).to_s
+	 end
+
+	 results_html = ''
+	 if results < maxres and results > 5
+	  results_html = '        <a href="l' + (results + 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">More Results</a> | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Less Results</a><br />' + "\n"
+	 elsif results < maxres
+	  results_html = '        <a href="l' + (results + 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">More Results</a> | Less Results<br />' + "\n"
+	 elsif results > 5
+	  results_html = '        More Results | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Less Results</a><br />' + "\n"
+	 end
+
+	 if shown.to_i == 0
+		files_list_title = ''
+		files_list = '      <div class="content large">No results.</div>' + "\n"
+	 else
+		files_list_title = '      <div class="title">' + "\n" +
+		  '<div class="links">' + results_html + '</div>' + "\n" +
+		  'Page ' + page.to_s + ' (files ' + ((page - 1) * results + 1).to_s + ' to ' + shown + ')' + "\n" +
+		  '</div>' + "\n"
+	 end
+
+	 cgi.out('text/html') {
+		xhtml_pre +
+		'      <div class="content large">' + "\n" +
+		'        ' + mine_only_msg + '<br />' + "\n" +
+		'        ' + images_only_msg + "\n" +
+		'      </div>' + "\n" +
+		files_list_title +
+		page_links +
+		files_list +
+		page_links +
+		xhtml_post
+	 }
+	 db.commit
   rescue Mysql::Error => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+	 }
   rescue RuntimeError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+	 }
   rescue SyntaxError, NameError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+	 }
   rescue StandardError => err
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+	 }
   rescue
-    db.rollback unless db.nil?
-    cgi.out('text/html') {
-      xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
-    }
+	 db.rollback unless db.nil?
+	 cgi.out('text/html') {
+		xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+	 }
   end
 }
