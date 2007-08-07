@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+#
+# $Id$
+#
+# Copyright 2007 David Shakaryan <omp@gentoo.org>
+# Copyright 2007 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+#
+
+quiet = false
+help = false
+ARGV.each do |arg|
+	if arg =~ /-q|--queit/
+		quiet = true
+	elsif arg =~ /-h|--help/
+		help = true
+	end
+end
+
+nocurl = false
+curl = %x{curl --version 2> /dev/null}
+if curl.empty?
+	nocurl = true
+	$stderr.puts 'Error: curl missing or not in path.  Cannot continue.'
+	$stderr.puts 
+end
+
+if ARGV.size < 1 or help or nocurl
+	$stderr.puts 'Usage:  ompload [-h|--help] [options] file(s)'
+	$stderr.puts '  -q, --quiet     Only output errors and warnings'
+	$stderr.puts 
+	$stderr.puts '  This script requires a copy of cURL in the path.'
+	Process.exit
+end
+
+errors = 0
+
+wait = 15
+poop = Time.now - wait
+
+Url = 'http://test.peemail.org/'
+
+argv = ARGV
+
+argv.each do |arg|
+
+	if !File.exists?(arg)
+		$stderr.puts "Invalid argument '#{arg}': file does not exist"
+		errors += 1
+		next
+	end
+
+	# no more than 1 every 15 seconds is common courtesy
+	turd = Time.now - poop
+	if turd < wait
+		sleep(wait - turd)
+	end
+
+	# upload file
+	output = %x{curl -s -F file1=@"#{arg}" #{Url}upload}
+	if output.empty?
+		$stderr.puts "Error omploading '#{arg}'"
+		errors += 1
+		poop = Time.now
+		next
+	end
+
+	# parse for an ID
+	if output =~ /View file: <a href="v(\w*)">/
+		id = $1
+		puts "Omploaded '#{arg}' to #{Url}v#{id}" if !quiet
+	elsif output =~ /Slow down there, cowboy\./
+		wait += 5
+		argv << arg
+		$stderr.puts "Got throttled when trying to ompload '#{arg}'"
+		$stderr.puts "Increasing wait and attempting to continue..."
+		errors += 1
+	else
+		$stderr.puts "Error omploading '#{arg}'"
+		errors += 1
+	end
+
+	poop = Time.now
+end
+
+if !quiet
+	if errors < 1
+		puts "Success."
+	else
+		puts "Finished with #{errors} errors."
+	end
+end
+
