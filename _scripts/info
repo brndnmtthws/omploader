@@ -208,11 +208,11 @@ FCGI.each_cgi {|cgi|
               body += '<br class="clear" />'
             end
           end
-          while body =~ /\[i\](.*)\[\/i\]/
-            body.sub!(/\[i\](.*)\[\/i\]/, '<em>\1</em>')
+          while body =~ /\[i\].+\[\/i\]/
+            body.sub!(/\[i\](.+?)\[\/i\]/, '<em>\1</em>')
           end
           while body =~ /\[b\].+\[\/b\]/
-            body.sub!(/\[b\](.+)\[\/b\]/, '<strong>\1</strong>')
+            body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
           end
           comments_body +=
             '      <a name="comment_' + cid + '"></a>' + "\n" +
