@@ -8,13 +8,32 @@
 # Distributed under the terms of the GNU General Public License v3
 #
 
+argv = Array.new
+
 quiet = false
 help = false
-ARGV.each do |arg|
-	if arg =~ /-q|--queit/
+skip = false
+filename = 'pasta'
+
+stdin = $stdin.read
+unless stdin.empty?
+	argv << ''
+end
+
+ARGV.each_index do |i|
+	if skip
+		skip = false
+		next
+	end
+	if ARGV[i] =~ /-q|--queit/
 		quiet = true
-	elsif arg =~ /-h|--help/
+	elsif ARGV[i] =~ /-h|--help/
 		help = true
+	elsif ARGV[i] =~ /-f|--filename/
+		filename = ARGV[i + 1]
+		skip = true
+	else
+		argv << ARGV[i]
 	end
 end
 
@@ -26,9 +45,13 @@ if curl.empty?
 	$stderr.puts 
 end
 
-if ARGV.size < 1 or help or nocurl
-	$stderr.puts 'Usage:  ompload [-h|--help] [options] file(s)'
+if (ARGV.size < 1 and stdin.empty?) or help or nocurl
+	$stderr.puts 'Usage:  ompload [-h|--help] [options] [file(s)]'
 	$stderr.puts '  -q, --quiet     Only output errors and warnings'
+	$stderr.puts '  -f, --filename  Filename to use when posting data'
+	$stderr.puts '                  from stdin'
+	$stderr.puts 
+	$stderr.puts '  You can supply a list of files or data via stdin (or both)'
 	$stderr.puts 
 	$stderr.puts '  This script requires a copy of cURL in the path.'
 	Process.exit
@@ -41,11 +64,11 @@ poop = Time.now - wait
 
 Url = 'http://test.peemail.org/'
 
-argv = ARGV
+used_stdin = false
 
 argv.each do |arg|
 
-	if !File.exists?(arg)
+	if stdin.empty? and !used_stdin and !File.exists?(arg)
 		$stderr.puts "Invalid argument '#{arg}': file does not exist"
 		errors += 1
 		next
@@ -57,8 +80,14 @@ argv.each do |arg|
 		sleep(wait - turd)
 	end
 
-	# upload file
-	output = %x{curl -s -F file1=@"#{arg}" #{Url}upload}
+	if !stdin.empty? and !used_stdin
+		# upload from stdin
+		output = %x{echo '#{stdin}' | curl -s -F "file1=@-;filename=#{filename}" #{Url}upload}
+		used_stdin = true
+	else
+		# upload file
+		output = %x{curl -s -F file1=@"#{arg}" #{Url}upload}
+	end
 	if output.empty?
 		$stderr.puts "Error omploading '#{arg}'"
 		errors += 1

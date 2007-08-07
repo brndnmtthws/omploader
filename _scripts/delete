@@ -11,7 +11,25 @@
 require 'omploader'
 require 'find'
 
-if ARGV.size < 1 or ARGV.to_s =~ /-h|--help/
+comments = false
+cleanup = false
+help = false
+
+argv = Array.new
+
+ARGV.each do |arg|
+	if arg =~ /-h|--help/
+		help = true
+	elsif arg =~ /-c|--comments/
+		comments = true
+	elsif arg =~ /-C|--cleanup/
+		cleanup = true
+	else
+		argv << arg
+	end
+end
+
+if help or (argv.empty? and !cleanup)
   $stderr.puts 'Usage:  delete [-h|--help] [options] ID [ID ID ID ...]'
   $stderr.puts '  -c, --comments  take arguments as comment IDs'
   $stderr.puts '  -C, --cleanup   cleanup other elements, such as the names and'
@@ -24,10 +42,7 @@ end
 
 db = db_connect
 
-ARGV.each do |arg|
-  if ARGV.to_s =~ /-h|--help/ or ARGV.to_s =~ /-c|--comments|-C|--cleanup/
-    next
-  end
+argv.each do |arg|
   begin
     id = arg.to_id
     # Verify that id is strictly numeric.
@@ -65,8 +80,8 @@ ARGV.each do |arg|
   end
 end
 
-if ARGV.to_s !~ /-h|--help/ and ARGV.to_s =~ /-c|--comments/
-  ARGV.each do |arg|
+if comments
+  argv.each do |arg|
     begin
       id = arg.to_i
       if id < 1
@@ -92,7 +107,7 @@ if ARGV.to_s !~ /-h|--help/ and ARGV.to_s =~ /-c|--comments/
   end
 end
 
-if ARGV.to_s =~ /-C|--cleanup/
+if cleanup
   begin
     query = db.prepare('delete
       from
