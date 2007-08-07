@@ -233,7 +233,7 @@ FCGI.each_cgi {|cgi|
 		if page > 1
 			page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + 1.to_s + param_search + '">First</a> <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous</a>'
 		else
-			page_links += "        First <span class="separator">&#x2503;</span> Previous"
+			page_links += '        First <span class="separator">&#x2503;</span> Previous'
 		end
 		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 		if query.execute(page * results).num_rows > 0
