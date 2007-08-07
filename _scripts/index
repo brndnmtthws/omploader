@@ -74,7 +74,7 @@ FCGI.each_cgi {|cgi|
 				'      </div>' + "\n" +
 				'      <div class="content">' + "\n"
 				top_files_info = ''
-				query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type = "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
+			query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type = "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
 			query.execute.num_rows.times do
 				result = query.fetch
 				id = result.first.to_s.to_b64
@@ -86,7 +86,7 @@ FCGI.each_cgi {|cgi|
 			top_files += '        <br class="clear" />' + "\n" + top_files_info + '        <br class="clear" />' + "\n" +
 				'        <br />' + "\n" +
 				'        <div class="filelist">' + "\n"
-				query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type != "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
+			query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type != "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
 			query.execute.num_rows.times do
 				result = query.fetch
 				id = result.first.to_s.to_b64

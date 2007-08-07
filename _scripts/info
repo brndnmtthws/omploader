@@ -187,27 +187,27 @@ FCGI.each_cgi {|cgi|
 
 		if throttle.to_i < Max_upload_count
 			comments_body +=
-					'      <a name="comment_post"></a>' + "\n" +
-					'      <div class="content">' + "\n" +
-					'        <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
-					'          <div class="form">' + "\n" +
-					'            <div class="float name left-align">' + "\n" +
-					'              <div class="label">Name</div>' + "\n" +
-					'              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
-					'            </div>' + "\n" +
-					'            <div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
-					'            <br class="clear" />' + "\n" +
-					'            <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
-					'            <br class="clear" />' + "\n" +
-					'            <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
-					'            <input type="submit" value="COMMENT!" class="button" />' + "\n" +
-					'          </div>' + "\n" +
-					'        </form>' + "\n" +
-					'      </div>' + "\n"
+				'      <a name="comment_post"></a>' + "\n" +
+				'      <div class="content">' + "\n" +
+				'        <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
+				'          <div class="form">' + "\n" +
+				'            <div class="float name left-align">' + "\n" +
+				'              <div class="label">Name</div>' + "\n" +
+				'              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
+				'            </div>' + "\n" +
+				'            <div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
+				'            <br class="clear" />' + "\n" +
+				'            <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
+				'            <br class="clear" />' + "\n" +
+				'            <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
+				'            <input type="submit" value="COMMENT!" class="button" />' + "\n" +
+				'          </div>' + "\n" +
+				'        </form>' + "\n" +
+				'      </div>' + "\n"
 		else
 			comments_body +=
-					'      <a name="comment_post"></a>' + "\n" +
-					'      <div class="content large">NO COOKIE!</div>' + "\n"
+				'      <a name="comment_post"></a>' + "\n" +
+				'      <div class="content large">NO COOKIE!</div>' + "\n"
 		end
 		meta = ''
 		if content_type_main == 'image'

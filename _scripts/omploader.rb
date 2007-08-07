@@ -37,35 +37,35 @@ end
 
 def xhtml_pre(title = '')
 	xhtml_pre = 
-	 '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' + "\n" +
-	 '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
-	 '  <head>' + "\n" +
-	 '    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
-	 '    <link rel="stylesheet" type="text/css" href="_style.css" />' + "\n" +
-	 '    <link rel="shortcut icon" href="_omploader_icon.png" type="image/x-icon" />' + "\n" +
-	 '    <title>omploader' + title + '</title>' + "\n" +
-	 '  </head>' + "\n" +
-	 '  <body>' + "\n" +
-	 '    <div id="container">' + "\n" +
-	 '      <div id="header">' + "\n" +
-	 '      <div id="title"><a href="/"><img src="_omploader.png" alt="omploader" /></a></div>'  + "\n" +
-	 '        <form enctype="multipart/form-data" action="l" method="post">' + "\n" +
-	 '          <div id="search">' + "\n" +
-	 '            <input name="search_post" size="20" class="field" type="text" /><input value="search" class="button" type="submit" />' + "\n" +
-	 '          </div>' + "\n" +
-	 '        </form>' + "\n" +
-	 '      </div>' + "\n"
+		'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' + "\n" +
+		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
+		'  <head>' + "\n" +
+		'    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
+		'    <link rel="stylesheet" type="text/css" href="_style.css" />' + "\n" +
+		'    <link rel="shortcut icon" href="_omploader_icon.png" type="image/x-icon" />' + "\n" +
+		'    <title>omploader' + title + '</title>' + "\n" +
+		'  </head>' + "\n" +
+		'  <body>' + "\n" +
+		'    <div id="container">' + "\n" +
+		'      <div id="header">' + "\n" +
+		'      <div id="title"><a href="/"><img src="_omploader.png" alt="omploader" /></a></div>'  + "\n" +
+		'        <form enctype="multipart/form-data" action="l" method="post">' + "\n" +
+		'          <div id="search">' + "\n" +
+		'            <input name="search_post" size="20" class="field" type="text" /><input value="search" class="button" type="submit" />' + "\n" +
+		'          </div>' + "\n" +
+		'        </form>' + "\n" +
+		'      </div>' + "\n"
 end
 
 def xhtml_post
 	xhtml_post =
-	 '      <div id="footer">' + "\n" +
-	 '        <div class="right"><a href="omploader.xpi">firefox extension</a></div>' + "\n" +
-	 '        <a href="irc://irc.freenode.net/##otw">otw</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://svn.omploader.org/">svn</a>' + "\n" + 
-	 '      </div>' + "\n" +
-	 '    </div>' + "\n" +
-	 '  </body>' + "\n" +
-	 '</html>'
+		'      <div id="footer">' + "\n" +
+		'        <div class="right"><a href="omploader.xpi">firefox extension</a></div>' + "\n" +
+		'        <a href="irc://irc.freenode.net/##otw">otw</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://svn.omploader.org/">svn</a>' + "\n" + 
+		'      </div>' + "\n" +
+		'    </div>' + "\n" +
+		'  </body>' + "\n" +
+		'</html>'
 end
 
 # Reconnect to database if connection is dropped.
@@ -93,13 +93,12 @@ end
 
 def session(cgi, new)
 	session = CGI::Session.new(cgi,
-	 'database_manager' => CGI::Session::PStore,  # use PStore
-	 'session_key' => '_rb_sess_id',              # custom session key
-	 'prefix' => 'pstore_sid_',                   # PStore option
-	 'session_expires' => Time.now + 60*60*24*365,
-	 'session_path' => '/',
-	 'new_session' => new
-									  )
+		'database_manager' => CGI::Session::PStore,  # use PStore
+		'session_key' => '_rb_sess_id',              # custom session key
+		'prefix' => 'pstore_sid_',                   # PStore option
+		'session_expires' => Time.now + 60*60*24*365,
+		'session_path' => '/',
+		'new_session' => new)
 end
 
 def get_owner_id(cgi, db)
@@ -161,18 +160,18 @@ def vimcolour(datum, filetype, title)
 	# Set terminal colours to 88 to allow us to use the Inkpot theme.
 	# The bdelete command is to delete the first buffer, so the generated HTML
 	# does not have to be saved to a different file.
-	%x{vim -n -e                    \
-	 -c 'set t_Co=88'              \
-	 -c 'set filetype=#{filetype}' \
-	 -c 'syntax on'                \
-	 -c 'set number'               \
-	 -c 'colorscheme inkpot'       \
-	 -c 'let html_use_css = 1'     \
-	 -c 'let use_xhtml = 1'        \
-	 -c 'run syntax/2html.vim'     \
-	 -c 'bdelete 1'                \
-	 -c 'wq! #{tempfile.path}'     \
-	#{tempfile.path}              }
+	%x{vim -n -e                     \
+		-c 'set t_Co=88'              \
+		-c 'set filetype=#{filetype}' \
+		-c 'syntax on'                \
+		-c 'set number'               \
+		-c 'colorscheme inkpot'       \
+		-c 'let html_use_css = 1'     \
+		-c 'let use_xhtml = 1'        \
+		-c 'run syntax/2html.vim'     \
+		-c 'bdelete 1'                \
+		-c 'wq! #{tempfile.path}'     \
+			#{tempfile.path}            }
 
 	# Read the temporary file and split it into three parts, splitting from the
 	# first <pre> tag and the last </pre> tag. This creates an array consisting
