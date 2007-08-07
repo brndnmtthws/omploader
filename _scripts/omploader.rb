@@ -39,32 +39,32 @@ def xhtml_pre(title = '')
 	xhtml_pre = 
 		'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' + "\n" +
 		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
-		'  <head>' + "\n" +
-		'    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
-		'    <link rel="stylesheet" type="text/css" href="_style.css" />' + "\n" +
-		'    <link rel="shortcut icon" href="_omploader_icon.png" type="image/x-icon" />' + "\n" +
-		'    <title>omploader' + title + '</title>' + "\n" +
-		'  </head>' + "\n" +
-		'  <body>' + "\n" +
-		'    <div id="container">' + "\n" +
-		'      <div id="header">' + "\n" +
-		'      <div id="title"><a href="/"><img src="_omploader.png" alt="omploader" /></a></div>'  + "\n" +
-		'        <form enctype="multipart/form-data" action="l" method="post">' + "\n" +
-		'          <div id="search">' + "\n" +
-		'            <input name="search_post" size="20" class="field" type="text" /><input value="search" class="button" type="submit" />' + "\n" +
-		'          </div>' + "\n" +
-		'        </form>' + "\n" +
-		'      </div>' + "\n"
+		"\t" + '<head>' + "\n" +
+		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
+		"\t\t" + '<link rel="stylesheet" type="text/css" href="_style.css" />' + "\n" +
+		"\t\t" + '<link rel="shortcut icon" href="_omploader_icon.png" type="image/x-icon" />' + "\n" +
+		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
+		"\t" + '</head>' + "\n" +
+		"\t" + '<body>' + "\n" +
+		"\t\t" + '<div id="container">' + "\n" +
+		"\t\t\t" + '<div id="header">' + "\n" +
+		"\t\t\t\t" + '<div id="title"><a href="/"><img src="_omploader.png" alt="omploader" /></a></div>'  + "\n" +
+		"\t\t\t\t" + '<form enctype="multipart/form-data" action="l" method="post">' + "\n" +
+		"\t\t\t\t\t" + '<div id="search">' + "\n" +
+		"\t\t\t\t\t\t" + '<input name="search_post" size="20" class="field" type="text" /><input value="search" class="button" type="submit" />' + "\n" +
+		"\t\t\t\t\t" + '</div>' + "\n" +
+		"\t\t\t\t" + '</form>' + "\n" +
+		"\t\t\t" + '</div>' + "\n"
 end
 
 def xhtml_post
 	xhtml_post =
-		'      <div id="footer">' + "\n" +
-		'        <div class="right"><a href="omploader.xpi">firefox extension</a></div>' + "\n" +
-		'        <a href="irc://irc.freenode.net/##otw">otw</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://svn.omploader.org/">svn</a>' + "\n" + 
-		'      </div>' + "\n" +
-		'    </div>' + "\n" +
-		'  </body>' + "\n" +
+		"\t\t\t" + '<div id="footer">' + "\n" +
+		"\t\t\t\t" + '<div class="right"><a href="omploader.xpi">firefox extension</a></div>' + "\n" +
+		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##otw">otw</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://svn.omploader.org/">svn</a>' + "\n" + 
+		"\t\t\t" + '</div>' + "\n" +
+		"\t\t" + '</div>' + "\n" +
+		"\t" + '</body>' + "\n" +
 		'</html>'
 end
 
@@ -160,7 +160,7 @@ def vimcolour(datum, filetype, title)
 	# Set terminal colours to 88 to allow us to use the Inkpot theme.
 	# The bdelete command is to delete the first buffer, so the generated HTML
 	# does not have to be saved to a different file.
-	%x{vim -n -e                     \
+	%x{vim -n -e                      \
 		-c 'set t_Co=88'              \
 		-c 'set filetype=#{filetype}' \
 		-c 'syntax on'                \
@@ -171,7 +171,7 @@ def vimcolour(datum, filetype, title)
 		-c 'run syntax/2html.vim'     \
 		-c 'bdelete 1'                \
 		-c 'wq! #{tempfile.path}'     \
-			#{tempfile.path}            }
+		#{tempfile.path}              }
 
 	# Read the temporary file and split it into three parts, splitting from the
 	# first <pre> tag and the last </pre> tag. This creates an array consisting

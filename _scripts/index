@@ -63,29 +63,31 @@ FCGI.each_cgi {|cgi|
 		end
 
 		if hide_top_files == 1
-			top_files = '      <div class="title">' + "\n" +
-				'        <div class="links"><a href="show">Show</a></div>' + "\n" +
-				'        Top Files' + "\n" +
-				'      </div>'
+			top_files =
+				"\t\t\t" + '<div class="title">' + "\n" +
+				"\t\t\t\t" + '<div class="links"><a href="show">Show</a></div>' + "\n" +
+				"\t\t\t\t" + 'Top Files' + "\n" +
+				"\t\t\t" + '</div>'
 		else
-			top_files = '      <div class="title">' + "\n" +
-				'        <div class="links"><a href="hide">Hide</a></div>' + "\n" +
-				'        Top Files' + "\n" +
-				'      </div>' + "\n" +
-				'      <div class="content">' + "\n"
-				top_files_info = ''
+			top_files =
+				"\t\t\t" + '<div class="title">' + "\n" +
+				"\t\t\t\t" + '<div class="links"><a href="hide">Hide</a></div>' + "\n" +
+				"\t\t\t\t" + 'Top Files' + "\n" +
+				"\t\t\t" + '</div>' + "\n" +
+				"\t\t\t" + '<div class="content">' + "\n"
+			top_files_info = ''
 			query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type = "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
 			query.execute.num_rows.times do
 				result = query.fetch
 				id = result.first.to_s.to_b64
 				name = result.last.to_s
 
-				top_files += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
-				top_files_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
+				top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+				top_files_info += "\t\t\t\t" + '<div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
 			end
-			top_files += '        <br class="clear" />' + "\n" + top_files_info + '        <br class="clear" />' + "\n" +
-				'        <br />' + "\n" +
-				'        <div class="filelist">' + "\n"
+			top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
+				"\t\t\t\t" + '<br />' + "\n" +
+				"\t\t\t\t" + '<div class="filelist">' + "\n"
 			query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type != "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
 			query.execute.num_rows.times do
 				result = query.fetch
@@ -93,13 +95,14 @@ FCGI.each_cgi {|cgi|
 				name = result.last.to_s
 
 				top_files += 
-					'          <div class="file" />' + "\n" +
-					'          <span class="filename"><a href="v' + id + '">' + name + '</a></span>' + "\n" +
-					'          <span class="fileinfo"><a href="i' + id + '">Info</a></span>' + "\n" +
-					'          </div>' + "\n"
+					"\t\t\t\t\t" + '<div class="file" />' + "\n" +
+					"\t\t\t\t\t" + '<span class="filename"><a href="v' + id + '">' + name + '</a></span>' + "\n" +
+					"\t\t\t\t\t" + '<span class="fileinfo"><a href="i' + id + '">Info</a></span>' + "\n" +
+					"\t\t\t\t\t" + '</div>' + "\n"
 			end
-			top_files += '        </div>' + "\n" +
-				'      </div>' + "\n"
+			top_files +=
+				"\t\t\t\t" + '</div>' + "\n" +
+				"\t\t\t" + '</div>' + "\n"
 		end
 
 		query = db.prepare('select count(*) from metadata')
@@ -119,68 +122,68 @@ FCGI.each_cgi {|cgi|
 			end
 			if big == 1 and paste != 1
 				form =
-					'        <form' + encoding + ' action="upload" method="post">' + "\n" +
-					'           <div class="form">' + "\n" +
-					'            <input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
-					'            <input type="' + input_type + '" name="' + input_name + '2" size="25" class="input field" /><br />' + "\n" +
-					'            <input type="' + input_type + '" name="' + input_name + '3" size="25" class="input field" /><br />' + "\n" +
-					'            <input type="' + input_type + '" name="' + input_name + '4" size="25" class="input field" /><br />' + "\n" +
-					'            <input type="' + input_type + '" name="' + input_name + '5" size="25" class="input field" /><br />' + "\n" +
-					'            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
-					'          </div>' + "\n" +
-					'        </form>'
+					"\t\t\t\t" + '<form' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t\t" + '<div class="form">' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '2" size="25" class="input field" /><br />' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '3" size="25" class="input field" /><br />' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '4" size="25" class="input field" /><br />' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '5" size="25" class="input field" /><br />' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
+					"\t\t\t\t\t" + '</div>' + "\n" +
+					"\t\t\t\t" + '</form>'
 			elsif paste == 1
 				form =
-					'        <form' + encoding + ' action="upload" method="post">' + "\n" +
-					'          <div class="form">' + "\n" +
-					'            <div class="float name left-align">' + "\n" +
-					'              <div class="label">Name</div>' + "\n" +
-					'              <input type="line" name="name" size="25" class="input field" />' + "\n" +
-					'            </div>' + "\n" +
-					'            <div class="float left-align">' + "\n" +
-					'              <div class="label">Syntax</div>' + "\n" +
-					'              <select name="syntax" class="input">' + "\n" +
-					'                <option selected value="raw">Plain Text</option>' + "\n" +
-					'                <option value="">Auto detect</option>' + "\n" +
-					'                <option disabled>––––––––––</option>' + "\n" +
-					'                <option value="c">C</option>' + "\n" +
-					'                <option value="cobol">COBOL</option>' + "\n" +
-					'                <option value="cpp">C++</option>' + "\n" +
-					'                <option value="css">CSS</option>' + "\n" +
-					'                <option value="fortran">Fortran</option>' + "\n" +
-					'                <option value="haskell">Haskell</option>' + "\n" +
-					'                <option value="html">HTML</option>' + "\n" +
-					'                <option value="java">Java</option>' + "\n" +
-					'                <option value="javascript">JavaScript</option>' + "\n" +
-					'                <option value="lisp">Lisp</option>' + "\n" +
-					'                <option value="pascal">Pascal</option>' + "\n" +
-					'                <option value="perl">Perl</option>' + "\n" +
-					'                <option value="php">PHP</option>' + "\n" +
-					'                <option value="python">Python</option>' + "\n" +
-					'                <option value="ruby">Ruby</option>' + "\n" +
-					'                <option value="scheme">Scheme</option>' + "\n" +
-					'                <option value="vb">Visual Basic</option>' + "\n" +
-					'                <option value="xhtml">XHTML</option>' + "\n" +
-					'                <option value="xml">XML</option>' + "\n" +
-					'              </select>' + "\n" +
-					'            </div>' + "\n" +
-					'            <br class="clear" />' + "\n" +
-					'            <div class="float"><textarea name="paste" class="input"></textarea></div>' + "\n" +
-					'            <br class="clear" />' + "\n" +
-					'            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
-					'          </div>' + "\n" +
-					'        </form>'
+					"\t\t\t\t" + '<form' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t\t" + '<div class="form">' + "\n" +
+					"\t\t\t\t\t\t\t" + '<div class="float name left-align">' + "\n" +
+					"\t\t\t\t\t\t\t" + '<div class="label">Name</div>' + "\n" +
+					"\t\t\t\t\t\t\t" + '<input type="line" name="name" size="25" class="input field" />' + "\n" +
+					"\t\t\t\t\t" + '</div>' + "\n" +
+					"\t\t\t\t\t" + '<div class="float left-align">' + "\n" +
+					"\t\t\t\t\t\t" + '<div class="label">Syntax</div>' + "\n" +
+					"\t\t\t\t\t\t\t" + '<select name="syntax" class="input">' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option selected value="raw">Plain Text</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="">Auto detect</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option disabled>––––––––––</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="c">C</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="cobol">COBOL</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="cpp">C++</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="css">CSS</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="fortran">Fortran</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="haskell">Haskell</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="html">HTML</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="java">Java</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="javascript">JavaScript</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="lisp">Lisp</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="pascal">Pascal</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="perl">Perl</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="php">PHP</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="python">Python</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="ruby">Ruby</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="scheme">Scheme</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="vb">Visual Basic</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="xhtml">XHTML</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="xml">XML</option>' + "\n" +
+					"\t\t\t\t\t\t\t" + '</select>' + "\n" +
+					"\t\t\t\t\t\t" + '</div>' + "\n" +
+					"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
+					"\t\t\t\t\t\t" + '<div class="float"><textarea name="paste" class="input"></textarea></div>' + "\n" +
+					"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
+					"\t\t\t\t\t" + '</div>' + "\n" +
+					"\t\t\t\t" + '</form>'
 			else
 				form =
-					'        <form' + encoding + ' action="upload" method="post">' + "\n" +
-					'          <div class="form">' + "\n" +
-					'            <input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
-					'            <input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
-					'          </div>' + "\n" +
-					'        </form>'
+					"\t\t\t\t" + '<form' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t\t" + '<div class="form">' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
+					"\t\t\t\t\t\t" + '<input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
+					"\t\t\t\t\t" + '</div>' + "\n" +
+					"\t\t\t\t" + '</form>'
 			end
 		else
-			form = '        <div class="content large">NO COOKIE!</div>'
+			form = "\t\t\t\t" + '<div class="content large">NO COOKIE!</div>'
 		end
 
 		if big == 0
@@ -189,17 +192,17 @@ FCGI.each_cgi {|cgi|
 			bigger = 'small'
 		end
 		xhtml =
-			'      <div class="content large">' + "\n" +
-			'        <a href="' + bigger + '">' + bigger + ' loader</a> | <a href="l">list</a>' + "\n" +
-			'        <div class="powered">powered by web ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
-			'      </div>' + "\n" +
-			'      <div class="title">' + "\n" +
-			'        <div class="links"><a href="file">From File</a> <span class="separator">&#x2503;</span> <a href="curl">From URL</a> <span class="separator">&#x2503;</span> <a href="paste">Pasta!</a></div>' + "\n" +
-			'        <div>Upload</div>' + "\n" +
-			'      </div>' + "\n" +
-			'      <div class="content">' + "\n" +
+			"\t\t\t" + '<div class="content large">' + "\n" +
+			"\t\t\t\t" + '<a href="' + bigger + '">' + bigger + ' loader</a> | <a href="l">list</a>' + "\n" +
+			"\t\t\t\t" + '<div class="powered">powered by web ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
+			"\t\t\t" + '</div>' + "\n" +
+			"\t\t\t" + '<div class="title">' + "\n" +
+			"\t\t\t\t" + '<div class="links"><a href="file">From File</a> <span class="separator">&#x2503;</span> <a href="curl">From URL</a> <span class="separator">&#x2503;</span> <a href="paste">Pasta!</a></div>' + "\n" +
+			"\t\t\t\t" + '<div>Upload</div>' + "\n" +
+			"\t\t\t" + '</div>' + "\n" +
+			"\t\t\t" + '<div class="content">' + "\n" +
 			form + "\n" +
-			'      </div>' + "\n" +
+			"\t\t\t" +'</div>' + "\n" +
 			top_files
 
 			cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
@@ -207,27 +210,27 @@ FCGI.each_cgi {|cgi|
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
 		}
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">' + err + '</div>' + xhtml_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
 		}
 	rescue StandardError => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
 		}
 	rescue
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
 		}
 	end
 }
