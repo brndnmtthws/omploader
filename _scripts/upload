@@ -152,17 +152,21 @@ FCGI.each_cgi {|cgi|
           
         output = output +
           '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
-          '      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n"
+          '      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n" +
+          '      With name: <a href="v' + id + '-/' + name + '">' + 'v' + id + '-/...</a><br /><br />' + "\n"
       rescue Mysql::Error => err
         db.rollback
         if err.errno == 1062
           # duplicate key
           # get id for the dupe one
-          query = db.prepare('select metadata.id from metadata where metadata.fingerprint = ?')
-          old_id = query.execute(fingerprint).fetch.to_s.to_b64
+          query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.fingerprint = ?')
+          res = query.execute(fingerprint).fetch
+          old_id = res[0].to_s.to_b64
+          name = res[1].to_s
           output = output +
             '      View file: <a href="v' + old_id + '">' + 'v' + old_id + '</a><br />' + "\n" +
-            '      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n"
+            '      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n" +
+            '      With name: <a href="v' + old_id + '-/' + name + '">' + 'v' + old_id + '-/...</a><br /><br />' + "\n"
           saved += 1
           next
         else

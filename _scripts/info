@@ -237,7 +237,7 @@ FCGI.each_cgi {|cgi|
           '              <div class="label">Name</div>' + "\n" +
           '              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
           '            </div>' + "\n" +
-          '            <div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i] - Italics.</strong></div>' + "\n" +
+          '            <div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
           '            <br class="clear" />' + "\n" +
           '            <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
           '            <br class="clear" />' + "\n" +
