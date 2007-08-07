@@ -61,7 +61,7 @@ def xhtml_post
 	xhtml_post =
 	 '      <div id="footer">' + "\n" +
 	 '        <div class="right"><a href="omploader.xpi">firefox extension</a></div>' + "\n" +
-	 '        <a href="irc://irc.freenode.net/##otw">otw</a> &#x2503; <a href="http://www.ruby-lang.org/">ruby</a> &#x2503; <a href="http://www.vim.org/">vim</a> &#x2503; <a href="http://svn.omploader.org/">svn</a>' + "\n" + 
+	 '        <a href="irc://irc.freenode.net/##otw">otw</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://svn.omploader.org/">svn</a>' + "\n" + 
 	 '      </div>' + "\n" +
 	 '    </div>' + "\n" +
 	 '  </body>' + "\n" +

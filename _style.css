@@ -45,6 +45,10 @@ br.clear {
 	clear: both;
 }
 
+span.separator {
+	font-weight: normal;
+}
+
 div#header {
 	margin: 10px 0 20px 0;
 }

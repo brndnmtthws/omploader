@@ -221,7 +221,7 @@ FCGI.each_cgi {|cgi|
 		 '        <div class="powered">powered by web ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
 		 '      </div>' + "\n" +
 		 '      <div class="title">' + "\n" +
-		 '        <div class="links"><a href="file">From File</a> &#x2503; <a href="curl">From URL</a> &#x2503; <a href="paste">Pasta!</a></div>' + "\n" +
+		 '        <div class="links"><a href="file">From File</a> <span class="separator">&#x2503;</span> <a href="curl">From URL</a> <span class="separator">&#x2503;</span> <a href="paste">Pasta!</a></div>' + "\n" +
 		 '        <div>Upload</div>' + "\n" +
 		 '      </div>' + "\n" +
 		 '      <div class="content">' + "\n" +

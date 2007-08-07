@@ -256,9 +256,9 @@ FCGI.each_cgi {|cgi|
 
 	 page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
 	 if page > 1
-		page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + 1.to_s + param_search + '">First</a> &#x2503; <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous</a>'
+		page_links += '        <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + 1.to_s + param_search + '">First</a> <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page - 1).to_s + param_search + '">Previous</a>'
 	 else
-		page_links += "        First &#x2503; Previous"
+		page_links += "        First <span class="separator">&#x2503;</span> Previous"
 	 end
 	 query = db.prepare('select
 						  metadata.id
@@ -273,9 +273,9 @@ FCGI.each_cgi {|cgi|
 		  ' limit
 		  ?,' + results.to_s)
 	 if query.execute(page * results).num_rows > 0
-		page_links += ' &#x2503; <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
+		page_links += ' <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
 	 else
-		page_links += ' &#x2503; Next'
+		page_links += ' <span class="separator">&#x2503;</span> Next'
 	 end
 	 page_links += "\n" + '      </div>' + "\n"
 
