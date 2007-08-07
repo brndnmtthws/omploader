@@ -74,25 +74,7 @@ FCGI.each_cgi {|cgi|
 		if id !~ /\A\d+\z/
 			raise 'You are a trad.'
 		end
-		query = db.prepare('select
-				  n1.name,
-				  metadata.size,
-				  metadata.hits,
-				  metadata.comment_count,
-				  metadata.creation_time,
-				  content_types_main.type,
-				  content_types_sub.type,
-				  n2.name
-			 from
-				metadata
-				inner join names as n1 on n1.id = metadata.name_id
-				inner join content_types on content_types.id = metadata.content_type_id
-				inner join content_types_main on content_types_main.id = content_types.content_type_main_id
-				inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
-				left join owners on owners.id = metadata.owner_id
-				left join names as n2 on n2.id = owners.name_id
-			 where
-				metadata.id = ?')
+		query = db.prepare('select n1.name, metadata.size, metadata.hits, metadata.comment_count, metadata.creation_time, content_types_main.type, content_types_sub.type, n2.name from metadata inner join names as n1 on n1.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join owners on owners.id = metadata.owner_id left join names as n2 on n2.id = owners.name_id where metadata.id = ?')
 		query.execute(id)
 
 		# Verify that id exists in database.
@@ -168,7 +150,6 @@ FCGI.each_cgi {|cgi|
 					array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
 					comment_array << array
 				end
-<<<<<<< .mine
 				comment_array.each { |array|
 					num = array[0]
 					cid = array[1]
@@ -200,11 +181,12 @@ FCGI.each_cgi {|cgi|
 						'      </div>' + "\n"
 				}
 			end
-			query = db.prepare('select count from upload_throttle where visitor_id = ?')
-			throttle = query.execute(visitor_id).fetch.to_s
+		end
+		query = db.prepare('select count from upload_throttle where visitor_id = ?')
+		throttle = query.execute(visitor_id).fetch.to_s
 
-			if throttle.to_i < Max_upload_count
-				comments_body +=
+		if throttle.to_i < Max_upload_count
+			comments_body +=
 					'      <a name="comment_post"></a>' + "\n" +
 					'      <div class="content">' + "\n" +
 					'        <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
@@ -222,31 +204,11 @@ FCGI.each_cgi {|cgi|
 					'          </div>' + "\n" +
 					'        </form>' + "\n" +
 					'      </div>' + "\n"
-			else
-				comments_body +=
+		else
+			comments_body +=
 					'      <a name="comment_post"></a>' + "\n" +
 					'      <div class="content large">NO COOKIE!</div>' + "\n"
-			end
-=======
-			 end
-			 while body =~ /\[i\].+\[\/i\]/
-				body.sub!(/\[i\](.+?)\[\/i\]/, '<em>\1</em>')
-			 end
-			 while body =~ /\[b\].+\[\/b\]/
-				body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
-			 end
-			 comments_body +=
-				'      <a name="comment_' + cid + '"></a>' + "\n" +
-				'      <div class="content comment left-align">' + "\n" +
-				'        <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
-				'        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc"><span class="separator">&#x2503;</span></span> <a href="#comment_' + cid + '">#' + num + '</a></div>' + "\n" +
-				'        <br class="clear" />' + "\n" +
-				'        <pre>' + body + '</pre>' + "\n" +
-				'      </div>' + "\n"
-		  }
->>>>>>> .r99
 		end
-
 		meta = ''
 		if content_type_main == 'image'
 			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
