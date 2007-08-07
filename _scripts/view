@@ -24,61 +24,50 @@ FCGI.each_cgi {|cgi|
 		if id !~ /\A\d+\z/
 			raise 'You are a trad.'
 		end
-		query = db.prepare('select
-		  names.name,
-		  content_types_main.type,
-		  content_types_sub.type
-		from
-		  metadata
-		  inner join names on names.id = metadata.name_id
-		  inner join content_types on content_types.id = metadata.content_type_id
-		  inner join content_types_main on content_types_main.id = content_types.content_type_main_id
-		  inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id
-		where
-		  metadata.id = ?')
-	 query.execute(id)
+		query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
+		query.execute(id)
 
-	 # Verify that id exists in database.
-	 if query.num_rows < 1
-		raise 'Nothing to pee here.'
-	 end
-	 info = query.fetch
-	 name = info[0].to_s
-	 content_type = info[1]+ '/' + info[2]
+		# Verify that id exists in database.
+		if query.num_rows < 1
+			raise 'Nothing to pee here.'
+		end
+		info = query.fetch
+		name = info[0].to_s
+		content_type = info[1]+ '/' + info[2]
 
-		  # Increment vote number if this is first view from visitor.
-	 query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
-	 res = query.execute(visitor_id, id)
-	 if res.num_rows == 0
-		 query = db.prepare('update metadata set hits = hits + 1 where id = ?')
-		 query.execute(id)
-		 query = db.prepare('insert into votes (visitor_id, metadata_id) values (?,?)')
-		 query.execute(visitor_id, id)
-		 referrer = cgi.referer.to_s
-		 referrer = URI.extract(referrer).first
-		 if referrer and !referrer.empty?
-			 split = URI.split(referrer)
-			 host = split[2]
-			 if host != cgi.host
-				 query = db.prepare('select id from referrers where address = ?')
-				 query.execute(referrer)
-				 if query.num_rows < 1
-					 query = db.prepare('insert into referrers (address) values (?)')
-					 query.execute(referrer)
-					 referrer_id = query.insert_id.to_s
-				 else
-					 referrer_id = query.fetch.to_s
-				 end
-				 query = db.prepare('insert into referrals (referrer_id, metadata_id) values (?,?) on duplicate key update count = count + 1')
-				 query.execute(referrer_id, id)
-			 end
-		 end
-	 end
+		# Increment vote number if this is first view from visitor.
+		query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
+		res = query.execute(visitor_id, id)
+		if res.num_rows == 0
+			query = db.prepare('update metadata set hits = hits + 1 where id = ?')
+			query.execute(id)
+			query = db.prepare('insert into votes (visitor_id, metadata_id) values (?,?)')
+			query.execute(visitor_id, id)
+			referrer = cgi.referer.to_s
+			referrer = URI.extract(referrer).first
+			if referrer and !referrer.empty?
+				split = URI.split(referrer)
+				host = split[2]
+				if host != cgi.host
+					query = db.prepare('select id from referrers where address = ?')
+					query.execute(referrer)
+					if query.num_rows < 1
+						query = db.prepare('insert into referrers (address) values (?)')
+						query.execute(referrer)
+						referrer_id = query.insert_id.to_s
+					else
+						referrer_id = query.fetch.to_s
+					end
+					query = db.prepare('insert into referrals (referrer_id, metadata_id) values (?,?) on duplicate key update count = count + 1')
+					query.execute(referrer_id, id)
+				end
+			end
+		end
 
-	 datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r').to_str
+		datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r').to_str
 
-	 cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { datum }
-	 db.commit
+		cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { datum }
+		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {

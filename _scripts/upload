@@ -151,9 +151,9 @@ FCGI.each_cgi {|cgi|
 				mmap.insert(0, datum)
 
 				output = output +
-			 '      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
-			 '      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n" +
-			 '      With name: <a href="v' + id + '-/' + name + '">' + 'v' + id + '-/...</a><br /><br />' + "\n"
+					'      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
+					'      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n" +
+					'      With name: <a href="v' + id + '-/' + name + '">' + 'v' + id + '-/...</a><br /><br />' + "\n"
 			rescue Mysql::Error => err
 				db.rollback
 				if err.errno == 1062
@@ -164,10 +164,10 @@ FCGI.each_cgi {|cgi|
 					old_id = res[0].to_s.to_b64
 					name = res[1].to_s
 					output = output +
-				'      View file: <a href="v' + old_id + '">' + 'v' + old_id + '</a><br />' + "\n" +
-				'      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n" +
-				'      With name: <a href="v' + old_id + '-/' + name + '">' + 'v' + old_id + '-/...</a><br /><br />' + "\n"
-				saved += 1
+						'      View file: <a href="v' + old_id + '">' + 'v' + old_id + '</a><br />' + "\n" +
+						'      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n" +
+						'      With name: <a href="v' + old_id + '-/' + name + '">' + 'v' + old_id + '-/...</a><br /><br />' + "\n"
+					saved += 1
 					next
 				else
 					raise err
@@ -181,12 +181,12 @@ FCGI.each_cgi {|cgi|
 		query.execute(visitor_id, saved, saved)
 		cgi.out {
 			xhtml_pre +
-		'        <div class="content large">' + "\n" +
-		'          omploaded!<br />' + "\n" +
-		'          <br />' + "\n" +
-		output +
-		'        </div>' + "\n" +
-		xhtml_post
+			'        <div class="content large">' + "\n" +
+			'          omploaded!<br />' + "\n" +
+			'          <br />' + "\n" +
+			output +
+			'        </div>' + "\n" +
+			xhtml_post
 		}
 		db.commit
 	rescue Mysql::Error => err
