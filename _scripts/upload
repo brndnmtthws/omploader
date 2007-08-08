@@ -112,6 +112,7 @@ FCGI.each_cgi {|cgi|
 					tmpfile.close
 					mmap = Mmap.new(tmpfile.path, 'rw')
 					mmap.insert(0, datum)
+					mmap.munmap
 					if content_type == 'audio/mpeg'
 						tag = ID3Lib::Tag.new(tmpfile.path)
 						artist = tag.artist.to_s.sanitise
@@ -149,6 +150,7 @@ FCGI.each_cgi {|cgi|
 				file.close
 				mmap = Mmap.new(file.path, 'rw')
 				mmap.insert(0, datum)
+				mmap.munmap
 				if name.length > 15
 					name_displayed = name[0..13] + '…'
 				else
