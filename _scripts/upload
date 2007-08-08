@@ -89,8 +89,12 @@ FCGI.each_cgi {|cgi|
 
 				name = name.sanitise
 
-				fm = FileMagic.new(FileMagic::MAGIC_MIME)
-				content_type = fm.buffer(datum)
+				if cgi.has_key?('paste') and syntax == 'raw'
+					content_type = 'text/plain'
+				else
+					fm = FileMagic.new(FileMagic::MAGIC_MIME)
+					content_type = fm.buffer(datum)
+				end
 
 				content_type_split = content_type.chomp.split('/', 2)
 				content_type_main = content_type_split.first
