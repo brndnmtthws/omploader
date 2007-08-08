@@ -46,7 +46,7 @@ argv.each do |arg|
 	begin
 		id = arg.to_id
 		# Verify that id is strictly numeric.
-		if id !~ /\A\d+\z/
+		if id !~ /[A-Za-z0-9+\/]+/
 			raise 'Ignoring argument "' + arg + '"'
 		end
 		query = db.prepare('delete from comments, comments_body using comments inner join comments_body on comments_body.id = comments.comment_id where comments.metadata_id = ?')
