@@ -177,7 +177,7 @@ FCGI.each_cgi {|cgi|
 						'        <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
 						'        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc"><span class="separator">&#x2503;</span></span> <a href="#comment_' + cid + '">#' + num + '</a></div>' + "\n" +
 						'        <br class="clear" />' + "\n" +
-						'        <pre>' + body + '</pre>' + "\n" +
+						'        <div class="body">' + body + '</div>' + "\n" +
 						'      </div>' + "\n"
 				}
 			end

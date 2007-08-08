@@ -280,7 +280,8 @@ div#container div.comment {
 	overflow: hidden;
 }
 
-div#container div.comment pre {
+div#container div.comment div.body {
+	font-family: monospace;
 	font-size: 1.2em;
 	text-align: left;
 	margin: 5px 0px 5px 0px;
