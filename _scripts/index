@@ -146,6 +146,7 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t\t\t\t\t" + '<option selected value="raw">Plain Text</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="">Auto detect</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option disabled>––––––––––</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="bash">BASH</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="c">C</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="cobol">COBOL</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="cpp">C++</option>' + "\n" +
@@ -162,6 +163,7 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t\t\t\t\t" + '<option value="python">Python</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="ruby">Ruby</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="scheme">Scheme</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="sh">SH</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="vb">Visual Basic</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="xhtml">XHTML</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="xml">XML</option>' + "\n" +
