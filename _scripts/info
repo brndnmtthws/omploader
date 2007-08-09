@@ -235,7 +235,7 @@ FCGI.each_cgi {|cgi|
 			'      <div class="content">' + "\n" +
 			'        <div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
 			'        <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n" +
-			'        <div class="left"><strong>Name:</strong></div><div class="right">' + name + '</div><br class="clear" />' + "\n" +
+			'        <div class="left"><strong>Name:</strong></div><div class="right"><a href="v' + id.to_b64 + '/' + name + '">' + name + '</a></div><br class="clear" />' + "\n" +
 			'        <div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
 			'        <div class="left"><strong>Hits:</strong></div><div class="right">' + hits + '</div><br class="clear" />' + "\n" +
 			'        <div class="left"><strong>Upload Time:</strong></div><div class="right">' + creation_time + '</div><br class="clear" />' + "\n" +
