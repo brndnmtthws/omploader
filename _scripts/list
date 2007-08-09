@@ -117,6 +117,11 @@ FCGI.each_cgi {|cgi|
 		search = ''
 		if cgi.has_key?('search_post')
 			search = cgi['search_post'].read.to_s
+			param_search = 's-' + search
+			redirect = 'l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search
+			print cgi.header({'Status' => '302 Moved', 'location' => redirect})
+			db.commit
+			next
 		elsif cgi.params['search'].to_s.length > 2
 			search = cgi.params['search'].to_s
 			search = search.reverse.chop.chop.reverse
