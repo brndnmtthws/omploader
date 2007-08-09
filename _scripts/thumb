@@ -46,9 +46,8 @@ FCGI.each_cgi {|cgi|
 			content_type = result[0]+ '/' + result[1]
 
 			if result[0] == 'image' and thumbnail_id.empty?
-				datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r').to_str
-				thumb = Image.from_blob(datum)[0]
-				datum.munmap
+				datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r')
+				thumb = Image.from_blob(datum.to_str)[0]
 
 				# Determine best thumbnail size.
 				if (thumb.columns.to_f / thumb.rows.to_f) == (4/3.0)
@@ -58,6 +57,7 @@ FCGI.each_cgi {|cgi|
 				else
 					thumb = thumb.thumbnail(100 * ((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0)), 75)
 				end
+				datum.munmap
 
 				query = db.prepare('insert into thumbnails (image) values (?)')
 				result = query.execute(thumb.to_blob.to_s)
