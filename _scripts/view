@@ -67,6 +67,7 @@ FCGI.each_cgi {|cgi|
 		datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r').to_str
 
 		cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { datum }
+		mmap.munmap
 		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
