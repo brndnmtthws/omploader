@@ -42,30 +42,32 @@ end
 
 db = db_connect
 
-argv.each do |arg|
-	begin
-		id = arg.to_id
-		# Verify that id is strictly numeric.
-		if id !~ /[A-Za-z0-9+\/]+/
-			raise 'Ignoring argument "' + arg + '"'
-			next
+if !comments
+	argv.each do |arg|
+		begin
+			id = arg.to_id
+			# Verify that id is strictly numeric.
+			if id !~ /[A-Za-z0-9+\/]+/
+				raise 'Ignoring argument "' + arg + '"'
+				next
+			end
+			query = db.prepare('delete from comments, comments_body using comments inner join comments_body on comments_body.id = comments.comment_id where comments.metadata_id = ?')
+			query.execute(id)
+			query = db.prepare('delete from thumbnails, votes, metadata using metadata left join thumbnails on thumbnails.id = metadata.thumbnail_id left join votes on votes.metadata_id = metadata.id where metadata.id = ?')
+			query.execute(id)
+			File.unlink(Paths['data'] + '/' + id.to_b64)
+			db.commit
+		rescue Mysql::Error => err
+			db.rollback unless db.nil?
+			$stderr.puts 'Error in delete script'
+			$stderr.puts err
+		rescue RuntimeError => err
+			db.rollback unless db.nil?
+			$stderr.puts err
 		end
-		query = db.prepare('delete from comments, comments_body using comments inner join comments_body on comments_body.id = comments.comment_id where comments.metadata_id = ?')
-		query.execute(id)
-		query = db.prepare('delete from thumbnails, votes, metadata using metadata left join thumbnails on thumbnails.id = metadata.thumbnail_id left join votes on votes.metadata_id = metadata.id where metadata.id = ?')
-		query.execute(id)
-		File.unlink(Paths['data'] + '/' + id.to_b64)
-		db.commit
-	rescue Mysql::Error => err
-		db.rollback unless db.nil?
-		$stderr.puts 'Error in delete script'
-		$stderr.puts err
-	rescue RuntimeError => err
-		db.rollback unless db.nil?
-		$stderr.puts err
 	end
 end
-
+	
 if comments
 	argv.each do |arg|
 		begin
@@ -73,8 +75,11 @@ if comments
 			if id < 1
 				raise 'Ignoring argument "' + arg + '"'
 			end
-			query = db.prepare('delete	from comments, comments_body using comments inner join comments_body on comments_body.id = comments.comment_id	where	comments.metadata_id = ?')
+			query = db.prepare('update metadata inner join comments on comments.metadata_id = metadata.id set metadata.comment_count = metadata.comment_count - 1 where comments.id = ?')
 			query.execute(id)
+			query = db.prepare('delete	from comments, comments_body using comments inner join comments_body on comments_body.id = comments.comment_id	where	comments.id = ?')
+			query.execute(id)
+			db.commit
 		rescue Mysql::Error => err
 			db.rollback unless db.nil?
 			$stderr.puts 'Error in delete script'
