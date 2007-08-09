@@ -187,7 +187,7 @@ def vimcolour(datum, filetype, title)
 	# first <pre> tag and the last </pre> tag. This creates an array consisting
 	# of the pre-code HTML, the code HTML, and the post-code HTML.
 	datum = Mmap.new(tempfile.path, 'r')
-	mmap.munmap
+	datum.munmap
 	datum = datum.split(/<pre>\n/, 2)
 	datum = [ datum[0],
 		datum[1].reverse.split(/\n>erp\/</, 2)[1].reverse,
