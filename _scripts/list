@@ -286,7 +286,7 @@ FCGI.each_cgi {|cgi|
 		end
 
 		cgi.out('text/html') {
-			xhtml_pre +
+			xhtml_pre('', search) +
 			'      <div class="content large">' + "\n" +
 			'        ' + mine_only_msg + '<br />' + "\n" +
 			'        ' + images_only_msg + "\n" +
