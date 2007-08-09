@@ -277,14 +277,16 @@ div#container div.large div.powered {
 
 div#container div.comment {
 	margin-bottom: 5px;
-	overflow: hidden;
 }
 
-div#container div.comment div.body {
-	font-family: monospace;
+div#container div.comment pre {
 	font-size: 1.2em;
 	text-align: left;
 	margin: 5px 0px 5px 0px;
+	overflow: hidden;
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -o-pre-wrap;
 }
 
 div#container div.content div.form textarea.comment {

@@ -177,7 +177,7 @@ FCGI.each_cgi {|cgi|
 						"\t\t\t\t" + '<div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
 						"\t\t\t\t" + '<div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc"><span class="separator">&#x2503;</span></span> <a href="#comment_' + cid + '">#' + num + '</a></div>' + "\n" +
 						"\t\t\t\t" + '<br class="clear" />' + "\n" +
-						"\t\t\t\t" + '<div class="body">' + body + '</div>' + "\n" +
+						"\t\t\t\t" + '<pre>' + body + '</pre>' + "\n" +
 						"\t\t\t" + '</div>' + "\n"
 				}
 			end
