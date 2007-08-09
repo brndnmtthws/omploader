@@ -103,9 +103,9 @@ FCGI.each_cgi {|cgi|
 			res = query.fetch
 			address = res[0].to_s
 			count = res[1].to_s
-			referrers += '        <div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
+			referrers += "\t\t\t\t" + '<div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
 		end
-		referrers = '        No referrers!' + "\n" if referrers.empty?
+		referrers = "\t\t\t\t" + 'No referrers!' + "\n" if referrers.empty?
 
 		if size > 1024*1024
 			n = (size.to_i/1024.0/1024.0).to_s
@@ -134,10 +134,10 @@ FCGI.each_cgi {|cgi|
 		end
 
 		comments_body =
-			'      <div class="title">' + "\n" + 
-			'        <div class="links">' + hide_link + '</div>' + "\n" +
-			'        <div>Comments</div>' + "\n" +
-			'      </div>' + "\n"
+			"\t\t\t" + '<div class="title">' + "\n" + 
+			"\t\t\t\t" + '<div class="links">' + hide_link + '</div>' + "\n" +
+			"\t\t\t\t" + '<div>Comments</div>' + "\n" +
+			"\t\t\t" + '</div>' + "\n"
 		cnum = 0
 
 		if hide_comments == 0
@@ -172,13 +172,13 @@ FCGI.each_cgi {|cgi|
 						body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
 					end
 					comments_body +=
-						'      <a name="comment_' + cid + '"></a>' + "\n" +
-						'      <div class="content comment left-align">' + "\n" +
-						'        <div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
-						'        <div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc"><span class="separator">&#x2503;</span></span> <a href="#comment_' + cid + '">#' + num + '</a></div>' + "\n" +
-						'        <br class="clear" />' + "\n" +
-						'        <div class="body">' + body + '</div>' + "\n" +
-						'      </div>' + "\n"
+						"\t\t\t" + '<a name="comment_' + cid + '"></a>' + "\n" +
+						"\t\t\t" + '<div class="content comment left-align">' + "\n" +
+						"\t\t\t\t" + '<div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
+						"\t\t\t\t" + '<div style="float: right"><span style="color: #666">' + date + '</span> <span style="color: #ccc"><span class="separator">&#x2503;</span></span> <a href="#comment_' + cid + '">#' + num + '</a></div>' + "\n" +
+						"\t\t\t\t" + '<br class="clear" />' + "\n" +
+						"\t\t\t\t" + '<div class="body">' + body + '</div>' + "\n" +
+						"\t\t\t" + '</div>' + "\n"
 				}
 			end
 		end
@@ -187,27 +187,27 @@ FCGI.each_cgi {|cgi|
 
 		if throttle.to_i < Max_upload_count
 			comments_body +=
-				'      <a name="comment_post"></a>' + "\n" +
-				'      <div class="content">' + "\n" +
-				'        <form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
-				'          <div class="form">' + "\n" +
-				'            <div class="float name left-align">' + "\n" +
-				'              <div class="label">Name</div>' + "\n" +
-				'              <input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
-				'            </div>' + "\n" +
-				'            <div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
-				'            <br class="clear" />' + "\n" +
-				'            <div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
-				'            <br class="clear" />' + "\n" +
-				'            <input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
-				'            <input type="submit" value="COMMENT!" class="button" />' + "\n" +
-				'          </div>' + "\n" +
-				'        </form>' + "\n" +
-				'      </div>' + "\n"
+				"\t\t\t" + '<a name="comment_post"></a>' + "\n" +
+				"\t\t\t" + '<div class="content">' + "\n" +
+				"\t\t\t\t" + '<form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
+				"\t\t\t\t\t" + '<div class="form">' + "\n" +
+				"\t\t\t\t\t\t" + '<div class="float name left-align">' + "\n" +
+				"\t\t\t\t\t\t\t" + '<div class="label">Name</div>' + "\n" +
+				"\t\t\t\t\t\t\t" + '<input type="line" name="name" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
+				"\t\t\t\t\t\t" + '</div>' + "\n" +
+				"\t\t\t\t\t\t" + '<div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
+				"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
+				"\t\t\t\t\t\t" + '<div class="float"><textarea name="comment" class="input comment"></textarea></div>' + "\n" +
+				"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
+				"\t\t\t\t\t\t" + '<input type="hidden" name="id" value="' + id.to_b64 + '" />' + "\n" +
+				"\t\t\t\t\t\t" + '<input type="submit" value="COMMENT!" class="button" />' + "\n" +
+				"\t\t\t\t\t" + '</div>' + "\n" +
+				"\t\t\t\t" + '</form>' + "\n" +
+				"\t\t\t" + '</div>' + "\n"
 		else
 			comments_body +=
-				'      <a name="comment_post"></a>' + "\n" +
-				'      <div class="content large">NO COOKIE!</div>' + "\n"
+				"\t\t\t" + '<a name="comment_post"></a>' + "\n" +
+				"\t\t\t" + '<div class="content large">NO COOKIE!</div>' + "\n"
 		end
 		meta = ''
 		if content_type_main == 'image'
@@ -219,11 +219,11 @@ FCGI.each_cgi {|cgi|
 			title = res[1].to_s
 			album = res[2].to_s
 			year = res[3].to_s
-			meta += '        <div class="left"><strong>Artist:</strong></div><div class="right">' + artist + '</div><br class="clear" />' + "\n" if artist and !artist.empty?
-			meta += '        <div class="left"><strong>Title:</strong></div><div class="right">' + title + '</div><br class="clear" />' + "\n" if title and !title.empty?
-			meta += '        <div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
-			meta += '        <div class="left"><strong>Year:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
-			meta = meta.insert(0, '          <br />' + "\n") if !meta.empty?
+			meta += "\t\t\t\t" + '<div class="left"><strong>Artist:</strong></div><div class="right">' + artist + '</div><br class="clear" />' + "\n" if artist and !artist.empty?
+			meta += "\t\t\t\t" + '<div class="left"><strong>Title:</strong></div><div class="right">' + title + '</div><br class="clear" />' + "\n" if title and !title.empty?
+			meta += "\t\t\t\t" + '<div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
+			meta += "\t\t\t\t" + '<div class="left"><strong>Year:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
+			meta = meta.insert(0, "\t\t\t\t<br />\n") if !meta.empty?
 			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
 		else
 			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
@@ -231,21 +231,21 @@ FCGI.each_cgi {|cgi|
 
 		cgi.out('type' => 'text/html') {
 			xhtml_pre(' – ' + name + ' (' + content_type + ')') +
-			'      <div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
-			'      <div class="content">' + "\n" +
-			'        <div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
-			'        <div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n" +
-			'        <div class="left"><strong>Name:</strong></div><div class="right"><a href="v' + id.to_b64 + '/' + name + '">' + name + '</a></div><br class="clear" />' + "\n" +
-			'        <div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
-			'        <div class="left"><strong>Hits:</strong></div><div class="right">' + hits + '</div><br class="clear" />' + "\n" +
-			'        <div class="left"><strong>Upload Time:</strong></div><div class="right">' + creation_time + '</div><br class="clear" />' + "\n" +
-			'        <div class="left"><strong>Content Type:</strong></div><div class="right">' + content_type + '</div><br class="clear" />' + "\n" +
+			"\t\t\t" + '<div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
+			"\t\t\t" + '<div class="content">' + "\n" +
+			"\t\t\t\t" + '<div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
+			"\t\t\t\t" + '<div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n" +
+			"\t\t\t\t" + '<div class="left"><strong>Name:</strong></div><div class="right"><a href="v' + id.to_b64 + '/' + name + '">' + name + '</a></div><br class="clear" />' + "\n" +
+			"\t\t\t\t" + '<div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
+			"\t\t\t\t" + '<div class="left"><strong>Hits:</strong></div><div class="right">' + hits + '</div><br class="clear" />' + "\n" +
+			"\t\t\t\t" + '<div class="left"><strong>Upload Time:</strong></div><div class="right">' + creation_time + '</div><br class="clear" />' + "\n" +
+			"\t\t\t\t" + '<div class="left"><strong>Content Type:</strong></div><div class="right">' + content_type + '</div><br class="clear" />' + "\n" +
 			meta +
-			'      </div>' + "\n" +
-			'      <div class="title">Top referrers</div>' + "\n" +
-			'      <div class="content">' + "\n" +
+			"\t\t\t" + '</div>' + "\n" +
+			"\t\t\t" + '<div class="title">Top referrers</div>' + "\n" +
+			"\t\t\t" + '<div class="content">' + "\n" +
 			referrers +
-			'      </div>' + "\n" +
+			"\t\t\t" + '</div>' + "\n" +
 			comments_body +
 			xhtml_post
 		}
@@ -253,27 +253,27 @@ FCGI.each_cgi {|cgi|
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
 		}
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">' + err + '</div>' + xhtml_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up. String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
 		}
 	rescue StandardError => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up. Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
 		}
 	rescue
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up. This error isn\'t being handled.</div>' + xhtml_post
 		}
 	end
 }
