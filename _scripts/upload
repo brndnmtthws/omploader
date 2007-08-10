@@ -72,13 +72,14 @@ FCGI.each_cgi {|cgi|
 					end
 					next if url == 'URL'
 					datum = Curl::Easy.perform(url).body_str
+					next if datum.length > 2**24 or datum.empty?
 				rescue
 					next
 				end
 			elsif cgi.has_key?('paste')
 				syntax = cgi['syntax'].read
 				datum = cgi['paste'].read.gsub("\r", '')
-				next if datum.empty?
+				next if datum.length > 2**24 or datum.empty?
 				name = cgi['name'].read
 				name = 'pasta' if name !~ /\S/
 					if syntax != 'raw'
