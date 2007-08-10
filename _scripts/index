@@ -215,8 +215,8 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t" +'</div>' + "\n" +
 			top_files
 
-			cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
 			db.commit
+			cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {

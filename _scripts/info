@@ -238,6 +238,7 @@ FCGI.each_cgi {|cgi|
 			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
 		end
 
+		db.commit
 		cgi.out('type' => 'text/html') {
 			xhtml_pre(' – ' + name + ' (' + content_type + ')') +
 			"\t\t\t" + '<div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
@@ -258,7 +259,6 @@ FCGI.each_cgi {|cgi|
 			comments_body +
 			xhtml_post
 		}
-		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {

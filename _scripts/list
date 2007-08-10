@@ -294,6 +294,7 @@ FCGI.each_cgi {|cgi|
 				'</div>' + "\n"
 		end
 
+		db.commit
 		cgi.out('text/html') {
 			xhtml_pre('', search) +
 			'      <div class="content large">' + "\n" +
@@ -306,7 +307,6 @@ FCGI.each_cgi {|cgi|
 			page_links +
 			xhtml_post
 		}
-		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {

@@ -204,6 +204,7 @@ FCGI.each_cgi {|cgi|
 		end
 		query = db.prepare('insert into upload_throttle (visitor_id, count) values (?,?) on duplicate key update count = count + ?')
 		query.execute(visitor_id, saved, saved)
+		db.commit
 		cgi.out {
 			xhtml_pre +
 			'        <div class="content large">' + "\n" +
@@ -213,7 +214,6 @@ FCGI.each_cgi {|cgi|
 			'        </div>' + "\n" +
 			xhtml_post
 		}
-		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
