@@ -11,9 +11,18 @@
 require 'omploader'
 require 'tempfile'
 
+got_usr1 = false
+
+Signal.trap("USR1") do
+	got_usr1 = true
+end
+
 db = db_connect
 
 FCGI.each_cgi {|cgi|
+	if got_usr1
+		break
+	end
 	begin
 		db_check(db)
 		visitor_id = register_visit(cgi, db)
