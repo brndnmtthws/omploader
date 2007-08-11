@@ -74,6 +74,7 @@ FCGI.each_cgi {|cgi|
 				query = db.prepare('update metadata set thumbnail_id = ? where id = ?')
 				query.execute(result.insert_id, id)
 
+				db.commit
 				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { thumb.to_blob.to_s }
 			elsif result[0] == 'image'
 				query = db.prepare('select image from thumbnails where id = ?')
