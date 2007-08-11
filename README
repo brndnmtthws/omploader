@@ -24,14 +24,14 @@ the code for libvorbisfile-ruby and ruby-mmap are available from the omploader s
 structure is as follows:
 
 ./          - holds top-level things
-./_scripts/ - holds scripts (including sql)
+./scripts/ - holds scripts (including sql)
 
 to use omploader, you need to set up apache properly (duh) and the mysql database
 
-cp _scripts/config.sample _scripts/config
+cp scripts/config.sample scripts/config
 
-edit _config and run the sql code included (_scripts/sql-structure) and everything should work
+edit config and run the sql code included (scripts/sql-structure) and everything should work
 
-add _scripts/cron to your crontab so that it executes every minute
+add scripts/cron to your crontab so that it executes every minute
 
 go team!

@@ -85,7 +85,7 @@ FCGI.each_cgi {|cgi|
 				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { result.fetch.to_s }
 			else
 				db.commit
-				cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png' + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { File.read('../_omploader_thumb.png') }
+				cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png' + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { File.read('../omploader_thumb.png') }
 			end
 		end
 	rescue Mysql::Error => err

@@ -6,33 +6,33 @@
 #
 # Distributed under the terms of the GNU General Public License v3
 
-DirectoryIndex _scripts/index
+DirectoryIndex scripts/index
 
-<FilesMatch "_scripts">
+<FilesMatch "scripts">
   Order deny,allow
   deny from all
 </FilesMatch>
 
 RewriteEngine on
-RewriteRule ^favicon.ico$ _omploader_icon.png [L]
+RewriteRule ^favicon.ico$ omploader_icon.png [L]
 
-RewriteRule ^small$ _scripts/index?big=0 [L]
-RewriteRule ^big$ _scripts/index?big=1 [L]
+RewriteRule ^small$ scripts/index?big=0 [L]
+RewriteRule ^big$ scripts/index?big=1 [L]
 
-RewriteRule ^show$ _scripts/index?hide_top_files=0 [L]
-RewriteRule ^hide$ _scripts/index?hide_top_files=1 [L]
+RewriteRule ^show$ scripts/index?hide_top_files=0 [L]
+RewriteRule ^hide$ scripts/index?hide_top_files=1 [L]
 
-RewriteRule ^file$ _scripts/index?curl=0 [L]
-RewriteRule ^curl$ _scripts/index?curl=1 [L]
-RewriteRule ^paste$ _scripts/index?paste=1 [L]
+RewriteRule ^file$ scripts/index?curl=0 [L]
+RewriteRule ^curl$ scripts/index?curl=1 [L]
+RewriteRule ^paste$ scripts/index?paste=1 [L]
 
-RewriteRule ^i([A-Za-z0-9+_]+)$ _scripts/info?id=$1 [L]
-RewriteRule ^i([A-Za-z0-9+_]+)-show$ _scripts/info?id=$1&hide_comments=0 [L]
-RewriteRule ^i([A-Za-z0-9+_]+)-hide$ _scripts/info?id=$1&hide_comments=1 [L]
+RewriteRule ^i([A-Za-z0-9+_]+)$ scripts/info?id=$1 [L]
+RewriteRule ^i([A-Za-z0-9+_]+)-show$ scripts/info?id=$1&hide_comments=0 [L]
+RewriteRule ^i([A-Za-z0-9+_]+)-hide$ scripts/info?id=$1&hide_comments=1 [L]
 
-RewriteRule ^l$ _scripts/list?column=t&page=1 [L]
-RewriteRule ^l(\d+)(.)(.)(.)(.)(\d+)(.*)$ _scripts/list?results=$1&order=$2&column=$3&mine_only=$4&images_only=$5&page=$6&search=$7 [L]
+RewriteRule ^l$ scripts/list?column=t&page=1 [L]
+RewriteRule ^l(\d+)(.)(.)(.)(.)(\d+)(.*)$ scripts/list?results=$1&order=$2&column=$3&mine_only=$4&images_only=$5&page=$6&search=$7 [L]
 
-RewriteRule ^t(.+)$ _scripts/thumb?id=$1 [L]
-RewriteRule ^v(.+)$ _scripts/view?id=$1 [L]
-RewriteRule ^upload(.*)$ _scripts/upload$1 [L]
+RewriteRule ^t(.+)$ scripts/thumb?id=$1 [L]
+RewriteRule ^v(.+)$ scripts/view?id=$1 [L]
+RewriteRule ^upload(.*)$ scripts/upload$1 [L]

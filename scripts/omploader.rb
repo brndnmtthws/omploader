@@ -41,14 +41,14 @@ def xhtml_pre(title = '', search = '')
 		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
 		"\t" + '<head>' + "\n" +
 		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
-		"\t\t" + '<link rel="stylesheet" type="text/css" href="_style.css" />' + "\n" +
-		"\t\t" + '<link rel="shortcut icon" href="_omploader_icon.png" type="image/x-icon" />' + "\n" +
+		"\t\t" + '<link rel="stylesheet" type="text/css" href="style.css" />' + "\n" +
+		"\t\t" + '<link rel="shortcut icon" href="omploader_icon.png" type="image/x-icon" />' + "\n" +
 		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
 		"\t" + '</head>' + "\n" +
 		"\t" + '<body>' + "\n" +
 		"\t\t" + '<div id="container">' + "\n" +
 		"\t\t\t" + '<div id="header">' + "\n" +
-		"\t\t\t\t" + '<div id="title"><a href="/"><img src="_omploader.png" alt="omploader" /></a></div>'  + "\n" +
+		"\t\t\t\t" + '<div id="title"><a href="/"><img src="omploader.png" alt="omploader" /></a></div>'  + "\n" +
 		"\t\t\t\t" + '<form enctype="multipart/form-data" action="l" method="post">' + "\n" +
 		"\t\t\t\t\t" + '<div id="search">' + "\n" +
 		"\t\t\t\t\t\t" + '<input name="search_post" size="20" class="field" type="text" value="' + search + '" /><input value="search" class="button" type="submit" />' + "\n" +
