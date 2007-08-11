@@ -43,6 +43,8 @@ FCGI.each_cgi {|cgi|
 		if throttle.to_i > Max_upload_count
 			raise 'Slow down there, cowboy.'
 		end
+		
+		db.commit
 
 		saved = 0
 		stop = true
@@ -193,11 +195,13 @@ FCGI.each_cgi {|cgi|
 						'      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n" +
 						'      With name: <a href="v' + old_id + '/' + name + '">' + 'v' + old_id + '/' + name_displayed + '</a><br /><br />' + "\n"
 					saved += 1
+					db.commit
 					next
 				else
 					raise err
 				end
 			end
+			db.commit
 		end
 		if saved < 1
 			raise 'You are a trad.'
