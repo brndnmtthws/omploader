@@ -10,18 +10,9 @@
 
 require 'omploader'
 
-got_usr1 = false
-
-Signal.trap("USR1") do
-	got_usr1 = true
-end
-
 db = db_connect
 
 FCGI.each_cgi {|cgi|
-	if got_usr1
-		break
-	end
 	begin
 		db_check(db)
 		register_visit(cgi, db)
@@ -128,8 +119,8 @@ FCGI.each_cgi {|cgi|
 			search = cgi['search_post'].read.to_s
 			param_search = 's-' + search
 			redirect = 'l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search
-			print cgi.header({'Status' => '302 Moved', 'location' => redirect})
 			db.commit
+			print cgi.header({'Status' => '302 Moved', 'location' => redirect})
 			next
 		elsif cgi.params['search'].to_s.length > 2
 			search = cgi.params['search'].to_s

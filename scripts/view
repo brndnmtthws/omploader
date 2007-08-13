@@ -11,18 +11,9 @@
 require 'omploader'
 require 'uri'
 
-got_usr1 = false
-
-Signal.trap("USR1") do
-	got_usr1 = true
-end
-
 db = db_connect
 
 FCGI.each_cgi {|cgi|
-	if got_usr1
-		break
-	end
 	begin
 		db_check(db)
 		visitor_id = register_visit(cgi, db)
@@ -73,9 +64,10 @@ FCGI.each_cgi {|cgi|
 			end
 		end
 
+		db.commit
+
 		datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r')
 
-		db.commit
 		cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { datum.to_str }
 		datum.munmap
 	rescue Mysql::Error => err

@@ -11,18 +11,9 @@
 require 'omploader'
 require 'tempfile'
 
-got_usr1 = false
-
-Signal.trap("USR1") do
-	got_usr1 = true
-end
-
 db = db_connect
 
 FCGI.each_cgi {|cgi|
-	if got_usr1
-		break
-	end
 	begin
 		db_check(db)
 		visitor_id = register_visit(cgi, db)
@@ -71,8 +62,8 @@ FCGI.each_cgi {|cgi|
 				query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
 				query.execute(visitor_id, 1)
 				redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
-				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
 				db.commit
+				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
 				next
 			end
 		else
