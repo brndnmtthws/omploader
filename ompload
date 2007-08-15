@@ -63,7 +63,7 @@ errors = 0
 wait = 15
 poop = Time.now - wait
 
-Url = 'http://test.peemail.org/'
+Url = 'http://omploader.org/'
 
 used_stdin = false
 

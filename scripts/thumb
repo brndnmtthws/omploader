@@ -47,7 +47,10 @@ FCGI.each_cgi {|cgi|
 
 			if result[0] == 'image' and thumbnail_id.empty?
 				datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r')
-				thumb = Image.from_blob(datum.to_str)[0]
+				imlist = Magick::ImageList.new
+				imlist.from_blob(datum.to_str)
+				imlist = imlist.coalesce
+				thumb = imlist.flatten_images
 
 				# Determine best thumbnail size.
 				if (thumb.columns.to_f / thumb.rows.to_f) == (4/3.0)
