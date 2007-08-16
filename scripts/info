@@ -222,7 +222,7 @@ FCGI.each_cgi {|cgi|
 			meta += "\t\t\t\t" + '<div class="left"><strong>Artist:</strong></div><div class="right">' + artist + '</div><br class="clear" />' + "\n" if artist and !artist.empty?
 			meta += "\t\t\t\t" + '<div class="left"><strong>Title:</strong></div><div class="right">' + title + '</div><br class="clear" />' + "\n" if title and !title.empty?
 			meta += "\t\t\t\t" + '<div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
-			meta += "\t\t\t\t" + '<div class="left"><strong>Year:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
+			meta += "\t\t\t\t" + '<div class="left"><strong>Date:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
 			meta = meta.insert(0, "\t\t\t\t<br />\n") if !meta.empty?
 			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
 		else
