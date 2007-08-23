@@ -248,8 +248,8 @@ begin
   delete from votes where unix_timestamp(date) < unix_timestamp(current_timestamp) - 86400;
   delete from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - 86400;
   delete from upload_throttle where unix_timestamp(date) < unix_timestamp(current_timestamp) - 120;
-  update metadata inner join thumbnails on thumbnails.id = metadata.thumbnail_id set metadata.thumbnail_id = null where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - 57600;
-  delete from thumbnails where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - 57600;
+  update metadata inner join thumbnails on thumbnails.id = metadata.thumbnail_id set metadata.thumbnail_id = null where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - 86400;
+  delete from thumbnails where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - 86400;
   update metadata inner join owners on owners.id = metadata.owner_id set metadata.owner_id = null where unix_timestamp(owners.last_accessed) < unix_timestamp(current_timestamp) - 31536000;
   delete from owners where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - 31536000;
 end */;;
