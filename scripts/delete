@@ -93,6 +93,12 @@ end
 
 if cleanup
 	begin
+		query = db.prepare('delete from content_types using content_types left join metadata on metadata.content_type_id = content_types.id where metadata.id is null')
+		query.execute
+		count = db.affected_rows
+		if count > 0
+			puts "Found #{count} lonely rows in content_types"
+		end
 		query = db.prepare('delete	from content_types_main using content_types_main left join content_types on content_types.content_type_main_id = content_types_main.id where content_types.id is null')
 		query.execute
 		count = db.affected_rows
@@ -104,12 +110,6 @@ if cleanup
 		count = db.affected_rows
 		if count > 0
 			puts "Found #{count} lonely rows in content_types_sub"
-		end
-		query = db.prepare('delete from content_types using content_types left join metadata on metadata.content_type_id = content_types.id where metadata.id is null')
-		query.execute
-		count = db.affected_rows
-		if count > 0
-			puts "Found #{count} lonely rows in content_types"
 		end
 		query = db.prepare('delete from thumbnails using thumbnails left join metadata on metadata.thumbnail_id = thumbnails.id where metadata.id is null')
 		query.execute
