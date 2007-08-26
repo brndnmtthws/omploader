@@ -207,8 +207,8 @@ FCGI.each_cgi {|cgi|
 						'          <tr class="even">' + "\n"
 				end
 
-				if name.length > 30
-					name_displayed = name[0..28] + '…'
+				if name.length > 25
+					name_displayed = name[0..23] + '…'
 				else
 					name_displayed = name
 				end
