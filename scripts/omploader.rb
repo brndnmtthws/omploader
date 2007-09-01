@@ -172,8 +172,8 @@ def vimcolour(datum, filetype, title)
 	# does not have to be saved to a different file.
 	%x{vim -n -e                      \
 		-c 'set t_Co=88'              \
-		-c 'set filetype=#{filetype}' \
 		-c 'syntax on'                \
+		-c 'set filetype=#{filetype}' \
 		-c 'set number'               \
 		-c 'colorscheme inkpot'       \
 		-c 'let html_use_css = 1'     \
