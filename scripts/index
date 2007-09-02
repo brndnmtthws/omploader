@@ -150,6 +150,7 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t\t\t\t\t" + '<option value="cobol">COBOL</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="cpp">C++</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="css">CSS</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="diff">Diff</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="fortran">Fortran</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="haskell">Haskell</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="html">HTML</option>' + "\n" +
