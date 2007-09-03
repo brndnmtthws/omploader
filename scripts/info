@@ -19,13 +19,17 @@ FCGI.each_cgi {|cgi|
 		visitor_id = register_visit(cgi, db)
 
 		query = db.prepare('select count from upload_throttle where visitor_id = ?')
-		throttle = query.execute(visitor_id).fetch.to_s
+		query.execute(visitor_id)
+		throttle = query.fetch.to_s
+		query.close
 
 		owner_id = get_owner_id(cgi, db)
 
 		if !owner_id.nil?
 			query = db.prepare('select hide_comments from owners where id = ?')
-			hide_comments = query.execute(owner_id).fetch.to_s.to_i
+			query.execute(owner_id)
+			hide_comments = query.fetch.to_s.to_i
+			query.close
 		else
 			hide_comments = 0
 		end
@@ -35,6 +39,7 @@ FCGI.each_cgi {|cgi|
 			if !owner_id.nil?
 				query = db.prepare('update owners set hide_comments = ? where id = ?')
 				res = query.execute(hide_comments.to_s, owner_id)
+				query.close
 			end
 		end
 
@@ -49,18 +54,24 @@ FCGI.each_cgi {|cgi|
 				# Insert our new comment into db
 				query = db.prepare('insert into comments_body (body) values (?)')
 				comment_id = query.execute(comment_body).insert_id
+				query.close
 				query = db.prepare('insert into comments (comment_id, metadata_id, owner_id) values (?,?,?)')
 				comment_id = query.execute(comment_id, id, owner_id).insert_id
+				query.close
 				query = db.prepare('update metadata set comment_count = comment_count + 1 where id = ?')
 				query.execute(id)
+				query.close
 				if !owner_id.nil?
 					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
 					name_id = query.execute(comment_name).insert_id
+					query.close
 					query = db.prepare('update owners set name_id = ? where id = ?')
 					query.execute(name_id, owner_id)
+					query.close
 				end
 				query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
 				query.execute(visitor_id, 1)
+				query.close
 				redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
 				db.commit
 				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
@@ -82,6 +93,7 @@ FCGI.each_cgi {|cgi|
 			raise 'Nothing to pee here.'
 		end
 		info = query.fetch
+		query.close
 		name = info[0]
 		size = info[1]
 		hits = info[2].to_s
@@ -105,6 +117,7 @@ FCGI.each_cgi {|cgi|
 			count = res[1].to_s
 			referrers += "\t\t\t\t" + '<div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
 		end
+		query.close
 		referrers = "\t\t\t\t" + 'No referrers!' + "\n" if referrers.empty?
 
 		if size > 1024*1024
@@ -122,6 +135,7 @@ FCGI.each_cgi {|cgi|
 		if !owner_id.nil?
 			query = db.prepare('select names.name from owners left join names on names.id = owners.name_id where owners.id = ?')
 			owner_name = query.execute(owner_id).fetch.to_s
+			query.close
 		end
 		if owner_name.nil? or owner_name.empty?
 			owner_name = 'some luser'
@@ -150,6 +164,7 @@ FCGI.each_cgi {|cgi|
 					array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
 					comment_array << array
 				end
+				query.close
 				comment_array.each { |array|
 					num = array[0]
 					cid = array[1]
@@ -184,6 +199,7 @@ FCGI.each_cgi {|cgi|
 		end
 		query = db.prepare('select count from upload_throttle where visitor_id = ?')
 		throttle = query.execute(visitor_id).fetch.to_s
+		query.close
 
 		if throttle.to_i < Max_upload_count
 			comments_body +=
@@ -215,6 +231,7 @@ FCGI.each_cgi {|cgi|
 		elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
 			query = db.prepare('select n1.name, n2.name, n3.name, n4.name from metadata left join names as n1 on n1.id = metadata.artist_id left join names as n2 on n2.id = metadata.title_id left join names as n3 on n3.id = metadata.album_id left join names as n4 on n4.id = metadata.year_id where metadata.id = ?')
 			res = query.execute(id).fetch
+			query.close
 			artist = res[0].to_s
 			title = res[1].to_s
 			album = res[2].to_s
