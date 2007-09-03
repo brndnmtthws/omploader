@@ -30,7 +30,8 @@ def db_connect
 	db_params = ConfigFile['database']
 	db = Sql.real_connect(db_params['host'], db_params['user'], db_params['pass'], db_params['name'])
 	query = db.prepare('set time_zone = ?')
-	query.execute(db_params['timezone'])
+	stmt = query.execute(db_params['timezone'])
+	stmt.close
 	db.autocommit(false)
 	return db
 end
@@ -82,13 +83,16 @@ end
 # Update visitors table in database.
 def register_visit(cgi, db)
 	query = db.prepare('insert into visitors (address) values (?) on duplicate key update last_visit = current_timestamp, id = last_insert_id(id)')
-	visitor_id = query.execute(cgi.remote_addr.to_s).insert_id.to_s
+	stmt = query.execute(cgi.remote_addr.to_s)
+	visitor_id = stmt.insert_id.to_s
+	stmt.close
 	return visitor_id
 end
 
 def run_cron(db)
 	q = db.prepare('call cron(?)')
 	q.execute(Max_upload_period)
+	q.close
 end
 
 def session(cgi, new)
@@ -105,8 +109,9 @@ def get_owner_id(cgi, db)
 	begin
 		s = session(cgi, false)
 		query = db.prepare('insert into owners (session_id) values (?) on duplicate key update session_id = ?, id = last_insert_id(id)')
-		query.execute(s.session_id.to_s, s.session_id.to_s)
+		stmt = query.execute(s.session_id.to_s, s.session_id.to_s)
 		owner_id = query.insert_id.to_s
+		stmt.close
 	rescue ArgumentError
 		# need to make new session
 		s = session(cgi, true)
@@ -115,7 +120,8 @@ def get_owner_id(cgi, db)
 			s = session(cgi, false)
 			# this is a new owner
 			query = db.prepare('insert into owners (session_id) values (?)')
-			owner_id = query.execute(s.session_id.to_s).insert_id.to_s
+			stmt = query.execute(s.session_id.to_s)
+			owner_id = stmt.insert_id.to_s
 			s['owner_id'] = owner_id
 		rescue ArgumentError
 			# browser won't allow or doesn't support cookies
