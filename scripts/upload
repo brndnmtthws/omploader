@@ -64,7 +64,7 @@ FCGI.each_cgi {|cgi|
 						next
 					end
 					next if url == 'URL'
-					next if url !~ /$http:\/\//
+					next if url !~ /^http:\/\//
 					datum = Curl::Easy.perform(url).body_str
 					next if datum.length > 2**24 or datum.empty?
 				rescue
