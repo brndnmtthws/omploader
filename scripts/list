@@ -182,9 +182,8 @@ FCGI.each_cgi {|cgi|
 		file_number = 0
 		stmt = query.execute((page - 1) * results)
 		num_rows = stmt.num_rows
-		stmt.close
 		num_rows.times do
-			result = query.fetch
+			result = stmt.fetch
 			id = result[0].to_s
 			time = result[1].to_s
 			hits = result[2].to_s
@@ -229,6 +228,7 @@ FCGI.each_cgi {|cgi|
 					'          </tr>' +  "\n"
 			end
 		end
+		stmt.close
 
 		if images_only
 			if file_number != 0
@@ -333,5 +333,7 @@ FCGI.each_cgi {|cgi|
 		cgi.out('text/html') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
 		}
+	ensure
+		stmt.close
 	end
 }

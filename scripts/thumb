@@ -26,13 +26,15 @@ FCGI.each_cgi {|cgi|
 			raise 'You are a trad.'
 		end
 		query = db.prepare('select metadata.content_type_id, metadata.thumbnail_id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
-		query.execute(id).close
+		stmt = query.execute(id)
+		num_rows = stmt.num_rows
+		info = stmt.fetch
+		stmt.close
 
 		# Verify that id exists in database.
-		if query.num_rows < 1
+		if num_rows < 1
 			raise 'Nothing to pee here.'
 		end
-		info = query.fetch
 		content_type_id = info[0].to_s
 		thumbnail_id = info[1].to_s
 		name = info[2].to_s
@@ -43,6 +45,7 @@ FCGI.each_cgi {|cgi|
 			query = db.prepare('select content_types_main.type, content_types_sub.type from content_types inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where content_types.id = ?')
 			stmt = query.execute(content_type_id)
 			result = stmt.fetch
+			stmt.close
 
 			content_type = result[0]+ '/' + result[1]
 
@@ -65,21 +68,23 @@ FCGI.each_cgi {|cgi|
 
 				query = db.prepare('insert into thumbnails (image) values (?)')
 				stmt = query.execute(thumb.to_blob.to_s)
+				insert_id = stmt.insert_id
+				stmt.close
 
 				query = db.prepare('update metadata set thumbnail_id = ? where id = ?')
-				query.execute(stmt.insert_id, id).close
-				stmt.close
+				query.execute(insert_id, id).close
 
 				db.commit
 				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { thumb.to_blob.to_s }
 			elsif result[0] == 'image'
 				query = db.prepare('select image from thumbnails where id = ?')
 				stmt = query.execute(thumbnail_id)
+				output = stmt.fetch.to_s
+				stmt.close
 				query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
 				query.execute(thumbnail_id).close
 				db.commit
-				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { stmt.fetch.to_s }
-				stmt.close
+				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { output }
 			else
 				db.commit
 				cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png' + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { File.read('../omploader_thumb.png') }
@@ -88,7 +93,7 @@ FCGI.each_cgi {|cgi|
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + ' ' + err.backtrace.to_s + '</div>' + xhtml_post
 		}
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
@@ -110,5 +115,7 @@ FCGI.each_cgi {|cgi|
 		cgi.out('text/html') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
 		}
+	ensure
+		stmt.close
 	end
 }
