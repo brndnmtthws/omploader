@@ -26,7 +26,7 @@ FCGI.each_cgi {|cgi|
 			raise 'You are a trad.'
 		end
 		query = db.prepare('select metadata.content_type_id, metadata.thumbnail_id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
-		query.execute(id)
+		query.execute(id).close
 
 		# Verify that id exists in database.
 		if query.num_rows < 1
@@ -41,7 +41,8 @@ FCGI.each_cgi {|cgi|
 			name = name.insert(name.rindex('.'), '-thumb') if !name.empty? and name =~ /\./
 
 			query = db.prepare('select content_types_main.type, content_types_sub.type from content_types inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where content_types.id = ?')
-			result = query.execute(content_type_id).fetch
+			stmt = query.execute(content_type_id)
+			result = stmt.fetch
 
 			content_type = result[0]+ '/' + result[1]
 
@@ -63,20 +64,22 @@ FCGI.each_cgi {|cgi|
 				datum.munmap
 
 				query = db.prepare('insert into thumbnails (image) values (?)')
-				result = query.execute(thumb.to_blob.to_s)
+				stmt = query.execute(thumb.to_blob.to_s)
 
 				query = db.prepare('update metadata set thumbnail_id = ? where id = ?')
-				query.execute(result.insert_id, id)
+				query.execute(stmt.insert_id, id).close
+				stmt.close
 
 				db.commit
 				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { thumb.to_blob.to_s }
 			elsif result[0] == 'image'
 				query = db.prepare('select image from thumbnails where id = ?')
-				result = query.execute(thumbnail_id)
+				stmt = query.execute(thumbnail_id)
 				query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
-				query.execute(thumbnail_id)
+				query.execute(thumbnail_id).close
 				db.commit
-				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { result.fetch.to_s }
+				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { stmt.fetch.to_s }
+				stmt.close
 			else
 				db.commit
 				cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png' + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { File.read('../omploader_thumb.png') }
