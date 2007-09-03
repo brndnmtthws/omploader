@@ -52,11 +52,12 @@ if !comments
 				next
 			end
 			query = db.prepare('delete from comments, comments_body using comments inner join comments_body on comments_body.id = comments.comment_id where comments.metadata_id = ?')
-			query.execute(id)
+			stmt = query.execute(id)
 			query = db.prepare('delete from thumbnails, votes, metadata using metadata left join thumbnails on thumbnails.id = metadata.thumbnail_id left join votes on votes.metadata_id = metadata.id where metadata.id = ?')
-			query.execute(id)
+			stmt = query.execute(id)
 			File.unlink(Paths['data'] + '/' + id.to_b64)
 			db.commit
+			stmt.close
 		rescue Mysql::Error => err
 			db.rollback unless db.nil?
 			$stderr.puts 'Error in delete script'
@@ -76,9 +77,9 @@ if comments
 				raise 'Ignoring argument "' + arg + '"'
 			end
 			query = db.prepare('update metadata inner join comments on comments.metadata_id = metadata.id set metadata.comment_count = metadata.comment_count - 1 where comments.id = ?')
-			query.execute(id)
+			query.execute(id).close
 			query = db.prepare('delete	from comments, comments_body using comments inner join comments_body on comments_body.id = comments.comment_id	where	comments.id = ?')
-			query.execute(id)
+			query.execute(id).close
 			db.commit
 		rescue Mysql::Error => err
 			db.rollback unless db.nil?
@@ -94,44 +95,51 @@ end
 if cleanup
 	begin
 		query = db.prepare('delete from content_types using content_types left join metadata on metadata.content_type_id = content_types.id where metadata.id is null')
-		query.execute
+		stmt = query.execute
 		count = db.affected_rows
+		stmt.close
 		if count > 0
 			puts "Found #{count} lonely rows in content_types"
 		end
 		query = db.prepare('delete	from content_types_main using content_types_main left join content_types on content_types.content_type_main_id = content_types_main.id where content_types.id is null')
-		query.execute
+		stmt = query.execute
 		count = db.affected_rows
+		stmt.close
 		if count > 0
 			puts "Found #{count} lonely rows in content_types_main"
 		end
 		query = db.prepare('delete from content_types_sub using content_types_sub left join content_types on content_types.content_type_sub_id = content_types_sub.id where content_types.id is null')
-		query.execute
+		stmt = query.execute
 		count = db.affected_rows
+		stmt.close
 		if count > 0
 			puts "Found #{count} lonely rows in content_types_sub"
 		end
 		query = db.prepare('delete from thumbnails using thumbnails left join metadata on metadata.thumbnail_id = thumbnails.id where metadata.id is null')
-		query.execute
+		stmt = query.execute
 		count = db.affected_rows
+		stmt.close
 		if count > 0
 			puts "Found #{count} lonely rows in thumbnails"
 		end
 		query = db.prepare('delete from comments_body using comments_body left join comments on comments.comment_id = comments_body.id left join metadata on metadata.id = comments.metadata_id where metadata.id is null')
-		query.execute
+		stmt = query.execute
 		count = db.affected_rows
+		stmt.close
 		if count > 0
 			puts "Found #{count} lonely rows in comments_body"
 		end
 		query = db.prepare('delete from comments using comments left join metadata on metadata.id = comments.metadata_id where metadata.id is null')
-		query.execute
+		stmt = query.execute
 		count = db.affected_rows
+		stmt.close
 		if count > 0
 			puts "Found #{count} lonely rows in comments"
 		end
 		query = db.prepare('delete from names using names left join metadata as m1 on m1.name_id = names.id left join metadata as m2 on m2.artist_id = names.id left join metadata as m3 on m3.title_id = names.id left join metadata as m4 on m4.album_id = names.id left join metadata as m5 on m5.year_id = names.id left join owners on owners.name_id = names.id where m1.id is null and m2.id is null and m3.id is null and m4.id is null and m5.id is null and owners.id is null')
-		query.execute
+		stmt = query.execute
 		count = db.affected_rows
+		stmt.close
 		if count > 0
 			puts "Found #{count} lonely rows in names"
 		end
@@ -146,12 +154,14 @@ if cleanup
 				puts 'done.'
 			else
 				query = db.prepare('select id from metadata where id = ?')
-				if query.execute(base.to_id).num_rows < 1
+				stmt = query.execute(base.to_id)
+				if stmt.num_rows < 1
 					# junk
 					print "Trying to remove '#{path}'..."
 					File.unlink(path)
 					puts 'done.'
 				end
+				stmt.close
 			end
 		end
 	rescue Mysql::Error => err
