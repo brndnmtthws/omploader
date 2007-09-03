@@ -25,7 +25,7 @@ FCGI.each_cgi {|cgi|
 			raise 'You are a trad.'
 		end
 		query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
-		query.execute(id)
+		query.execute(id).close
 
 		# Verify that id exists in database.
 		if query.num_rows < 1
@@ -38,11 +38,13 @@ FCGI.each_cgi {|cgi|
 		# Increment vote number if this is first view from visitor.
 		query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
 		res = query.execute(visitor_id, id)
-		if res.num_rows == 0
+		rows = res.num_rows
+		res.close
+		if rows == 0
 			query = db.prepare('update metadata set hits = hits + 1 where id = ?')
-			query.execute(id)
+			query.execute(id).close
 			query = db.prepare('insert into votes (visitor_id, metadata_id) values (?,?)')
-			query.execute(visitor_id, id)
+			query.execute(visitor_id, id).close
 			referrer = cgi.referer.to_s
 			referrer = URI.extract(referrer).first
 			if referrer and !referrer.empty?
@@ -50,16 +52,16 @@ FCGI.each_cgi {|cgi|
 				host = split[2]
 				if host != cgi.host
 					query = db.prepare('select id from referrers where address = ?')
-					query.execute(referrer)
+					query.execute(referrer).close
 					if query.num_rows < 1
 						query = db.prepare('insert into referrers (address) values (?)')
-						query.execute(referrer)
+						query.execute(referrer).close
 						referrer_id = query.insert_id.to_s
 					else
 						referrer_id = query.fetch.to_s
 					end
 					query = db.prepare('insert into referrals (referrer_id, metadata_id) values (?,?) on duplicate key update count = count + 1')
-					query.execute(referrer_id, id)
+					query.execute(referrer_id, id).close
 				end
 			end
 		end
