@@ -21,7 +21,9 @@ FCGI.each_cgi {|cgi|
 
 		if !owner_id.nil?
 			query = db.prepare('select big, hide_top_files, curl, paste from owners where id = ?')
-			res = query.execute(owner_id).fetch
+			stmt = query.execute(owner_id)
+			res = stmt.fetch
+			stmt.close
 
 			big = res[0].to_i
 			hide_top_files = res[1].to_i
@@ -59,7 +61,8 @@ FCGI.each_cgi {|cgi|
 		end
 		if update_owner and !owner_id.nil?
 			query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
-			query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
+			stmt = query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
+			stmt.close
 		end
 
 		if hide_top_files == 1
@@ -77,20 +80,23 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t" + '<div class="content">' + "\n"
 			top_files_info = ''
 			query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type = "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
-			query.execute.num_rows.times do
-				result = query.fetch
+			stmt = query.execute
+			stmt.num_rows.times do
+				result = stmt.fetch
 				id = result.first.to_s.to_b64
 				name = result.last.to_s
 
 				top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 				top_files_info += "\t\t\t\t" + '<div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
 			end
+			stmt.close
 			top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
 				"\t\t\t\t" + '<br />' + "\n" +
 				"\t\t\t\t" + '<div class="filelist">' + "\n"
 			query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type != "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
-			query.execute.num_rows.times do
-				result = query.fetch
+			stmt = query.execute
+			stmt.num_rows.times do
+				result = stmt.fetch
 				id = result.first.to_s.to_b64
 				name = result.last.to_s
 
@@ -100,15 +106,19 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t\t" + '<span class="fileinfo"><a href="i' + id + '">Info</a></span>' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n"
 			end
+			stmt.close
 			top_files +=
 				"\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t" + '</div>' + "\n"
 		end
 
 		query = db.prepare('select count(*) from metadata')
-		count = query.execute.fetch.to_s
+		stmt = query.execute
+		count = stmt.fetch.to_s
 		query = db.prepare('select count from upload_throttle where visitor_id = ?')
-		throttle = query.execute(visitor_id).fetch.to_s
+		stmt = query.execute(visitor_id)
+		throttle = stmt.fetch.to_s
+		stmt.close
 
 		if throttle.to_i < Max_upload_count
 			if curl == 1 and paste != 1
