@@ -333,7 +333,5 @@ FCGI.each_cgi {|cgi|
 		cgi.out('text/html') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
 		}
-	ensure
-		stmt.close
 	end
 }
