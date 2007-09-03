@@ -21,7 +21,9 @@ FCGI.each_cgi {|cgi|
 
 		if !owner_id.nil?
 			query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
-			res = query.execute(owner_id).fetch
+			stmt = query.execute(owner_id)
+			res = stmt.fetch
+			stmt.close
 			mine_only = res[0].to_s.to_i
 			list_images = res[1].to_s.to_i
 			results = res[2].to_s.to_i
@@ -83,7 +85,7 @@ FCGI.each_cgi {|cgi|
 			end
 			if !owner_id.nil?
 				query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
-				res = query.execute(mine_only.to_s, results.to_s, list_images, owner_id)
+				query.execute(mine_only.to_s, results.to_s, list_images, owner_id).close
 			end
 		end
 
@@ -154,7 +156,9 @@ FCGI.each_cgi {|cgi|
 		end
 
 		query = db.prepare('select count(*) from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause)
-		count = query.execute.fetch.to_s.to_i
+		stmt = query.execute
+		count = stmt.fetch.to_s.to_i
+		stmt.close
 		if page > count / results + 1
 			page = 1
 		end
@@ -176,7 +180,10 @@ FCGI.each_cgi {|cgi|
 				row_number = 0
 		end
 		file_number = 0
-		query.execute((page - 1) * results).num_rows.times do
+		stmt = query.execute((page - 1) * results)
+		num_rows = stmt.num_rows
+		stmt.close
+		num_rows.times do
 			result = query.fetch
 			id = result[0].to_s
 			time = result[1].to_s
@@ -241,7 +248,10 @@ FCGI.each_cgi {|cgi|
 			page_links += '        First <span class="separator">&#x2503;</span> Previous'
 		end
 		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
-		if query.execute(page * results).num_rows > 0
+		stmt = query.execute(page * results)
+		num_rows = stmt.num_rows
+		stmt.close
+		if num_rows > 0
 			page_links += ' <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
 		else
 			page_links += ' <span class="separator">&#x2503;</span> Next'
