@@ -25,13 +25,15 @@ FCGI.each_cgi {|cgi|
 			raise 'You are a trad.'
 		end
 		query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
-		query.execute(id).close
+		stmt = query.execute(id)
 
 		# Verify that id exists in database.
-		if query.num_rows < 1
+		if stmt.num_rows < 1
+			stmt.close
 			raise 'Nothing to pee here.'
 		end
-		info = query.fetch
+		info = stmt.fetch
+		stmt.close
 		name = info[0].to_s
 		content_type = info[1]+ '/' + info[2]
 

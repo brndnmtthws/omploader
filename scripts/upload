@@ -30,7 +30,9 @@ FCGI.each_cgi {|cgi|
 
 
 		query = db.prepare('select count from upload_throttle where visitor_id = ?')
-		throttle = query.execute(visitor_id).fetch.to_s
+		stmt = query.execute(visitor_id)
+		throttle = stmt.fetch.to_s
+		stmt.close
 		if throttle.to_i > Max_upload_count
 			raise 'Slow down there, cowboy.'
 		end
@@ -89,7 +91,9 @@ FCGI.each_cgi {|cgi|
 
 			begin
 				query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-				name_id = query.execute(name).insert_id
+				stmt = query.execute(name)
+				name_id = stmt.insert_id
+				stmt.close
 
 				name = name.sanitise
 
@@ -104,16 +108,24 @@ FCGI.each_cgi {|cgi|
 				content_type_main = content_type_split.first
 				content_type_sub = content_type_split.last
 				query = db.prepare('insert into content_types_main (type) values (?) on duplicate key update id = last_insert_id(id)')
-				content_type_main_id = query.execute(content_type_main).insert_id
+				stmt = query.execute(content_type_main)
+				content_type_main_id = stmt.insert_id
+				stmt.close
 				query = db.prepare('insert into content_types_sub (type) values (?) on duplicate key update id = last_insert_id(id)')
-				content_type_sub_id = query.execute(content_type_sub).insert_id
+				stmt = query.execute(content_type_sub)
+				content_type_sub_id = stmt.insert_id
+				stmt.close
 				query = db.prepare('insert into content_types (content_type_main_id, content_type_sub_id) values (?,?) on duplicate key update id = last_insert_id(id)')
-				content_type_id = query.execute(content_type_main_id, content_type_sub_id).insert_id
+				stmt = query.execute(content_type_main_id, content_type_sub_id)
+				content_type_id = stmt.insert_id
+				stmt.close
 
 				fingerprint = Digest::SHA1.hexdigest(datum)
 
 				query = db.prepare('insert into metadata (content_type_id, name_id, size, owner_id, fingerprint) values (?,?,?,?,?)')
-				id = query.execute(content_type_id, name_id, datum.length, owner_id, fingerprint).insert_id
+				stmt = query.execute(content_type_id, name_id, datum.length, owner_id, fingerprint)
+				id = stmt.insert_id
+				stmt.close
 
 				if content_type == 'audio/mpeg' or content_type == 'application/ogg'
 					tmpfile = Tempfile.new(name)
@@ -139,15 +151,20 @@ FCGI.each_cgi {|cgi|
 						end
 					end
 					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-					artist_id = query.execute(artist).insert_id
+					stmt = query.execute(artist)
+					artist_id = stmt.insert_id
 					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-					title_id = query.execute(title).insert_id
+					stmt = query.execute(title)
+					title_id = stmt.insert_id
 					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-					album_id = query.execute(album).insert_id
+					stmt = query.execute(album)
+					album_id = stmt.insert_id
 					query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-					year_id = query.execute(year).insert_id
+					stmt = query.execute(year)
+					year_id = stmt.insert_id
 					query = db.prepare('update metadata set artist_id = ?, title_id = ?, album_id = ?, year_id = ? where metadata.id = ?')
-					query.execute(artist_id, title_id, album_id, year_id, id)
+					stmt = query.execute(artist_id, title_id, album_id, year_id, id)
+					stmt.close
 				end
 
 				saved = saved + 1
@@ -174,7 +191,9 @@ FCGI.each_cgi {|cgi|
 					# duplicate key
 					# get id for the dupe one
 					query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.fingerprint = ?')
-					res = query.execute(fingerprint).fetch
+					stmt = query.execute(fingerprint)
+					res = stmt.fetch
+					stmt.close
 					old_id = res[0].to_s.to_b64
 					name = res[1].to_s
 					if name.length > 15
@@ -199,7 +218,7 @@ FCGI.each_cgi {|cgi|
 			raise 'You are a trad.'
 		end
 		query = db.prepare('insert into upload_throttle (visitor_id, count) values (?,?) on duplicate key update count = count + ?')
-		query.execute(visitor_id, saved, saved)
+		query.execute(visitor_id, saved, saved).close
 		db.commit
 		cgi.out {
 			xhtml_pre +
