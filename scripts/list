@@ -143,7 +143,7 @@ FCGI.each_cgi {|cgi|
 		where_clause = ' '
 		wheres = search.split(' ')
 		for item in wheres
-			where_clause += 'names.name like "%' + item + '%" or '
+			where_clause += 'names.name like "%' + item + '%" and '
 		end
 		where_clause = where_clause.chop.chop.chop
 		if my_where_clause.empty? and !where_clause.empty?
