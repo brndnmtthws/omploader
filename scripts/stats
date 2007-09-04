@@ -1,0 +1,61 @@
+#!/bin/env ruby
+#
+# $Id$
+#
+# Copyright 2007 David Shakaryan <omp@gentoo.org>
+# Copyright 2007 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+#
+
+require 'omploader'
+
+db = db_connect
+
+FCGI.each_cgi {|cgi|
+	begin
+		db_check(db)
+		visitor_id = register_visit(cgi, db)
+
+		owner_id = get_owner_id(cgi, db)
+		query = db.prepare('select referrers.address, sum(count) from referrals inner join referrers on referrers.id = referrals.referrer_id group by referrals.referrer_id order by sum(count) desc limit 10;')
+		stmt = query.execute
+		top_refs = ''
+		stmt.num_rows.times do
+			res = stmt.fetch
+			address = res[0].to_s
+			count = res[1].to_s.to_i
+			top_refs += "\t\t\t\t" + '<a href="' + address + '">' + address + '</a> hits: ' + count + '<br />' + "\n"
+		end
+		stmt.close
+		xhtml = top_refs
+
+		db.commit
+		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
+	rescue Mysql::Error => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+		}
+	rescue RuntimeError => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">' + err + '</div>' + xhtml_post
+		}
+	rescue SyntaxError, NameError => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+		}
+	rescue StandardError => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+		}
+	rescue
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+		}
+	end
+}
