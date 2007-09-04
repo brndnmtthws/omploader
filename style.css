@@ -226,7 +226,6 @@ div#container div.content div.filelist div.file span.filename a {
 }
 
 div#container div.content div.filelist div.file span.fileinfo {
-	color: #bbb;
 	display: table-cell;
 	padding-left: 15px;
 }

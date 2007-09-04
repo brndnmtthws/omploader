@@ -101,9 +101,9 @@ FCGI.each_cgi {|cgi|
 				name = result.last.to_s
 
 				top_files += 
-					"\t\t\t\t\t" + '<div class="file" />' + "\n" +
-					"\t\t\t\t\t" + '<span class="filename"><a href="v' + id + '">' + name + '</a></span>' + "\n" +
-					"\t\t\t\t\t" + '<span class="fileinfo"><a href="i' + id + '">Info</a></span>' + "\n" +
+					"\t\t\t\t\t" + '<div class="file">' + "\n" +
+					"\t\t\t\t\t\t" + '<span class="filename"><a href="v' + id + '">' + name + '</a></span>' + "\n" +
+					"\t\t\t\t\t\t" + '<span class="fileinfo"><a href="i' + id + '">Info</a></span>' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n"
 			end
 			stmt.close
