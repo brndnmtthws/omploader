@@ -21,6 +21,8 @@ ConfigFile = YAML::load(File.open('config'))
 
 Max_upload_count = ConfigFile['limits']['upload_count']
 Max_upload_period = ConfigFile['limits']['upload_period'] * 60
+Max_rand = ConfigFile['limits']['max_random_rows'] * 5
+
 
 Paths = ConfigFile['paths']
 

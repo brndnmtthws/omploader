@@ -9,10 +9,9 @@
 #
 
 require 'omploader'
+require 'set'
 
 db = db_connect
-
-Max_rand = 5
 
 FCGI.each_cgi {|cgi|
 	begin
@@ -23,8 +22,7 @@ FCGI.each_cgi {|cgi|
 
 		top_files =
 			"\t\t\t" + '<div class="title">' + "\n" +
-			"\t\t\t\t" + '<div class="links"><a href="hide">Hide</a></div>' + "\n" +
-			"\t\t\t\t" + 'Top Files' + "\n" +
+			"\t\t\t\t" + 'Random Images' + "\n" +
 			"\t\t\t" + '</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n"
 		query = db.prepare('select max(id), min(id) from metadata')
@@ -33,7 +31,8 @@ FCGI.each_cgi {|cgi|
 		max = res[0].to_i
 		min = res[1].to_i
 		count = Max_rand
-		rands = Array.new
+		rands = Set.new
+		try = 0
 		while count > 0
 			rand_id = rand(max - min) + min
 			query = db.prepare('select metadata.id from metadata inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where metadata.id = ? and content_types_main.type = "image"')
@@ -42,13 +41,19 @@ FCGI.each_cgi {|cgi|
 			num_rows = stmt.num_rows
 			stmt.close
 			if num_rows < 1
-			else
+				try += 1
+				if try > 5
+					count -= 1
+					try = 0
+				end
+			elsif rands.add?(res[0])
 				count -= 1
-				rands << res[0]
 			end
 		end
+		count = 0
 		top_files_info = ''
 		rands.each {|id|
+			count += 1
 			query = db.prepare('select names.name from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
 			stmt = query.execute(id)
 			result = stmt.fetch
@@ -57,11 +62,24 @@ FCGI.each_cgi {|cgi|
 
 			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id.to_s.to_b64 + '"><img src="t' + id.to_s.to_b64 + '" alt="View file!" /></a></div></div>' + "\n"
 			top_files_info += "\t\t\t\t" + '<div class="info float"><a href="i' + id.to_s.to_b64 + '">Info</a></div>' + "\n"
+			if count % 5 == 0
+				top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
+					"\t\t\t\t" + '<br />' + "\n"
+				top_files_info = ''
+			end
 		}
-		top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
-			"\t\t\t" + '</div>' + "\n"
+		if count < Max_rand and count % 5 != 0
+			top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
+				"\t\t\t" + '</div>' + "\n"
+		else
+			top_files += "\t\t\t" + '</div>' + "\n"
+		end
 
-		xhtml = top_files
+		xhtml =
+			"\t\t\t" + '<div class="content large">' + "\n" +
+			"\t\t\t\t" + '<a href="random">MOAR!</a>' + "\n" +
+			"\t\t\t" + '</div>' + "\n" +
+			top_files
 
 		db.commit
 		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }

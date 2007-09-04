@@ -29,6 +29,7 @@ limits:
 # for this to work properly
   upload_count: 10
   upload_period: 2
+  max_random_rows: 2
 paths:
 # Path of data store (relative to scripts)
   data: ../data/
