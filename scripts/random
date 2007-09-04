@@ -59,7 +59,6 @@ FCGI.each_cgi {|cgi|
 			top_files_info += "\t\t\t\t" + '<div class="info float"><a href="i' + id.to_s.to_b64 + '">Info</a></div>' + "\n"
 		}
 		top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
-			"\t\t\t\t" + '<br />' + "\n" +
 			"\t\t\t" + '</div>' + "\n"
 
 		xhtml = top_files
