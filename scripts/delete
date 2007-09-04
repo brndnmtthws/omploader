@@ -58,6 +58,7 @@ if !comments
 			File.unlink(Paths['data'] + '/' + id.to_b64)
 			db.commit
 			stmt.close
+			puts "Successfully removed #{id.to_b64}"
 		rescue Mysql::Error => err
 			db.rollback unless db.nil?
 			$stderr.puts 'Error in delete script'
