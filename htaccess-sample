@@ -36,3 +36,5 @@ RewriteRule ^l(\d+)(.)(.)(.)(.)(\d+)(.*)$ scripts/list?results=$1&order=$2&colum
 RewriteRule ^t(.+)$ scripts/thumb?id=$1 [L]
 RewriteRule ^v(.+)$ scripts/view?id=$1 [L]
 RewriteRule ^upload(.*)$ scripts/upload$1 [L]
+RewriteRule ^stats$ scripts/stats [L]
+RewriteRule ^random$ scripts/random [L]
