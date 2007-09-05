@@ -87,12 +87,13 @@ argv.each do |arg|
 	tmp = Tempfile.new(filename)
 	if !stdin.nil? and !used_stdin
 		# upload from stdin
-		%x{echo '#{stdin}' | curl -# -F "file1=@-;filename=#{filename}" #{Url}upload -o #{tmp.path}}
+		puts "Progress for '#{arg}'"
+		%x{echo '#{stdin}' | curl -# -F 'file1=@-;filename="#{filename}"' #{Url}upload -o '#{tmp.path}'}
 		used_stdin = true
 	else
 		# upload file
 		puts "Progress for '#{arg}'"
-		%x{curl -# -F file1=@"#{arg}" #{Url}upload -o #{tmp.path}}
+		%x{curl -# -F file1=@"#{arg}" #{Url}upload -o '#{tmp.path}'}
 	end
 	if !File.size?(tmp.path)
 		$stderr.puts "Error omploading '#{arg}'"
