@@ -145,7 +145,7 @@ FCGI.each_cgi {|cgi|
 		for item in wheres
 			where_clause += 'names.name like "%' + item + '%" and '
 		end
-		where_clause = where_clause.chop.chop.chop
+		where_clause = where_clause.chop.chop.chop.chop
 		if my_where_clause.empty? and !where_clause.empty?
 			where_clause = 'where ' + where_clause
 		end
