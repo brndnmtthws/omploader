@@ -8,6 +8,8 @@
 # Distributed under the terms of the GNU General Public License v3
 #
 
+require 'tempfile'
+
 argv = Array.new
 
 quiet = false
@@ -46,7 +48,7 @@ if curl.empty?
 	$stderr.puts 
 end
 
-if (ARGV.size < 1 and stdin.empty?) or help or nocurl
+if (ARGV.size < 1 and (stdin.nil? or stdin.empty?)) or help or nocurl
 	$stderr.puts 'Usage:  ompload [-h|--help] [options] [file(s)]'
 	$stderr.puts '  -q, --quiet     Only output errors and warnings'
 	$stderr.puts '  -f, --filename  Filename to use when posting data'
@@ -78,24 +80,27 @@ argv.each do |arg|
 	# no more than 1 every 15 seconds is common courtesy
 	turd = Time.now - poop
 	if turd < wait
-		puts wait - turd
+		puts 'Sleeping for ' + (wait - turd).to_s
 		sleep(wait - turd)
 	end
 
+	tmp = Tempfile.new(filename)
 	if !stdin.nil? and !used_stdin
 		# upload from stdin
-		output = %x{echo '#{stdin}' | curl -s -F "file1=@-;filename=#{filename}" #{Url}upload}
+		%x{echo '#{stdin}' | curl -# -F "file1=@-;filename=#{filename}" #{Url}upload -o #{tmp.path}}
 		used_stdin = true
 	else
 		# upload file
-		output = %x{curl -s -F file1=@"#{arg}" #{Url}upload}
+		puts "Progress for '#{arg}'"
+		%x{curl -# -F file1=@"#{arg}" #{Url}upload -o #{tmp.path}}
 	end
-	if output.empty?
+	if !File.size?(tmp.path)
 		$stderr.puts "Error omploading '#{arg}'"
 		errors += 1
 		poop = Time.now
 		next
 	end
+	output = IO.read(tmp.path)
 
 	# parse for an ID
 	if output =~ /View file: <a href="v([A-Za-z0-9+\/]+)">/
