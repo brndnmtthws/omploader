@@ -101,6 +101,7 @@ FCGI.each_cgi {|cgi|
 	rescue Magick::ImageMagickError => err
 		# just ignore these for the most part
 		db.rollback unless db.nil?
+		cgi.out('text/plain') { 'This thumbnail is fucked, sorry.' }
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
