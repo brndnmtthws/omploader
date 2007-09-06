@@ -53,19 +53,10 @@ FCGI.each_cgi {|cgi|
 				split = URI.split(referrer)
 				host = split[2]
 				if host != cgi.host
-					query = db.prepare('select id from referrers where address = ?')
+					query = db.prepare('insert into referrers (address) values (?) on duplicate key update id = last_insert_id(id)')
 					stmt = query.execute(referrer)
-					num_rows = stmt.num_rows
-					res = stmt.fetch
+					referrer_id = stmt.insert_id.to_s
 					stmt.close
-					if num_rows < 1
-						query = db.prepare('insert into referrers (address) values (?)')
-						stmt = query.execute(referrer)
-						referrer_id = stmt.insert_id.to_s
-						stmt.close
-					else
-						referrer_id = res[0]
-					end
 					query = db.prepare('insert into referrals (referrer_id, metadata_id) values (?,?) on duplicate key update count = count + 1')
 					query.execute(referrer_id, id).close
 				end
