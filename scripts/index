@@ -217,32 +217,60 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t" +'</div>' + "\n" +
 			top_files
 
-			db.commit
-			cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
+		db.commit
+		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
 		cgi.out('text/html') {
-			xhtml_pre + "\t\t\t\t" + '<div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
 		}
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
-			xhtml_pre + "\t\t\t\t" + '<div class="content large">' + err + '</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
 		cgi.out('text/html') {
-			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
 		}
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	rescue StandardError => err
 		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
 		cgi.out('text/html') {
-			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	rescue
 		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
 		cgi.out('text/html') {
-			xhtml_pre + "\t\t\t\t" + '<div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
 		}
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	end
 }

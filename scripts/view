@@ -39,9 +39,9 @@ FCGI.each_cgi {|cgi|
 
 		# Increment vote number if this is first view from visitor.
 		query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
-		res = query.execute(visitor_id, id)
-		rows = res.num_rows
-		res.close
+		stmt = query.execute(visitor_id, id)
+		rows = stmt.num_rows
+		stmt.close
 		if rows == 0
 			query = db.prepare('update metadata set hits = hits + 1 where id = ?')
 			query.execute(id).close
@@ -61,10 +61,10 @@ FCGI.each_cgi {|cgi|
 					if num_rows < 1
 						query = db.prepare('insert into referrers (address) values (?)')
 						stmt = query.execute(referrer)
-						referrer_id = query.insert_id.to_s
+						referrer_id = stmt.insert_id.to_s
 						stmt.close
 					else
-						referrer_id = res.to_s
+						referrer_id = res[0]
 					end
 					query = db.prepare('insert into referrals (referrer_id, metadata_id) values (?,?) on duplicate key update count = count + 1')
 					query.execute(referrer_id, id).close
@@ -80,9 +80,16 @@ FCGI.each_cgi {|cgi|
 		datum.munmap
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + err + '</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
 		}
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
 		cgi.out('text/html') {
@@ -90,18 +97,39 @@ FCGI.each_cgi {|cgi|
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
 		}
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	rescue StandardError => err
 		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + err + ' [ ' + err.backtrace.to_s + ' ]</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	rescue
 		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
 		cgi.out('text/html') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled.</div>' + xhtml_post
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
 		}
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	end
 }

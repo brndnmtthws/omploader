@@ -169,9 +169,13 @@ if cleanup
 		db.rollback unless db.nil?
 		$stderr.puts 'Error in delete script'
 		$stderr.puts err
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
 		$stderr.puts err
+		log = Logger.new(Paths['log'])
+		log.error(err)
 	end
 end
 

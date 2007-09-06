@@ -17,7 +17,11 @@ begin
 rescue Mysql::Error => err
 	db.rollback unless db.nil?
 	$stderr.puts 'MySQL error in cron script: ' + err
+	log = Logger.new(Paths['log'])
+	log.error(err)
 rescue
 	db.rollback unless db.nil?
 	$stderr.puts 'Error in cron script'
+	log = Logger.new(Paths['log'])
+	log.error(err)
 end

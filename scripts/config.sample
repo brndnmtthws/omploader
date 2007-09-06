@@ -14,22 +14,29 @@ database:
   user: omploader
   pass: omploader
   host: localhost
-# Takes zoneinfo names as a param, eg.
-# Canada/Mountain
-# Europe/Helsinki
-# US/Eastern
+  # Takes zoneinfo names as a param, eg.
+  # Canada/Mountain
+  # Europe/Helsinki
+  # US/Eastern
   timezone: UTC
 
 # Limits (ie min/maximums)
 limits:
-# Number of uploads in a given period (in minutes)
-# before getting throttled
-#
-# Note: the cron script needs to run every minute
-# for this to work properly
+  # Number of uploads in a given period (in minutes)
+  # before getting throttled
+  #
+  # Note: the cron script needs to run every minute
+  # for this to work properly
   upload_count: 10
   upload_period: 2
   max_random_rows: 2
+
 paths:
-# Path of data store (relative to scripts)
+  # Path of data store (relative to scripts)
   data: ../data/
+  log: ../error_log
+
+# Debugging options
+debug:
+  # Enable extra debug info? (true/false)
+  enabled: true
