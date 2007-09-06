@@ -230,6 +230,9 @@ FCGI.each_cgi {|cgi|
 			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
@@ -247,6 +250,9 @@ FCGI.each_cgi {|cgi|
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
 		log.error(err)
 	rescue StandardError => err
 		db.rollback unless db.nil?
@@ -259,6 +265,9 @@ FCGI.each_cgi {|cgi|
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
 		log.error(err)
 	rescue
 		db.rollback unless db.nil?
@@ -271,6 +280,9 @@ FCGI.each_cgi {|cgi|
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
 		log.error(err)
 	end
 }

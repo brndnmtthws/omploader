@@ -39,4 +39,4 @@ paths:
 # Debugging options
 debug:
   # Enable extra debug info? (true/false)
-  enabled: true
+  enabled: false
