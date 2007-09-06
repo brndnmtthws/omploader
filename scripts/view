@@ -34,7 +34,6 @@ FCGI.each_cgi {|cgi|
 		end
 		info = stmt.fetch
 		stmt.close
-		info = stmt.fetch
 		name = info[0].to_s
 		content_type = info[1]+ '/' + info[2]
 
