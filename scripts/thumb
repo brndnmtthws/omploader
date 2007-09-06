@@ -60,13 +60,13 @@ FCGI.each_cgi {|cgi|
 				if (thumb.columns.to_f / thumb.rows.to_f) == (4/3.0)
 					thumb = thumb.thumbnail(100, 75)
 				elsif (thumb.columns.to_f / thumb.rows.to_f) > (4/3.0)
-					if (thumb.columns.to_f / thumb.rows.to_f) == 0
+					if (thumb.columns.to_f / thumb.rows.to_f).to_i == 0
 						thumb = thumb.thumbnail(100, 1)
 					else
 						thumb = thumb.thumbnail(100, 75 * ((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f)))
 					end
 				else
-					if ((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0)) == 0
+					if (thumb.columns.to_f / thumb.rows.to_f).to_i == 0
 						thumb = thumb.thumbnail(1, 75)
 					else
 						thumb = thumb.thumbnail(100 * ((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0)), 75)
