@@ -82,7 +82,7 @@ FCGI.each_cgi {|cgi|
 			top_files
 
 		db.commit
-		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
+		cgi.out('text/html') { xhtml_pre('', '', false) + xhtml + xhtml_post }
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
