@@ -84,6 +84,7 @@ FCGI.each_cgi {|cgi|
 
 				db.commit
 				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { thumb.to_blob.to_s }
+				GC.start
 			elsif result[0] == 'image'
 				query = db.prepare('select image from thumbnails where id = ?')
 				stmt = query.execute(thumbnail_id)
@@ -93,7 +94,6 @@ FCGI.each_cgi {|cgi|
 				query.execute(thumbnail_id).close
 				db.commit
 				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { output }
-				GC.start
 			else
 				db.commit
 				cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png' + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { File.read('../omploader_thumb.png') }
