@@ -122,8 +122,8 @@ FCGI.each_cgi {|cgi|
 		if cgi.has_key?('search_post')
 			search = cgi['search_post'].read.to_s
 			param_search = 's-' + search
-			param_search = URI.escape(param_search)
 			param_search = param_search.gsub(/:/, '%3A').gsub(/\//, '%2F')
+			param_search = URI.escape(param_search)
 			redirect = 'l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search
 			db.commit
 			print cgi.header({'Status' => '302 Moved', 'location' => redirect})
@@ -131,11 +131,12 @@ FCGI.each_cgi {|cgi|
 		elsif cgi.params['search'].to_s.length > 2
 			search = cgi.params['search'].to_s
 			search = search.reverse.chop.chop.reverse
+			search = URI.unescape(search)
 		end
 
 		param_search = 's-' + search
-		param_search = URI.escape(param_search)
 		param_search = param_search.gsub(/:/, '%3A').gsub(/\//, '%2F')
+		param_search = URI.escape(param_search)
 
 		my_where_clause = ''
 		if mine_only != 0 and !owner_id.nil?
