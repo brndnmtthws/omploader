@@ -143,7 +143,8 @@ FCGI.each_cgi {|cgi|
 			my_where_clause = ' where content_types_main.type like "image" '
 		end
 		where_clause = ' '
-		wheres = search.split(' ')
+		wheres = search.gsub(/%/, '\\%').gsub(/_/, '\\_').split(' ')
+		wheres.each_index{|i| wheres[i] = '%' + wheres[i] + '%'}
 		for item in wheres
 			where_clause += 'names.name like ? and '
 		end
@@ -187,7 +188,9 @@ FCGI.each_cgi {|cgi|
 		end
 		file_number = 0
 		if !wheres.empty?
-			stmt = query.execute((page - 1) * results, *wheres)
+			other_wheres = wheres
+			other_wheres << (page - 1) * results
+			stmt = query.execute(*other_wheres)
 		else
 			stmt = query.execute((page - 1) * results)
 		end
@@ -259,7 +262,10 @@ FCGI.each_cgi {|cgi|
 		end
 		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 		if !wheres.empty?
-			stmt = query.execute(page * results, *wheres)
+			other_wheres = wheres
+			other_wheres.delete_at(other_wheres.size - 1)
+			other_wheres << page * results
+			stmt = query.execute(*other_wheres)
 		else
 			stmt = query.execute(page * results)
 		end
