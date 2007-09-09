@@ -58,7 +58,7 @@ def xhtml_pre(title = '', search = '', showsearch = true)
 	if showsearch
 		xhtml_pre +=
 			"\t\t\t\t\t" + '<div id="search">' + "\n" +
-			"\t\t\t\t\t\t" + '<input name="search_post" size="20" class="field" type="text" value="' + search + '" /><input value="search" class="button" type="submit" />' + "\n" +
+			"\t\t\t\t\t\t" + '<input name="search_post" size="20" class="field" type="text" value="' + search.gsub(/\\/, '\\') + '" /><input value="search" class="button" type="submit" />' + "\n" +
 			"\t\t\t\t\t" + '</div>' + "\n"
 	end
 	xhtml_pre +=

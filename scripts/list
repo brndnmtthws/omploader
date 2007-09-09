@@ -9,6 +9,7 @@
 #
 
 require 'omploader'
+require 'uri'
 
 db = db_connect
 
@@ -115,14 +116,15 @@ FCGI.each_cgi {|cgi|
 
 		page = cgi.params['page'].to_s.to_i
 		page = 1 if page == 0
+#		cgi.out('text/plain') { 'gay' }
 
 		search = ''
 		if cgi.has_key?('search_post')
 			search = cgi['search_post'].read.to_s
 			param_search = 's-' + search
-			redirect = 'l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search
+			redirect = 'l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search.gsub(/:/, '%3A').gsub(/\//, '%2F')
 			db.commit
-			print cgi.header({'Status' => '302 Moved', 'location' => redirect})
+			print cgi.header({'Status' => '302 Moved', 'location' => URI.escape(redirect)})
 			next
 		elsif cgi.params['search'].to_s.length > 2
 			search = cgi.params['search'].to_s
@@ -143,7 +145,7 @@ FCGI.each_cgi {|cgi|
 		where_clause = ' '
 		wheres = search.split(' ')
 		for item in wheres
-			where_clause += 'names.name like "%' + item + '%" and '
+			where_clause += 'names.name like ? and '
 		end
 		where_clause = where_clause.chop.chop.chop.chop
 		if my_where_clause.empty? and !where_clause.empty?
@@ -156,7 +158,11 @@ FCGI.each_cgi {|cgi|
 		end
 
 		query = db.prepare('select count(*) from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause)
-		stmt = query.execute
+		if !wheres.empty?
+			stmt = query.execute(*wheres)
+		else
+			stmt = query.execute
+		end
 		count = stmt.fetch.to_s.to_i
 		stmt.close
 		if page > count / results + 1
@@ -180,7 +186,11 @@ FCGI.each_cgi {|cgi|
 				row_number = 0
 		end
 		file_number = 0
-		stmt = query.execute((page - 1) * results)
+		if !wheres.empty?
+			stmt = query.execute((page - 1) * results, *wheres)
+		else
+			stmt = query.execute((page - 1) * results)
+		end
 		num_rows = stmt.num_rows
 		num_rows.times do
 			result = stmt.fetch
@@ -248,7 +258,11 @@ FCGI.each_cgi {|cgi|
 			page_links += '        First <span class="separator">&#x2503;</span> Previous'
 		end
 		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
-		stmt = query.execute(page * results)
+		if !wheres.empty?
+			stmt = query.execute(page * results, *wheres)
+		else
+			stmt = query.execute(page * results)
+		end
 		num_rows = stmt.num_rows
 		stmt.close
 		if num_rows > 0
