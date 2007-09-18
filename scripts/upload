@@ -55,6 +55,7 @@ FCGI.each_cgi {|cgi|
 					url = cgi['url' + i.to_s]
 					begin
 						# do some checking on our url
+						url = URI.escape(url)
 						url = URI.extract(url).first
 						split = URI.split(url)
 						host = split[2]
