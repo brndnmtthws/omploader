@@ -148,6 +148,7 @@ FCGI.each_cgi {|cgi|
 		end
 
 		comments_body =
+			"\t\t\t" + '<a name="comment_top">' + "\n" +
 			"\t\t\t" + '<div class="title">' + "\n" + 
 			"\t\t\t\t" + '<div class="links">' + hide_link + '</div>' + "\n" +
 			"\t\t\t\t" + '<div>Comments</div>' + "\n" +
