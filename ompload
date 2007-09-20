@@ -1,4 +1,4 @@
-#!/bin/env ruby
+#!/usr/bin/env ruby
 #
 # $Id$
 #
@@ -88,7 +88,10 @@ argv.each do |arg|
 	if !stdin.nil? and !used_stdin
 		# upload from stdin
 		puts "Progress for '#{arg}'"
-		%x{echo '#{stdin}' | curl -# -F 'file1=@-;filename="#{filename}"' #{Url}upload -o '#{tmp.path}'}
+		p = IO.popen("curl -# -F 'file1=@-;filename=\"#{filename}\"' #{Url}upload -o '#{tmp.path}'", "w+")
+		p.puts stdin
+		p.close_write
+		Process.wait
 		used_stdin = true
 	else
 		# upload file
