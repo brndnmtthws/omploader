@@ -167,6 +167,7 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t\t\t\t\t" + '<option value="java">Java</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="javascript">JavaScript</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="lisp">Lisp</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="mysql">MySQL</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="pascal">Pascal</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="perl">Perl</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="php">PHP</option>' + "\n" +
