@@ -72,7 +72,7 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t" + '</div>' + "\n"
 		stmt.close
 
-		xhtml = top_refs + new_disc
+		xhtml = new_disc + top_refs
 
 		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
 	rescue Mysql::Error => err
