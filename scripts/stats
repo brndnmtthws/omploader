@@ -51,7 +51,7 @@ FCGI.each_cgi {|cgi|
 								 	order by c1.creation_date desc
 								 	limit 10')
 		stmt = query.execute
-		new_disc = "\t\t\t" + '<div class="title">Recently discussed</div>' + "\n" +
+		new_disc = "\t\t\t" + '<div class="title">Recently Discussed</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
 			"\t\t\t\t" + '<div class="filelist">' + "\n"
 		stmt.num_rows.times do

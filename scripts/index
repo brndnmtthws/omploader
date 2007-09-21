@@ -206,7 +206,7 @@ FCGI.each_cgi {|cgi|
 		end
 		xhtml =
 			"\t\t\t" + '<div class="content large">' + "\n" +
-			"\t\t\t\t" + '<a href="' + bigger + '">' + bigger + ' loader</a> | <a href="l">list</a> | <a href="r">random</a> | <a href="stats">stats</a>' + "\n" +
+			"\t\t\t\t" + '<a href="' + bigger + '">' + bigger + ' loader</a> | <a href="l">list</a> | <a href="r">random</a> | <a href="s">stats</a>' + "\n" +
 			"\t\t\t\t" + '<div class="powered">powered by web ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
 			"\t\t\t" + '</div>' + "\n" +
 			"\t\t\t" + '<div class="title">' + "\n" +
