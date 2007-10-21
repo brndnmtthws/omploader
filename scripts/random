@@ -63,8 +63,7 @@ FCGI.each_cgi {|cgi|
 			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id.to_s.to_b64 + '"><img src="t' + id.to_s.to_b64 + '" alt="View file!" /></a></div></div>' + "\n"
 			top_files_info += "\t\t\t\t" + '<div class="info float"><a href="i' + id.to_s.to_b64 + '">Info</a></div>' + "\n"
 			if count % 5 == 0
-				top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
-					"\t\t\t\t" + '<br />' + "\n"
+				top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n"
 				top_files_info = ''
 			end
 		}
