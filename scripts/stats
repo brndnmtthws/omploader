@@ -61,11 +61,11 @@ FCGI.each_cgi {|cgi|
 			name = res[2].to_s
 			date = res[3].to_s
 
-			name = name[0..56] + '...' if name.length > 60
+			name = name[0..46] + '...' if name.length > 50
 			new_disc += "\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><a href="i' + id.to_b64 + '#comment_top">' + name + '</a></span>' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="fileinfo">' + count + '</span>' + "\n" +
-				"\t\t\t\t\t\t" + '<span class="fileinfo">' + date + '</span>' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="fileinfo">' + date.sub(' ', '&nbsp;') + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
 		end
 		new_disc += "\t\t\t\t" + '</div>' + "\n" +
