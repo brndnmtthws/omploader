@@ -100,9 +100,15 @@ FCGI.each_cgi {|cgi|
 				id = result.first.to_s.to_b64
 				name = result.last.to_s
 
+				if name.length > 60
+					name_displayed = name[0..58] + '…'
+				else
+					name_displayed = name
+				end
+
 				top_files += 
 					"\t\t\t\t\t" + '<div class="file">' + "\n" +
-					"\t\t\t\t\t\t" + '<span class="filename"><a href="v' + id + '">' + name + '</a></span>' + "\n" +
+					"\t\t\t\t\t\t" + '<span class="filename"><a href="v' + id + '" title="' + name + '">' + name_displayed + '</a></span>' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="fileinfo"><a href="i' + id + '">Info</a></span>' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n"
 			end
