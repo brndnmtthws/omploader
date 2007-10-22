@@ -27,10 +27,10 @@ FCGI.each_cgi {|cgi|
 		stmt.num_rows.times do
 			res = stmt.fetch
 			address = res[0].to_s
-			address.length > 60 ? address_listed = address[0..56] + '...' : address_listed = address
+			address.length > 60 ? address_listed = address[0..58] + '…' : address_listed = address
 			count = res[1].to_s
 			top_refs += "\t\t\t\t\t" + '<div class="file">' + "\n" +
-				"\t\t\t\t\t\t" + '<span class="filename"><a href="' + address + '">' + address_listed + '</a></span>' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><a href="' + address + '" title="' + address + '">' + address_listed + '</a></span>' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="fileinfo">' + count + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
 		end
@@ -61,9 +61,13 @@ FCGI.each_cgi {|cgi|
 			name = res[2].to_s
 			date = res[3].to_s
 
-			name = name[0..46] + '...' if name.length > 50
+			if name.length > 50
+				name_displayed = name[0..48] + '…'
+			else
+				name_displayed = name
+			end
 			new_disc += "\t\t\t\t\t" + '<div class="file">' + "\n" +
-				"\t\t\t\t\t\t" + '<span class="filename"><a href="i' + id.to_b64 + '#comment_top">' + name + '</a></span>' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><a href="i' + id.to_b64 + '#comment_top" title="' + name + '">' + name_displayed + '</a></span>' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="fileinfo">' + count + '</span>' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="fileinfo">' + date.sub(' ', '&nbsp;') + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
