@@ -63,7 +63,8 @@ end
 errors = 0
 
 wait = 15
-poop = Time.now - wait
+old_poop = Time.now - wait
+new_poop = Time.now
 
 Url = 'http://omploader.org/'
 
@@ -78,30 +79,39 @@ argv.each do |arg|
 	end
 
 	# no more than 1 every 15 seconds is common courtesy
-	turd = Time.now - poop
+	turd = new_poop - old_poop
 	if turd < wait
-		puts 'Sleeping for ' + (wait - turd).to_s
+		puts 'Sleeping for ' + (wait - turd).to_s if !quiet
 		sleep(wait - turd)
 	end
+	old_poop = new_poop
 
 	tmp = Tempfile.new(filename)
 	if !stdin.nil? and !used_stdin
 		# upload from stdin
-		puts "Progress for '#{arg}'"
-		p = IO.popen("curl -# -F 'file1=@-;filename=\"#{filename}\"' #{Url}upload -o '#{tmp.path}'", "w+")
+		puts "Progress for '#{arg}'" if !quiet
+		if quiet
+			p = IO.popen("curl -s -F 'file1=@-;filename=\"#{filename}\"' #{Url}upload -o '#{tmp.path}'", "w+")
+		else
+			p = IO.popen("curl -# -F 'file1=@-;filename=\"#{filename}\"' #{Url}upload -o '#{tmp.path}'", "w+")
+		end
 		p.puts stdin
 		p.close_write
 		Process.wait
 		used_stdin = true
 	else
 		# upload file
-		puts "Progress for '#{arg}'"
-		%x{curl -# -F file1=@"#{arg}" #{Url}upload -o '#{tmp.path}'}
+		puts "Progress for '#{arg}'" if !quiet
+		if quiet
+			%x{curl -s -F file1=@"#{arg}" #{Url}upload -o '#{tmp.path}'}
+		else
+			%x{curl -# -F file1=@"#{arg}" #{Url}upload -o '#{tmp.path}'}
+		end
 	end
 	if !File.size?(tmp.path)
 		$stderr.puts "Error omploading '#{arg}'"
 		errors += 1
-		poop = Time.now
+		new_poop = Time.now
 		next
 	end
 	output = IO.read(tmp.path)
@@ -121,7 +131,7 @@ argv.each do |arg|
 		errors += 1
 	end
 
-	poop = Time.now
+	new_poop = Time.now
 end
 
 if !quiet
