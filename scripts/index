@@ -138,7 +138,7 @@ FCGI.each_cgi {|cgi|
 			end
 			if big == 1 and paste != 1
 				form =
-					"\t\t\t\t" + '<form name="' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t" + '<form name="ompload' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
 					"\t\t\t\t\t" + '<div class="form">' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '2" size="25" class="input field" /><br />' + "\n" +
@@ -150,7 +150,7 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t" + '</form>'
 			elsif paste == 1
 				form =
-					"\t\t\t\t" + '<form name="paste"' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t" + '<form name="omploadpaste"' + encoding + ' action="upload" method="post">' + "\n" +
 					"\t\t\t\t\t" + '<div class="form">' + "\n" +
 					"\t\t\t\t\t\t\t" + '<div class="float name left-align">' + "\n" +
 					"\t\t\t\t\t\t\t" + '<div class="label">Name</div>' + "\n" +
@@ -194,7 +194,7 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t" + '</form>'
 			else
 				form =
-					"\t\t\t\t" + '<form name="' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t" + '<form name="ompload' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
 					"\t\t\t\t\t" + '<div class="form">' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
