@@ -23,6 +23,10 @@ ConfigFile = YAML::load(File.open('config'))
 Max_upload_count = ConfigFile['limits']['upload_count']
 Max_upload_period = ConfigFile['limits']['upload_period'] * 60
 Max_rand = ConfigFile['limits']['max_random_rows'] * 5
+Vote_expiry = ConfigFile['limits']['vote_expiry'] * 86400
+Visitor_expiry = ConfigFile['limits']['visitor_expiry'] * 86400
+Thumbnail_expiry = ConfigFile['limits']['thumbnail_expiry'] * 86400
+Owner_expiry = ConfigFile['limits']['owner_expiry'] * 86400
 
 Debug = ConfigFile['debug']['enabled']
 
@@ -98,8 +102,20 @@ def register_visit(cgi, db)
 end
 
 def run_cron(db)
-	q = db.prepare('call cron(?)')
+	q = db.prepare('delete from votes where unix_timestamp(date) < unix_timestamp(current_timestamp) - ?')
+	q.execute(Vote_expiry)
+	q = db.prepare('delete from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ?')
+	q.execute(Visitor_expiry)
+	q = db.prepare('delete from upload_throttle where unix_timestamp(date) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Max_upload_period)
+	q = db.prepare('update metadata inner join thumbnails on thumbnails.id = metadata.thumbnail_id set metadata.thumbnail_id = null where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
+	q.execute(Thumbnail_expiry)
+	q = db.prepare('delete from thumbnails where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ?')
+	q.execute(Thumbnail_expiry)
+	q = db.prepare('update metadata inner join owners on owners.id = metadata.owner_id set metadata.owner_id = null where unix_timestamp(owners.last_accessed) < unix_timestamp(current_timestamp) - ?')
+	q.execute(Owner_expiry)
+	q = db.prepare('delete from owners where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ?')
+	q.execute(Owner_expiry)
 	q.close
 end
 

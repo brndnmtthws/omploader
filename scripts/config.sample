@@ -30,6 +30,15 @@ limits:
   upload_count: 10
   upload_period: 2
   max_random_rows: 2
+  
+  # Number of days after which 'votes' (hit counts) expire
+  vote_expiry: 1
+  # Number of days after which 'visitors' (IP addresses used to count votes) expire
+  visitor_expiry: 1
+  # Number of days after which thumbnails expire
+  thumbnail_expiry: 1
+  # Number of days after which owners expire
+  owner_expiry: 365.25
 
 paths:
   # Path of data store (relative to scripts)
