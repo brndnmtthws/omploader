@@ -49,7 +49,7 @@ FCGI.each_cgi {|cgi|
 								 		join (select id, max(creation_date) as creation_date from comments group by id order by creation_date desc) as c2 on c2.id = c1.id
 								 	group by metadata.id
 								 	order by c1.creation_date desc
-								 	limit 10')
+								 	limit 20')
 		stmt = query.execute
 		new_disc = "\t\t\t" + '<div class="title">Recently Discussed</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +

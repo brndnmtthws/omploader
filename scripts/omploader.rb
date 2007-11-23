@@ -74,7 +74,7 @@ def xhtml_post
 	xhtml_post =
 		"\t\t\t" + '<div id="footer">' + "\n" +
 		"\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>' + "\n" +
-		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##otw">otw</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://svn.omploader.org/">svn</a>' + "\n" + 
+		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##otw">otw</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://svn.omploader.org/">svn</a> <span class="separator">&#x2503;</span> <a href="faq.xhtml">faq</a>' + "\n" + 
 		"\t\t\t" + '</div>' + "\n" +
 		"\t\t" + '</div>' + "\n" +
 		"\t" + '</body>' + "\n" +

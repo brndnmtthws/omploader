@@ -119,7 +119,7 @@ FCGI.each_cgi {|cgi|
 			if cgi.has_key?('file' + i.to_s)
 				file = cgi['file' + i.to_s]
 				datum = file.read
-				next if datum.length > 2**24 or datum.empty?
+				next if datum.length > 2**25 or datum.empty?
 				name = file.original_filename.chomp
 				name = 'ompload' if name !~ /\S/
 			elsif cgi.has_key?('url' + i.to_s)
