@@ -43,6 +43,7 @@ limits:
 paths:
   # Path of data store (relative to scripts)
   data: ../data/
+  thumbnails: ../thumbnails/
   log: ../error_log
 
 # Debugging options
