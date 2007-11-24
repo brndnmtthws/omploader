@@ -17,6 +17,7 @@ require 'yaml'
 require 'mmap'
 require 'tempfile'
 require 'logger'
+require 'find'
 
 ConfigFile = YAML::load(File.open('config'))
 
@@ -117,6 +118,27 @@ def run_cron(db)
 	q = db.prepare('delete from owners where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Owner_expiry)
 	q.close
+	Find.find(Paths['thumbnails']) do |path|
+		next if path == Paths['thumbnails']
+		base = File.basename(path)
+		if base.to_id == 0 or base != base.to_id.to_b64
+			# junk
+			print "Trying to remove '#{path}'..."
+			File.unlink(path)
+			puts 'done.'
+		else
+			query = db.prepare('select thumbnail_id from metadata where id = ?')
+			stmt = query.execute(base.to_id)
+			pee = stmt.fetch.to_s
+			if stmt.num_rows < 1 or pee.empty?
+				# junk
+				print "Trying to remove '#{path}'..."
+				File.unlink(path)
+				puts 'done.'
+			end
+			stmt.close
+		end
+	end
 end
 
 def session(cgi, new)
