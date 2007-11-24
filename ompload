@@ -76,6 +76,11 @@ argv.each do |arg|
 		$stderr.puts "Invalid argument '#{arg}': file does not exist"
 		errors += 1
 		next
+	elsif File.size(arg) > 2**25
+		$stderr.puts "Error omploading '#{arg}': file exceeds " + (2**25).to_s + " bytes (size was " + File.size(arg).to_s + ")."
+		errors += 1
+		new_poop = Time.now
+		next
 	end
 
 	# no more than 1 every 15 seconds is common courtesy
@@ -102,10 +107,12 @@ argv.each do |arg|
 	else
 		# upload file
 		puts "Progress for '#{arg}'" if !quiet
+		# escape quotes
+		tmp_path = arg.gsub('"', '\"')
 		if quiet
-			%x{curl -s -F file1=@"#{arg}" #{Url}upload -o '#{tmp.path}'}
+			%x{curl -s -F file1=@"#{tmp_path}" #{Url}upload -o '#{tmp.path}'}
 		else
-			%x{curl -# -F file1=@"#{arg}" #{Url}upload -o '#{tmp.path}'}
+			%x{curl -# -F file1=@"#{tmp_path}" #{Url}upload -o '#{tmp.path}'}
 		end
 	end
 	if !File.size?(tmp.path)
