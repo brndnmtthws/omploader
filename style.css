@@ -292,7 +292,26 @@ div#container div.content div.form textarea.comment {
 	height: 100px;
 }
 
-div#container div.content ol { list-style: none; padding-left: 1em; }
-div#container div.content ol li { text-align:left; }
+div#container div.content div.faq ol {
+	list-style: none;
+	padding-left: 1em;
+}
+
+div#container div.content div.faq ol li {
+	text-align:left;
+}
+
+div#container div.content div.faq div.q {
+	color: #a8002b;
+	font-weight: bold;
+	font-size: 1.2em;
+	margin-bottom: 0.2em;
+}
+
+div#container div.content div.faq div.a {
+	padding-left: 1em;
+	margin-bottom: 1.2em;
+}
+
 /*div#container div.content ol li + li + li p > strong { display: block; width: 250px; height: 200px; background-image: url('http://omploader.org/vNzdu'); }
 div#container div.content ol li + li + li p > strong + strong { display: inline; background-image: none; }*/
