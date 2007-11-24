@@ -191,7 +191,6 @@ CREATE TABLE `referrers` (
 
 CREATE TABLE `thumbnails` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `image` blob NOT NULL,
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7099 DEFAULT CHARSET=utf8;

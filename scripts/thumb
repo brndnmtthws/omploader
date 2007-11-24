@@ -74,8 +74,13 @@ FCGI.each_cgi {|cgi|
 				end
 				datum.munmap
 
-				query = db.prepare('insert into thumbnails (image) values (?)')
-				stmt = query.execute(thumb.to_blob.to_s)
+				query = db.prepare('insert into thumbnails (last_accessed) values (current_timestamp)')
+				stmt = query.execute
+				file = File.new(Paths['thumbnails'] + '/' + id.to_b64, File::CREAT|File::TRUNC|File::RDWR, 0664)
+				file.close
+				datum = Mmap.new(file.path, 'rw')
+				datum.insert(0, thumb.to_blob.to_s)
+				datum.unmap
 				insert_id = stmt.insert_id
 				stmt.close
 
@@ -86,14 +91,12 @@ FCGI.each_cgi {|cgi|
 				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { thumb.to_blob.to_s }
 				GC.start
 			elsif result[0] == 'image'
-				query = db.prepare('select image from thumbnails where id = ?')
-				stmt = query.execute(thumbnail_id)
-				output = stmt.fetch.to_s
-				stmt.close
 				query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
 				query.execute(thumbnail_id).close
 				db.commit
-				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { output }
+				datum = Mmap.new(Paths['thumbnails'] + '/' + id.to_b64, 'r')
+				cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { datum.to_str }
+				datum.munmap
 			else
 				db.commit
 				cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png' + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { File.read('../omploader_thumb.png') }
