@@ -74,13 +74,14 @@ FCGI.each_cgi {|cgi|
 				end
 				datum.munmap
 
-				query = db.prepare('insert into thumbnails (last_accessed) values (current_timestamp)')
-				stmt = query.execute
 				file = File.new(Paths['thumbnails'] + '/' + id.to_b64, File::CREAT|File::TRUNC|File::RDWR, 0664)
 				file.close
 				datum = Mmap.new(file.path, 'rw')
 				datum.insert(0, thumb.to_blob.to_s)
 				datum.unmap
+				
+				query = db.prepare('insert into thumbnails (last_accessed) values (current_timestamp)')
+				stmt = query.execute
 				insert_id = stmt.insert_id
 				stmt.close
 

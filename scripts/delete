@@ -56,6 +56,10 @@ if !comments
 			query = db.prepare('delete from thumbnails, votes, metadata using metadata left join thumbnails on thumbnails.id = metadata.thumbnail_id left join votes on votes.metadata_id = metadata.id where metadata.id = ?')
 			stmt = query.execute(id)
 			File.unlink(Paths['data'] + '/' + id.to_b64)
+			begin
+				File.unlink(Paths['thumbnails'] + '/' + id.to_b64)
+			rescue Errno::ENOENT
+			end
 			db.commit
 			stmt.close
 			puts "Successfully removed #{id.to_b64}"
@@ -157,6 +161,27 @@ if cleanup
 				query = db.prepare('select id from metadata where id = ?')
 				stmt = query.execute(base.to_id)
 				if stmt.num_rows < 1
+					# junk
+					print "Trying to remove '#{path}'..."
+					File.unlink(path)
+					puts 'done.'
+				end
+				stmt.close
+			end
+		end
+		Find.find(Paths['thumbnails']) do |path|
+			next if path == Paths['thumbnails']
+			base = File.basename(path)
+			if base.to_id == 0 or base != base.to_id.to_b64
+				# junk
+				print "Trying to remove '#{path}'..."
+				File.unlink(path)
+				puts 'done.'
+			else
+				query = db.prepare('select thumbnail_id from metadata where id = ?')
+				stmt = query.execute(base.to_id)
+				pee = stmt.fetch.to_s
+				if stmt.num_rows < 1 or pee.empty?
 					# junk
 					print "Trying to remove '#{path}'..."
 					File.unlink(path)
