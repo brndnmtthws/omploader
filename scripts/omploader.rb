@@ -109,6 +109,14 @@ def run_cron(db)
 	q.execute(Visitor_expiry)
 	q = db.prepare('delete from upload_throttle where unix_timestamp(date) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Max_upload_period)
+	q = db.prepare('select metadata.id from metadata inner join thumbnails on metadata.thumbnail_id = thumbnails.id where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
+	stmt = q.execute(Thumbnail_expiry)
+	num_rows = stmt.num_rows
+	num_rows.times do
+		id = stmt.fetch.to_s
+		File.unlink(Paths['thumbnails'] + '/' + id.to_b64)
+	end
+	stmt.close
 	q = db.prepare('update metadata inner join thumbnails on thumbnails.id = metadata.thumbnail_id set metadata.thumbnail_id = null where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Thumbnail_expiry)
 	q = db.prepare('delete from thumbnails where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ?')
@@ -118,27 +126,6 @@ def run_cron(db)
 	q = db.prepare('delete from owners where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Owner_expiry)
 	q.close
-	Find.find(Paths['thumbnails']) do |path|
-		next if path == Paths['thumbnails']
-		base = File.basename(path)
-		if base.to_id == 0 or base != base.to_id.to_b64
-			# junk
-			print "Trying to remove '#{path}'..."
-			File.unlink(path)
-			puts 'done.'
-		else
-			query = db.prepare('select thumbnail_id from metadata where id = ?')
-			stmt = query.execute(base.to_id)
-			pee = stmt.fetch.to_s
-			if stmt.num_rows < 1 or pee.empty?
-				# junk
-				print "Trying to remove '#{path}'..."
-				File.unlink(path)
-				puts 'done.'
-			end
-			stmt.close
-		end
-	end
 end
 
 def session(cgi, new)

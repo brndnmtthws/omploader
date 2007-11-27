@@ -36,7 +36,7 @@ CREATE TABLE `comments` (
   KEY `comment_id` (`comment_id`),
   CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments_body` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `comments_body`
@@ -46,7 +46,7 @@ CREATE TABLE `comments_body` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `body` varchar(750) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types`
@@ -61,7 +61,7 @@ CREATE TABLE `content_types` (
   KEY `content_type_sub_id` (`content_type_sub_id`),
   CONSTRAINT `content_types_ibfk_1` FOREIGN KEY (`content_type_main_id`) REFERENCES `content_types_main` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `content_types_ibfk_2` FOREIGN KEY (`content_type_sub_id`) REFERENCES `content_types_sub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1395 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types_main`
@@ -72,7 +72,7 @@ CREATE TABLE `content_types_main` (
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=991 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `content_types_sub`
@@ -83,7 +83,7 @@ CREATE TABLE `content_types_sub` (
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=1483 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `metadata`
@@ -122,7 +122,7 @@ CREATE TABLE `metadata` (
   CONSTRAINT `metadata_ibfk_20` FOREIGN KEY (`owner_id`) REFERENCES `owners` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `metadata_ibfk_21` FOREIGN KEY (`content_type_id`) REFERENCES `content_types` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `metadata_ibfk_22` FOREIGN KEY (`name_id`) REFERENCES `names` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3253 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `names`
@@ -133,7 +133,7 @@ CREATE TABLE `names` (
   `name` varchar(200) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2432 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `owners`
@@ -156,7 +156,7 @@ CREATE TABLE `owners` (
   UNIQUE KEY `session_id` (`session_id`),
   KEY `name_id` (`name_id`),
   CONSTRAINT `owners_ibfk_1` FOREIGN KEY (`name_id`) REFERENCES `names` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=19444 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `referrals`
@@ -172,7 +172,7 @@ CREATE TABLE `referrals` (
   KEY `metadata_id` (`metadata_id`),
   CONSTRAINT `referrals_ibfk_1` FOREIGN KEY (`referrer_id`) REFERENCES `referrers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `referrals_ibfk_2` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13207 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `referrers`
@@ -183,7 +183,7 @@ CREATE TABLE `referrers` (
   `address` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=1172 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `thumbnails`
@@ -193,7 +193,7 @@ CREATE TABLE `thumbnails` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7099 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `upload_throttle`
@@ -207,7 +207,7 @@ CREATE TABLE `upload_throttle` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `visitor_id` (`visitor_id`),
   CONSTRAINT `upload_throttle_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=968 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `visitors`
@@ -219,7 +219,7 @@ CREATE TABLE `visitors` (
   `last_visit` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=142202 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `votes`
@@ -235,7 +235,7 @@ CREATE TABLE `votes` (
   KEY `metadata_id` (`metadata_id`),
   CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `votes_ibfk_2` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=36025 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
