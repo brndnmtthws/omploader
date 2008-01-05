@@ -114,7 +114,7 @@ def run_cron(db)
 	num_rows = stmt.num_rows
 	num_rows.times do
 		id = stmt.fetch.to_s
-		File.unlink(Paths['thumbnails'] + '/' + id.to_b64)
+		File.unlink(Paths['thumbnails'] + '/' + id.to_b64) if File.exist?(Paths['thumbnails'] + '/' + id.to_b64)
 	end
 	stmt.close
 	q = db.prepare('update metadata inner join thumbnails on thumbnails.id = metadata.thumbnail_id set metadata.thumbnail_id = null where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
