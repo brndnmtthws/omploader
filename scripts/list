@@ -119,7 +119,7 @@ FCGI.each_cgi {|cgi|
 #		cgi.out('text/plain') { 'gay' }
 
 		search = ''
-		if cgi.has_key?('search_post')
+		if cgi.has_key?('search_post') and cgi['search_post'].class == StringIO
 			search = cgi['search_post'].read.to_s
 			param_search = 's-' + search
 			param_search = param_search.gsub(/:/, '%3A').gsub(/\//, '%2F')
