@@ -140,6 +140,9 @@ FCGI.each_cgi {|cgi|
 					end
 					next if url == 'URL'
 					next if url =~ /^file:\//i
+					next if url =~ /127\.0\.0\.1/i
+					next if url =~ /:\/\/127\.0\.0\.1\//i
+					next if url =~ /:\/\/localhost\//i
 					datum = Curl::Easy.perform(url).body_str
 					next if datum.length > 2**24 or datum.empty?
 				rescue
