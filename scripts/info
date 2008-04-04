@@ -46,10 +46,10 @@ FCGI.each_cgi {|cgi|
 		comment_name = ''
 		comment_body = ''
 
-		if !owner_id.nil? and cgi.has_key?('comment' + owner_id) and throttle.to_i < Max_upload_count
-			comment_body = cgi['comment' + owner_id].read.to_s.sanitise
-			comment_name = cgi['name' + owner_id].read.to_s.sanitise
-			id = cgi['id' + owner_id].read.to_id
+		if !owner_id.nil? and cgi.has_key?('loldongs' + owner_id) and throttle.to_i < Max_upload_count
+			comment_body = cgi['loldongs' + owner_id].read.to_s.sanitise
+			comment_name = cgi['peewang' + owner_id].read.to_s.sanitise
+			id = cgi['cocks' + owner_id].read.to_id
 			if !comment_body.empty?
 				# Insert our new comment into db
 				query = db.prepare('insert into comments_body (body) values (?)')
@@ -219,13 +219,13 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t\t\t" + '<div class="form">' + "\n" +
 				"\t\t\t\t\t\t" + '<div class="float name left-align">' + "\n" +
 				"\t\t\t\t\t\t\t" + '<div class="label">Name</div>' + "\n" +
-				"\t\t\t\t\t\t\t" + '<input type="line" name="name' + owner_id + '" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
+				"\t\t\t\t\t\t\t" + '<input type="line" name="peewang' + owner_id + '" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
 				"\t\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t\t" + '<div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
 				"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
-				"\t\t\t\t\t\t" + '<div class="float"><textarea name="comment' + owner_id + '" class="input comment"></textarea></div>' + "\n" +
+				"\t\t\t\t\t\t" + '<div class="float"><textarea name="loldongs' + owner_id + '" class="input comment"></textarea></div>' + "\n" +
 				"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
-				"\t\t\t\t\t\t" + '<input type="hidden" name="id' + owner_id + '" value="' + id.to_b64 + '" />' + "\n" +
+				"\t\t\t\t\t\t" + '<input type="hidden" name="cocks' + owner_id + '" value="' + id.to_b64 + '" />' + "\n" +
 				"\t\t\t\t\t\t" + '<input type="submit" value="COMMENT!" class="button" />' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t" + '</form>' + "\n" +
