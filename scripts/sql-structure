@@ -98,7 +98,7 @@ CREATE TABLE `metadata` (
   `creation_time` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `thumbnail_id` int(10) unsigned default NULL,
   `owner_id` int(10) unsigned default NULL,
-  `comment_count` tinyint(4) NOT NULL default '0',
+  `comment_count` int(10) NOT NULL default '0',
   `artist_id` int(10) unsigned default NULL,
   `title_id` int(10) unsigned default NULL,
   `album_id` int(10) unsigned default NULL,
