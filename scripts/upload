@@ -44,8 +44,6 @@ def vimcolour(datum, filetype, title)
 		-c 'let use_xhtml = 1'        \
 		-c 'run syntax/2html.vim'     \
 		-c 'bdelete 1'                \
-		-c 'set ts=4'                 \
-		-c 'set shiftwidth=4'         \
 		-c 'wq! #{tempfile.path}'     \
 		#{tempfile.path}              }
 
