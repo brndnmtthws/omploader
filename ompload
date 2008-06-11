@@ -28,7 +28,7 @@ ARGV.each_index do |i|
 		skip = false
 		next
 	end
-	if ARGV[i] =~ /-q|--queit/
+	if ARGV[i] =~ /-q|--quiet/
 		quiet = true
 	elsif ARGV[i] =~ /-h|--help/
 		help = true
