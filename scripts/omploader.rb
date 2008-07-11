@@ -29,6 +29,9 @@ Visitor_expiry = ConfigFile['limits']['visitor_expiry'] * 86400
 Thumbnail_expiry = ConfigFile['limits']['thumbnail_expiry'] * 86400
 Owner_expiry = ConfigFile['limits']['owner_expiry'] * 86400
 
+Pub_key = ConfigFile['captcha']['pub_key']
+Priv_key = ConfigFile['captcha']['priv_key']
+
 Debug = ConfigFile['debug']['enabled']
 
 Paths = ConfigFile['paths']

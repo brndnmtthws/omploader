@@ -46,6 +46,11 @@ paths:
   thumbnails: ../thumbnails/
   log: ../error_log
 
+# Captcha keys from http://recaptcha.net/
+captcha:
+  pub_key: aoerlugsrhcapustnhaoeu
+  priv_key: oaeu09aoeu90aoeu89
+
 # Debugging options
 debug:
   # Enable extra debug info? (true/false)

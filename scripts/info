@@ -10,8 +10,12 @@
 
 require 'omploader'
 require 'tempfile'
+require 'rubygems'
+require 'recaptcha'
 
 db = db_connect
+
+Captcha = ReCaptcha::Client.new(Pub_key, Priv_key)
 
 FCGI.each_cgi {|cgi|
 	begin
@@ -47,6 +51,13 @@ FCGI.each_cgi {|cgi|
 		comment_body = ''
 
 		if !owner_id.nil? and cgi.has_key?('loldongs' + owner_id) and throttle.to_i < Max_upload_count
+			lolres = Captcha.validate(cgi.remote_addr, cgi['recaptcha_challenge_field'].read.to_s, cgi['recaptcha_response_field'].read.to_s)
+			if !lolres
+				cgi.out('text/html') {
+					xhtml_pre + '        <div class="content large">Captcha failure :(</div>' + xhtml_post
+				}
+				next
+			end
 			comment_body = cgi['loldongs' + owner_id].read.to_s.sanitise
 			comment_name = cgi['peewang' + owner_id].read.to_s.sanitise
 			id = cgi['cocks' + owner_id].read.to_id
@@ -219,6 +230,7 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t\t\t" + '<div class="form">' + "\n" +
 				"\t\t\t\t\t\t" + '<div class="float name left-align">' + "\n" +
 				"\t\t\t\t\t\t\t" + '<div class="label">Name</div>' + "\n" +
+				Captcha.get_challenge() +
 				"\t\t\t\t\t\t\t" + '<input type="line" name="peewang' + owner_id + '" size="25" class="input field" value="' + owner_name + '" />' + "\n" +
 				"\t\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t\t" + '<div style="color: #999; font-family: monospace; text-align: right; float: right"><strong>[thumb]id[/thumb]</strong> - Thumbnail for another file.<br/><strong>[b]text[/b]</strong> - Bold.<strong> &nbsp; [i]text[/i]</strong> - Italics.</div>' + "\n" +
