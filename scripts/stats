@@ -29,6 +29,7 @@ FCGI.each_cgi {|cgi|
 		size = res[1].to_f/1024.0/1024.0/1024.0
 		query = db.prepare('select count(id) from visitors;')
 		stmt = query.execute
+		res = stmt.fetch
 		visitors = res[0]
 		gen_stats += "\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Number of files:</b> </span><span class="filename">' + count.to_s + '</span>' + "\n" +
