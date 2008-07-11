@@ -19,6 +19,31 @@ FCGI.each_cgi {|cgi|
 		owner_id = get_owner_id(cgi, db)
 		db.commit
 
+		gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
+			"\t\t\t" + '<div class="content">' + "\n" +
+			"\t\t\t\t" + '<div class="filelist">' + "\n"
+		query = db.prepare('select count(id), sum(size) from metadata;')
+		stmt = query.execute
+		res = stmt.fetch
+		count = res[0]
+		size = res[1].to_f/1024.0/1024.0/1024.0
+		query = db.prepare('select count(id) from visitors;')
+		stmt = query.execute
+		visitors = res[0]
+		gen_stats += "\t\t\t\t\t" + '<div class="file">' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><b>Number of files:</b> </span><span class="filename">' + count.to_s + '</span>' + "\n" +
+				"\t\t\t\t\t" + '</div>' + "\n" +
+				"\t\t\t\t\t" + '<div class="file">' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><b>Data store size:</b> </span><span class="filename">' + sprintf("%.2f", size) + ' GiB</span>' + "\n" +
+				"\t\t\t\t\t" + '</div>' + "\n" +
+				"\t\t\t\t\t" + '<div class="file">' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><b>Unique visitors in last ' + (Visitor_expiry/3600).to_s + ' hours:</b> </span><span class="filename">' + visitors.to_s + '</span>' + "\n" +
+				"\t\t\t\t\t" + '</div>' + "\n"
+
+		gen_stats += "\t\t\t\t" + '</div>' + "\n" +
+			"\t\t\t" + '</div>' + "\n"
+		stmt.close
+		
 		query = db.prepare('select referrers.address, sum(count) from referrals inner join referrers on referrers.id = referrals.referrer_id group by referrals.referrer_id order by sum(count) desc limit 15;')
 		stmt = query.execute
 		top_refs = "\t\t\t" + '<div class="title">Top Referrers</div>' + "\n" +
@@ -76,7 +101,7 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t" + '</div>' + "\n"
 		stmt.close
 
-		xhtml = new_disc + top_refs
+		xhtml = gen_stats + new_disc + top_refs
 
 		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
 	rescue Mysql::Error => err
