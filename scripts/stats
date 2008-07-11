@@ -31,6 +31,10 @@ FCGI.each_cgi {|cgi|
 		stmt = query.execute
 		res = stmt.fetch
 		visitors = res[0]
+		query = db.prepare('select count(id) from comments;')
+		stmt = query.execute
+		res = stmt.fetch
+		comments = res[0]
 		gen_stats += "\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Number of files:</b> </span><span class="filename">' + count.to_s + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n" +
@@ -39,6 +43,9 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Unique visitors in last ' + (Visitor_expiry/3600).to_s + ' hours:</b> </span><span class="filename">' + visitors.to_s + '</span>' + "\n" +
+				"\t\t\t\t\t" + '</div>' + "\n" +
+				"\t\t\t\t\t" + '<div class="file">' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><b>Comments:</b> </span><span class="filename">' + comments.to_s + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
 
 		gen_stats += "\t\t\t\t" + '</div>' + "\n" +
