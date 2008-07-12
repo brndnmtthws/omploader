@@ -203,7 +203,7 @@ if cleanup
 		num_rows.times do
 			result = stmt.fetch
 			id = result[0].to_s
-			if (!File.exists?(Paths['data'] + id.to_b64))
+			if (!File.exists?(Paths['data'] + '/' + id.to_b64))
 				delete(id.to_b64)
 			end
 		end
