@@ -91,7 +91,7 @@ FCGI.each_cgi {|cgi|
 					query.execute(insert_id, id).close
 
 					db.commit
-					cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+					cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
 					info[0] = content_type;
 					info[1] = name
 					Cache.set($0 + id, info, Default_cache_expiry_long)
@@ -100,20 +100,21 @@ FCGI.each_cgi {|cgi|
 					query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
 					query.execute(thumbnail_id).close
 					db.commit
-					cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+					cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
 					info[0] = content_type;
 					info[1] = name
 					Cache.set($0 + id, info, Default_cache_expiry_long)
 				else
 					db.commit
-					cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800, 'X-Sendfile' => Dir.pwd + '/../omploader_thumb.png') {''}
+					cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/../omploader_thumb.png') {''}
 					info[0] = 'image/png';
 					info[1] = 'omploader-thumb.png'
 					Cache.set($0 + id, info, Default_cache_expiry_long)
 				end
 			end
 		else
-			cgi.out('type' => thumb[0], 'Content-Disposition' => 'inline; filename="' + thumb[1] + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+			db.commit
+			cgi.out('type' => thumb[0], 'Content-Disposition' => 'inline; filename="' + thumb[1] + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
 		end
 	rescue Magick::ImageMagickError => err
 		# just ignore these for the most part
