@@ -300,7 +300,7 @@ FCGI.each_cgi {|cgi|
 		if saved < 1
 			raise 'You are a trad.'
 		end
-		Cache.set('throttle' + visitor_id, thottle.to_i + 1, Max_upload_period)
+		Cache.set('throttle' + visitor_id, throttle.to_i + 1, Max_upload_period)
 		db.commit
 		cgi.out {
 			xhtml_pre +
