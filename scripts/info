@@ -181,8 +181,8 @@ FCGI.each_cgi {|cgi|
 		if hide_comments == 0
 			comments_body = Cache.get($0 + 'comments' + id)
 			if comments_body.nil?
+				comments_body = ''
 				if comment_count > 0
-					comments_body = ''
 					query = db.prepare('select	comments.id, comments.creation_date, comments_body.body,	names.name from comments inner join metadata on metadata.id = comments.metadata_id inner join comments_body on comments_body.id = comments.comment_id	left join owners on owners.id = comments.owner_id left join names on names.id = owners.name_id where metadata.id = ? order by comments.creation_date asc')
 					comment_array = Array.new
 					query.execute(id).num_rows.times do
