@@ -1,0 +1,113 @@
+#!/bin/env ruby
+#
+# $Id: index 255 2008-01-02 20:53:40Z brenden $
+#
+# Copyright 2007-2008 David Shakaryan <omp@gentoo.org>
+# Copyright 2007-2008 Brenden Matthews <brenden@rty.ca>
+#
+# Distributed under the terms of the GNU General Public License v3
+#
+
+require 'omploader'
+
+db = db_connect
+
+FCGI.each_cgi {|cgi|
+	begin
+		top_files =
+			"\t\t\t" + '<div class="title">' + "\n" +
+			"\t\t\t\t" + 'Top Images' + "\n" +
+			"\t\t\t" + '</div>' + "\n" +
+			"\t\t\t" + '<div class="content">' + "\n"
+		top_files_info = ''
+		query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type = "image" and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 20')
+		stmt = query.execute
+		(stmt.num_rows.to_f / 5).ceil.times do
+			top_files_info = ''
+
+			5.times do
+			result = stmt.fetch
+			id = result.first.to_s.to_b64
+			name = result.last.to_s
+
+			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+			top_files_info += "\t\t\t\t" + '<div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
+			end
+
+			top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info
+		end
+		stmt.close
+		top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" +
+			"\t\t\t" + '</div>' + "\n"
+
+		xhtml = top_files
+
+		db.commit
+		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
+	rescue Mysql::Error => err
+		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
+		}
+		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
+		log.error(err)
+	rescue RuntimeError => err
+		db.rollback unless db.nil?
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+		}
+	rescue SyntaxError, NameError => err
+		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
+		}
+		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
+		log.error(err)
+	rescue StandardError => err
+		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		}
+		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
+		log.error(err)
+	rescue
+		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+		else
+			errmsg = err.to_s
+		end
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
+		}
+		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
+		log.error(err)
+	end
+}
