@@ -14,12 +14,22 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
 	begin
-		db_check(db)
-		visitor_id = register_visit(cgi, db)
+		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+		if visitor_id.nil?
+			db_check(db)
+			visitor_id = register_visit(cgi, db)
+			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+		end
 
-		owner_id = get_owner_id(cgi, db)
+		owner_id = Cache.get('owner_id' + session_id(cgi))
+		if owner_id.nil?
+			db_check(db)
+			owner_id = get_owner_id(cgi, db)
+			Cache.set('owner_id' + session_id(cgi), owner_id, Default_cache_expiry_short)
+		end
 
-		if !owner_id.nil?
+		prefs = Cache.get($0 + 'prefs' + owner_id)
+		if !owner_id.nil? and prefs.nil?
 			query = db.prepare('select big, hide_top_files, curl, paste from owners where id = ?')
 			stmt = query.execute(owner_id)
 			res = stmt.fetch
@@ -29,6 +39,12 @@ FCGI.each_cgi {|cgi|
 			hide_top_files = res[1].to_i
 			curl = res[2].to_i
 			paste = res[3].to_i
+			Cache.set($0 + 'prefs' + owner_id, res, Default_cache_expiry_long)
+		elsif !prefs.nil?
+			big = prefs[0].to_i
+			hide_top_files = prefs[1].to_i
+			curl = prefs[2].to_i
+			paste = prefs[3].to_i
 		else
 			big = 0
 			hide_top_files = 0
@@ -63,6 +79,12 @@ FCGI.each_cgi {|cgi|
 			query = db.prepare('update owners set big = ?, hide_top_files = ?, curl = ?, paste = ? where id = ?')
 			stmt = query.execute(big.to_s, hide_top_files.to_s, curl.to_s, paste.to_s, owner_id)
 			stmt.close
+			prefs = Array.new
+			prefs[0] = big.to_s
+			prefs[1] = hide_top_files.to_s
+			prefs[2] = curl.to_s
+			prefs[3] = paste.to_s
+			Cache.set($0 + 'prefs' + owner_id, res, Default_cache_expiry_long)
 		end
 
 		if hide_top_files == 1
@@ -126,10 +148,10 @@ FCGI.each_cgi {|cgi|
 		#		query = db.prepare('select count(*) from metadata')
 		#		stmt = query.execute
 		#		count = stmt.fetch.to_s
-		query = db.prepare('select count from upload_throttle where visitor_id = ?')
-		stmt = query.execute(visitor_id)
-		throttle = stmt.fetch.to_s
-		stmt.close
+		throttle = Cache.get('throttle' + visitor_id)
+		if throttle.nil?
+			thottle = 0
+		end
 
 		if throttle.to_i < Max_upload_count
 			if curl == 1 and paste != 1

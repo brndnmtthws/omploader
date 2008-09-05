@@ -19,15 +19,24 @@ Captcha = ReCaptcha::Client.new(Pub_key, Priv_key)
 
 FCGI.each_cgi {|cgi|
 	begin
-		db_check(db)
-		visitor_id = register_visit(cgi, db)
+		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+		if visitor_id.nil?
+			db_check(db)
+			visitor_id = register_visit(cgi, db)
+			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+		end
 
-		query = db.prepare('select count from upload_throttle where visitor_id = ?')
-		query.execute(visitor_id)
-		throttle = query.fetch.to_s
-		query.close
+		throttle = Cache.get('throttle' + visitor_id)
+		if throttle.nil?
+			thottle = 0
+		end
 
-		owner_id = get_owner_id(cgi, db)
+		owner_id = Cache.get('owner_id' + session_id(cgi))
+		if owner_id.nil?
+			db_check(db)
+			owner_id = get_owner_id(cgi, db)
+			Cache.set('owner_id' + session_id(cgi), owner_id, Default_cache_expiry_short)
+		end
 
 		if !owner_id.nil?
 			query = db.prepare('select hide_comments from owners where id = ?')
@@ -80,12 +89,10 @@ FCGI.each_cgi {|cgi|
 					query.execute(name_id, owner_id)
 					query.close
 				end
-				query = db.prepare('insert into upload_throttle (visitor_id, count) values (?, ?) on duplicate key update count = count + 1')
-				query.execute(visitor_id, 1)
-				query.close
+				Cache.set('throttle' + visitor_id, thottle.to_i + 1, Max_upload_period)
 				redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
-				db.commit
 				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
+				db.commit
 				next
 			end
 		else
@@ -289,7 +296,6 @@ FCGI.each_cgi {|cgi|
 			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
 		end
 
-		db.commit
 		cgi.out('type' => 'text/html') {
 			xhtml_pre(' – ' + name + ' (' + content_type + ')') +
 			"\t\t\t" + '<div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
@@ -310,6 +316,7 @@ FCGI.each_cgi {|cgi|
 			comments_body +
 			xhtml_post
 		}
+		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug

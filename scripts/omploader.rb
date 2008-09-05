@@ -142,6 +142,15 @@ def session(cgi, new)
 		'new_session' => new)
 end
 
+def session_id(cgi)
+	begin
+		s = session(cgi, false)
+		return s.session_id.to_s
+	rescue ArgumentError
+		return ''
+	end
+end
+
 def get_owner_id(cgi, db)
 	begin
 		s = session(cgi, false)

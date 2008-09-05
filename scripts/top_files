@@ -14,8 +14,13 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
 	begin
-		db_check(db)
-		visitor_id = register_visit(cgi, db)
+		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+		if visitor_id.nil?
+			db_check(db)
+			visitor_id = register_visit(cgi, db)
+			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+		end
+
 
 		top_files = Cache.get($0)
 		if top_files.nil?
@@ -50,8 +55,8 @@ FCGI.each_cgi {|cgi|
 
 		xhtml = top_files
 
-		db.commit
 		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
+		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug

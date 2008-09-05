@@ -15,9 +15,6 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
 	begin
-		db_check(db)
-		visitor_id = register_visit(cgi, db)
-
 		id = cgi.params['id'].to_s.to_id
 
 		# Verify that id is strictly numeric.
@@ -27,6 +24,7 @@ FCGI.each_cgi {|cgi|
 
 		info = Cache.get($0 + id)
 		if info.nil?
+			db_check(db)
 			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
 			stmt = query.execute(id)
 
@@ -43,6 +41,13 @@ FCGI.each_cgi {|cgi|
 		content_type = info[1]+ '/' + info[2]
 
 		cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64) {''}
+
+		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+		if visitor_id.nil?
+			db_check(db)
+			visitor_id = register_visit(cgi, db)
+			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+		end
 
 		# Increment vote number if this is first view from visitor.
 		query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')

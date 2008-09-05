@@ -15,12 +15,22 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
 	begin
-		db_check(db)
-		register_visit(cgi, db)
+		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+		if visitor_id.nil?
+			db_check(db)
+			visitor_id = register_visit(cgi, db)
+			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+		end
 
-		owner_id = get_owner_id(cgi, db)
+		owner_id = Cache.get('owner_id' + session_id(cgi))
+		if owner_id.nil?
+			db_check(db)
+			owner_id = get_owner_id(cgi, db)
+			Cache.set('owner_id' + session_id(cgi), owner_id, Default_cache_expiry_short)
+		end
 
-		if !owner_id.nil?
+		prefs = Cache.get($0 + 'prefs' + owner_id)
+		if !owner_id.nil? and prefs.nil?
 			query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
 			stmt = query.execute(owner_id)
 			res = stmt.fetch
@@ -28,6 +38,11 @@ FCGI.each_cgi {|cgi|
 			mine_only = res[0].to_s.to_i
 			list_images = res[1].to_s.to_i
 			results = res[2].to_s.to_i
+			Cache.set($0 + 'prefs' + owner_id, res, Default_cache_expiry_long)
+		elsif !prefs.nil?
+			mine_only = prefs[0].to_s.to_i
+			list_images = prefs[1].to_s.to_i
+			results = prefs[2].to_s.to_i
 		else
 			mine_only = 0
 			list_images = 0
@@ -76,20 +91,6 @@ FCGI.each_cgi {|cgi|
 			results_sel = results
 		end
 
-		if mine_sel != mine_only or results != results_sel or cgi.params['images_only'].to_s =~ /^n{1}$|^y{1}$/
-			mine_only = mine_sel
-			results = results_sel
-			if results > maxres
-				results = maxres
-			elsif results < 5
-				results = 5
-			end
-			if !owner_id.nil?
-				query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
-				query.execute(mine_only.to_s, results.to_s, list_images, owner_id).close
-			end
-		end
-
 		order_short = cgi.params['order'].to_s
 		if order_short == 'a'
 			order = 'asc'
@@ -98,6 +99,19 @@ FCGI.each_cgi {|cgi|
 		else
 			order_short = 'd'
 			order = 'desc'
+		end
+
+		if mine_sel != mine_only or results != results_sel or cgi.params['images_only'].to_s =~ /^n{1}$|^y{1}$/
+			mine_only = mine_sel
+			results = results_sel
+			if results > maxres
+				results = maxres
+			elsif results < 5
+				results = 5
+			end
+			update_prefs = true
+		else
+			update_prefs = false
 		end
 
 		column_short = cgi.params['column'].to_s
@@ -116,7 +130,7 @@ FCGI.each_cgi {|cgi|
 
 		page = cgi.params['page'].to_s.to_i
 		page = 1 if page == 0
-#		cgi.out('text/plain') { 'gay' }
+		#		cgi.out('text/plain') { 'gay' }
 
 		search = ''
 		if cgi.has_key?('search_post') and cgi['search_post'].class == StringIO
@@ -346,6 +360,19 @@ FCGI.each_cgi {|cgi|
 			page_links +
 			xhtml_post
 		}
+
+		if update_prefs
+			if !owner_id.nil?
+				query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
+				query.execute(mine_only.to_s, results.to_s, list_images, owner_id).close
+				prefs = Array.new
+				prefs[0] = mine_only.to_s
+				prefs[1] = list_images.to_s
+				prefs[2] = results.to_s
+				Cache.set($0 + 'prefs' + owner_id, prefs, Default_cache_expiry_long)
+			end
+		end
+		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug

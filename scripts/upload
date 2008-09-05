@@ -93,18 +93,25 @@ end
 
 FCGI.each_cgi {|cgi|
 	begin
-		db_check(db)
-		visitor_id = register_visit(cgi, db)
-
 		output = ''
+		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+		if visitor_id.nil?
+			db_check(db)
+			visitor_id = register_visit(cgi, db)
+			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+		end
 
-		owner_id = get_owner_id(cgi, db)
+		owner_id = Cache.get('owner_id' + session_id(cgi))
+		if owner_id.nil?
+			db_check(db)
+			owner_id = get_owner_id(cgi, db)
+			Cache.set('owner_id' + session_id(cgi), owner_id, Default_cache_expiry_short)
+		end
 
-
-		query = db.prepare('select count from upload_throttle where visitor_id = ?')
-		stmt = query.execute(visitor_id)
-		throttle = stmt.fetch.to_s
-		stmt.close
+		throttle = Cache.get('throttle' + visitor_id)
+		if throttle.nil?
+			throttle = 0
+		end
 		if throttle.to_i > Max_upload_count
 			raise 'Slow down there, cowboy.'
 		end
@@ -293,8 +300,7 @@ FCGI.each_cgi {|cgi|
 		if saved < 1
 			raise 'You are a trad.'
 		end
-		query = db.prepare('insert into upload_throttle (visitor_id, count) values (?,?) on duplicate key update count = count + ?')
-		query.execute(visitor_id, saved, saved).close
+		Cache.set('throttle' + visitor_id, thottle.to_i + 1, Max_upload_period)
 		db.commit
 		cgi.out {
 			xhtml_pre +

@@ -16,9 +16,6 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
 	begin
-		db_check(db)
-		register_visit(cgi, db)
-
 		id = cgi.params['id'].to_s.to_id
 
 		# Verify that id is strictly numeric.
@@ -27,6 +24,15 @@ FCGI.each_cgi {|cgi|
 		end
 		thumb = Cache.get($0 + id)
 		if thumb.nil?
+			visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+			if visitor_id.nil?
+				db_check(db)
+				visitor_id = register_visit(cgi, db)
+				Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+			else
+				db_check(db)
+			end
+
 			query = db.prepare('select metadata.content_type_id, metadata.thumbnail_id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
 			stmt = query.execute(id)
 			num_rows = stmt.num_rows
@@ -115,6 +121,12 @@ FCGI.each_cgi {|cgi|
 		else
 			db.commit
 			cgi.out('type' => thumb[0], 'Content-Disposition' => 'inline; filename="' + thumb[1] + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+			visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+			if visitor_id.nil?
+				db_check(db)
+				visitor_id = register_visit(cgi, db)
+				Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+			end
 		end
 	rescue Magick::ImageMagickError => err
 		# just ignore these for the most part

@@ -16,9 +16,12 @@ db = db_connect
 FCGI.each_cgi {|cgi|
 	begin
 		db_check(db)
-		visitor_id = register_visit(cgi, db)
-
-		owner_id = get_owner_id(cgi, db)
+		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+		if visitor_id.nil?
+			visitor_id = register_visit(cgi, db)
+			db.commit
+			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
+		end
 
 		top_files =
 			"\t\t\t" + '<div class="title">' + "\n" +
@@ -33,6 +36,7 @@ FCGI.each_cgi {|cgi|
 		count = Max_rand
 		rands = Set.new
 		try = 0
+		overall_tries = 0
 		while count > 0
 			rand_id = rand(max - min) + min
 			query = db.prepare('select metadata.id from metadata inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where metadata.id = ? and content_types_main.type = "image"')
@@ -42,12 +46,18 @@ FCGI.each_cgi {|cgi|
 			stmt.close
 			if num_rows < 1
 				try += 1
+				overall_tries += 1
 				if try > 15
 					count -= 1
 					try = 0
 				end
 			elsif rands.add?(res[0])
 				count -= 1
+			else
+				overall_tries += 1
+			end
+			if overall_tries > 30
+				count = 0
 			end
 		end
 		count = 0
@@ -80,7 +90,6 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t" + '</div>' + "\n" +
 			top_files
 
-		db.commit
 		cgi.out('text/html') { xhtml_pre('', '', false) + xhtml + xhtml_post }
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
