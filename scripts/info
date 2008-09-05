@@ -38,24 +38,24 @@ FCGI.each_cgi {|cgi|
 			Cache.set('owner_id' + session_id(cgi), owner_id, Default_cache_expiry_short)
 		end
 
-		if !owner_id.nil?
+		hide_comments = Cache.get($0 + 'hide_comments ' + owner_id)
+		if !owner_id.nil? and hide_comments.nil?
 			query = db.prepare('select hide_comments from owners where id = ?')
 			query.execute(owner_id)
 			hide_comments = query.fetch.to_s.to_i
 			query.close
+		elsif !hide_comments.nil?
+			hide_comments = hide_comments.to_i
 		else
 			hide_comments = 0
 		end
 
 		if cgi.has_key?('hide_comments') and hide_comments != cgi.params['hide_comments'].to_s.to_i
 			hide_comments = cgi.params['hide_comments'].to_s.to_i
-			if !owner_id.nil?
-				query = db.prepare('update owners set hide_comments = ? where id = ?')
-				res = query.execute(hide_comments.to_s, owner_id)
-				query.close
-			end
+			update_prefs = true
+		else
+			update_prefs = false
 		end
-
 		comment_name = ''
 		comment_body = ''
 
@@ -65,6 +65,7 @@ FCGI.each_cgi {|cgi|
 				cgi.out('text/html') {
 					xhtml_pre + '        <div class="content large">Captcha failure :(</div>' + xhtml_post
 				}
+				db.commit
 				next
 			end
 			comment_body = cgi['loldongs' + owner_id].read.to_s.sanitise
@@ -90,9 +91,11 @@ FCGI.each_cgi {|cgi|
 					query.close
 				end
 				Cache.set('throttle' + visitor_id, thottle.to_i + 1, Max_upload_period)
+				Cache.delete($0 + id)
+				Cache.delete($0 + 'comments' + id)
 				redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
-				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
 				db.commit
+				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
 				next
 			end
 		else
@@ -185,6 +188,10 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t" + '</div>' + "\n"
 			cnum = 0
 
+#		cgi.out('text/plain') { comment_count.to_s }
+#		db.commit
+#		next
+
 		if hide_comments == 0
 			comments_body = Cache.get($0 + 'comments' + id)
 			if comments_body.nil?
@@ -238,13 +245,10 @@ FCGI.each_cgi {|cgi|
 						"\t\t\t\t" + '<pre>' + body + '</pre>' + "\n" +
 						"\t\t\t" + '</div>' + "\n"
 					}
+						Cache.set($0 + 'comments' + id, comments_body, Default_cache_expiry_short)
 				end
 			end
-			Cache.set($0 + 'comments' + id, comments_body, Default_cache_expiry_short)
 		end
-		query = db.prepare('select count from upload_throttle where visitor_id = ?')
-		throttle = query.execute(visitor_id).fetch.to_s
-		query.close
 
 		if throttle.to_i < Max_upload_count and !owner_id.nil?
 			comments_body +=
@@ -316,6 +320,14 @@ FCGI.each_cgi {|cgi|
 			comments_body +
 			xhtml_post
 		}
+		if update_prefs
+			if !owner_id.nil?
+				query = db.prepare('update owners set hide_comments = ? where id = ?')
+				res = query.execute(hide_comments.to_s, owner_id)
+				query.close
+				Cache.set($0 + 'hide_comments ' + owner_id, hide_comments.to_s, Default_cache_expiry_long)
+			end
+		end
 		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?

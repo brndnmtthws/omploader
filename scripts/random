@@ -46,7 +46,6 @@ FCGI.each_cgi {|cgi|
 			stmt.close
 			if num_rows < 1
 				try += 1
-				overall_tries += 1
 				if try > 15
 					count -= 1
 					try = 0
