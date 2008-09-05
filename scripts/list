@@ -29,7 +29,7 @@ FCGI.each_cgi {|cgi|
 			Cache.set('owner_id' + session_id(cgi), owner_id, Default_cache_expiry_short)
 		end
 
-		prefs = Cache.get($0 + 'prefs' + owner_id)
+		prefs = Cache.get($0 + 'prefs' + owner_id.to_s)
 		if !owner_id.nil? and prefs.nil?
 			query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
 			stmt = query.execute(owner_id)

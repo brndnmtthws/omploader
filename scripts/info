@@ -38,7 +38,7 @@ FCGI.each_cgi {|cgi|
 			Cache.set('owner_id' + session_id(cgi), owner_id, Default_cache_expiry_short)
 		end
 
-		hide_comments = Cache.get($0 + 'hide_comments ' + owner_id)
+		hide_comments = Cache.get($0 + 'hide_comments ' + owner_id.to_s)
 		if !owner_id.nil? and hide_comments.nil?
 			query = db.prepare('select hide_comments from owners where id = ?')
 			query.execute(owner_id)
