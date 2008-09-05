@@ -19,6 +19,11 @@ FCGI.each_cgi {|cgi|
 		owner_id = get_owner_id(cgi, db)
 		db.commit
 
+		html = Cache.get($0)
+		if !html.nil?
+			cgi.out('text/html') { html }
+		else
+
 		gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
 			"\t\t\t\t" + '<div class="filelist">' + "\n"
@@ -112,6 +117,8 @@ FCGI.each_cgi {|cgi|
 		xhtml = gen_stats + new_disc + top_refs
 
 		cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
+		Cache.set($0, xhtml_pre + xhtml + xhtml_post, Default_cache_expiry_long)
+		end
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug

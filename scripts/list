@@ -163,24 +163,30 @@ FCGI.each_cgi {|cgi|
 			where_clause = my_where_clause
 		end
 
-		query = db.prepare('select count(*) from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause)
-		if !wheres.empty?
-			stmt = query.execute(*wheres)
-		else
-			stmt = query.execute
+		count = Cache.get($0 + 'count' + where_clause)
+		if count.nil?
+			query = db.prepare('select count(*) from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause)
+			if !wheres.empty?
+				stmt = query.execute(*wheres)
+			else
+				stmt = query.execute
+			end
+			count = stmt.fetch.to_s.to_i
+			stmt.close
+			Cache.set($0 + 'count' + where_clause, count, Default_cache_expiry_short)
 		end
-		count = stmt.fetch.to_s.to_i
-		stmt.close
 		if page > count / results + 1
 			page = 1
 		end
 
-		query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
-		if images_only
-			files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
-				files_list_info = ''
-		else
-			files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
+		files_list = Cache.get($0 + 'files' + where_clause + column + order + results.to_s)
+		if files_list.nil?
+			query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			if images_only
+				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
+					files_list_info = ''
+			else
+				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 				'        <table>' + "\n" +
 				'          <tr>' + "\n" +
 				'            <th>Name<a href="l' + results.to_s + 'an' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dn' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</th>' + "\n" +
@@ -190,74 +196,77 @@ FCGI.each_cgi {|cgi|
 				'            <th class="small">Time<a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
 				'          </tr>' + "\n"
 				row_number = 0
-		end
-		file_number = 0
-		if !wheres.empty?
-			other_wheres = wheres
-			other_wheres << (page - 1) * results
-			stmt = query.execute(*other_wheres)
-		else
-			stmt = query.execute((page - 1) * results)
-		end
-		num_rows = stmt.num_rows
-		num_rows.times do
-			result = stmt.fetch
-			id = result[0].to_s
-			time = result[1].to_s
-			hits = result[2].to_s
-			comment_count = result[3].to_s
-			name = result[4].to_s
-			next if id.to_i < 1
-			id = id.to_b64
-
-			file_number = file_number + 1
-			if images_only
-				files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
-				files_list_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
-				if file_number == 5
-					file_number = 0
-					files_list += '        <br class="clear" />' + "\n"
-					files_list += files_list_info
-					files_list += '        <br class="clear" />' + "\n"
-					files_list_info = ''
-				end
+			end
+			file_number = 0
+			if !wheres.empty?
+				other_wheres = wheres
+				other_wheres << (page - 1) * results
+				stmt = query.execute(*other_wheres)
 			else
-				row_number += 1
-				if row_number % 2 == 1
-					files_list +=
+				stmt = query.execute((page - 1) * results)
+			end
+			num_rows = stmt.num_rows
+			num_rows.times do
+				result = stmt.fetch
+				id = result[0].to_s
+				time = result[1].to_s
+				hits = result[2].to_s
+				comment_count = result[3].to_s
+				name = result[4].to_s
+				next if id.to_i < 1
+				id = id.to_b64
+
+				file_number = file_number + 1
+				if images_only
+					files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+					files_list_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
+					if file_number == 5
+						file_number = 0
+						files_list += '        <br class="clear" />' + "\n"
+						files_list += files_list_info
+						files_list += '        <br class="clear" />' + "\n"
+						files_list_info = ''
+					end
+				else
+					row_number += 1
+					if row_number % 2 == 1
+						files_list +=
 						'          <tr>' + "\n"
-				else
-					files_list +=
+					else
+						files_list +=
 						'          <tr class="even">' + "\n"
-				end
+					end
 
-				if name.length > 25
-					name_displayed = name[0..23] + '…'
-				else
-					name_displayed = name
-				end
+					if name.length > 25
+						name_displayed = name[0..23] + '…'
+					else
+						name_displayed = name
+					end
 
-				files_list +=
+					files_list +=
 					'            <td><a href="v' + id + '" title="' + name + '">' + name_displayed + '</a></td>' + "\n" +
 					'            <td class="small"><a href="i' + id + '">Info</td>' + "\n" +
 					'            <td class="small">' + hits + '</td>' + "\n" +
 					'            <td class="small">' + comment_count + '</td>' + "\n" +
 					'            <td class="small">' + time.sub(' ', '&nbsp;') + '</td>' + "\n" +
 					'          </tr>' +  "\n"
+				end
 			end
-		end
-		stmt.close
+			stmt.close
 
-		if images_only
-			if file_number != 0
-				files_list += '        <br class="clear" />' + "\n"
-				files_list += files_list_info
-				files_list += '        <br class="clear" />' + "\n"
+			if images_only
+				if file_number != 0
+					files_list += '        <br class="clear" />' + "\n"
+					files_list += files_list_info
+					files_list += '        <br class="clear" />' + "\n"
+				end
+			else
+				files_list += '        </table>' + "\n"
 			end
+			files_list += '      </div>' + "\n"
+			Cache.set($0 + 'files' + where_clause + column + order + results.to_s, files_list, Default_cache_expiry_short)
 		else
-			files_list += '        </table>' + "\n"
 		end
-		files_list += '      </div>' + "\n"
 
 		page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
 		if page > 1
@@ -265,6 +274,8 @@ FCGI.each_cgi {|cgi|
 		else
 			page_links += '        First <span class="separator">&#x2503;</span> Previous'
 		end
+		num_rows = Cache.get($0 + 'num_rows' + where_clause + column + order + results.to_s)
+		if num_rows.nil?
 		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 		if !wheres.empty?
 			other_wheres = wheres
@@ -276,6 +287,8 @@ FCGI.each_cgi {|cgi|
 		end
 		num_rows = stmt.num_rows
 		stmt.close
+		Cache.set($0 + 'num_rows' + where_clause + column + order + results.to_s, num_rows, Default_cache_expiry_short)
+		end
 		if num_rows > 0
 			page_links += ' <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
 		else

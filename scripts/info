@@ -96,15 +96,19 @@ FCGI.each_cgi {|cgi|
 		if id !~ /\A\d+\z/
 			raise 'You are a trad.'
 		end
-		query = db.prepare('select n1.name, metadata.size, metadata.hits, metadata.comment_count, metadata.creation_time, content_types_main.type, content_types_sub.type, n2.name from metadata inner join names as n1 on n1.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join owners on owners.id = metadata.owner_id left join names as n2 on n2.id = owners.name_id where metadata.id = ?')
-		query.execute(id)
+		info = Cache.get($0 + id)
+		if info.nil?
+			query = db.prepare('select n1.name, metadata.size, metadata.hits, metadata.comment_count, metadata.creation_time, content_types_main.type, content_types_sub.type, n2.name from metadata inner join names as n1 on n1.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join owners on owners.id = metadata.owner_id left join names as n2 on n2.id = owners.name_id where metadata.id = ?')
+			query.execute(id)
 
-		# Verify that id exists in database.
-		if query.num_rows < 1
-			raise 'Nothing to pee here.'
+			# Verify that id exists in database.
+			if query.num_rows < 1
+				raise 'Nothing to pee here.'
+			end
+			info = query.fetch
+			query.close
+			Cache.set($0 + id, info, Default_cache_expiry_short)
 		end
-		info = query.fetch
-		query.close
 		name = info[0]
 		size = info[1]
 		hits = info[2].to_s
@@ -119,17 +123,21 @@ FCGI.each_cgi {|cgi|
 			info_owner_name = 'some luser'
 		end
 
-		# get and process referrers
-		query = db.prepare('select referrers.address, referrals.count from metadata inner join referrals on referrals.metadata_id = metadata.id inner join referrers on referrers.id = referrals.referrer_id where metadata.id = ?	order by referrals.count desc	limit 3')
-		referrers = ''
-		query.execute(id).num_rows.times do
-			res = query.fetch
-			address = res[0].to_s
-			count = res[1].to_s
-			referrers += "\t\t\t\t" + '<div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
+		referrers = Cache.get($0 + 'refs' + id)
+		if referrers.nil?
+			# get and process referrers
+			query = db.prepare('select referrers.address, referrals.count from metadata inner join referrals on referrals.metadata_id = metadata.id inner join referrers on referrers.id = referrals.referrer_id where metadata.id = ?	order by referrals.count desc	limit 3')
+			referrers = ''
+			query.execute(id).num_rows.times do
+				res = query.fetch
+				address = res[0].to_s
+				count = res[1].to_s
+				referrers += "\t\t\t\t" + '<div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
+			end
+			query.close
+			referrers = "\t\t\t\t" + 'No referrers!' + "\n" if referrers.empty?
+			Cache.set($0 + 'refs' + id, referrers, Default_cache_expiry_short)
 		end
-		query.close
-		referrers = "\t\t\t\t" + 'No referrers!' + "\n" if referrers.empty?
 
 		if size > 1024*1024
 			n = (size.to_i/1024.0/1024.0).to_s
@@ -143,13 +151,17 @@ FCGI.each_cgi {|cgi|
 			size = size.to_s + ' bytes'
 		end
 
-		if !owner_id.nil?
-			query = db.prepare('select names.name from owners left join names on names.id = owners.name_id where owners.id = ?')
-			owner_name = query.execute(owner_id).fetch.to_s
-			query.close
-		end
-		if owner_name.nil? or owner_name.empty?
-			owner_name = 'some luser'
+		owner_name = Cache.get($0 + 'name' + id)
+		if owner_name.nil?
+			if !owner_id.nil?
+				query = db.prepare('select names.name from owners left join names on names.id = owners.name_id where owners.id = ?')
+				owner_name = query.execute(owner_id).fetch.to_s
+				query.close
+			end
+			if owner_name.nil? or owner_name.empty?
+				owner_name = 'some luser'
+			end
+			Cache.set($0 + 'name' + id, owner_name, Default_cache_expiry_long)
 		end
 
 		if hide_comments == 1
@@ -164,50 +176,53 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t\t" + '<div class="links">' + hide_link + '</div>' + "\n" +
 			"\t\t\t\t" + '<div>Comments</div>' + "\n" +
 			"\t\t\t" + '</div>' + "\n"
-		cnum = 0
+			cnum = 0
 
 		if hide_comments == 0
-			if comment_count > 0
-				query = db.prepare('select	comments.id, comments.creation_date, comments_body.body,	names.name from comments inner join metadata on metadata.id = comments.metadata_id inner join comments_body on comments_body.id = comments.comment_id	left join owners on owners.id = comments.owner_id left join names on names.id = owners.name_id where metadata.id = ? order by comments.creation_date asc')
-				comment_array = Array.new
-				query.execute(id).num_rows.times do
-					cnum += 1
-					res = query.fetch
-					array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
-					comment_array << array
-				end
-				query.close
-				comment_array.each { |array|
-					num = array[0]
-					cid = array[1]
-					date = array[2]
-					body = array[3].sub(/\A[\r\n]+/, '').sub(/[\r\n]+\z/, '')
-					lname = array[4]
-					if lname.nil? or lname.empty?
-						lname = 'some luser'
+			comments_body = Cache.get($0 + 'comments' + id)
+			if comments_body.nil?
+				if comment_count > 0
+					comments_body = ''
+					query = db.prepare('select	comments.id, comments.creation_date, comments_body.body,	names.name from comments inner join metadata on metadata.id = comments.metadata_id inner join comments_body on comments_body.id = comments.comment_id	left join owners on owners.id = comments.owner_id left join names on names.id = owners.name_id where metadata.id = ? order by comments.creation_date asc')
+					comment_array = Array.new
+					query.execute(id).num_rows.times do
+						cnum += 1
+						res = query.fetch
+						array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
+						comment_array << array
 					end
-					if body =~ /\A\[thumb\]([\w+\/]+)\[\/thumb\]/
-						if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-							body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
-							body += '<br class="clear" />'
-						elsif body =~ /\A\[thumb\]v([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-							body.sub!(/\[thumb\]v([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
-							body += '<br class="clear" />'
-						elsif body =~ /\A\[thumb\]i([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-							body.sub!(/\[thumb\]i([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
-							body += '<br class="clear" />'
+					query.close
+					comment_array.each { |array|
+						num = array[0]
+						cid = array[1]
+						date = array[2]
+						body = array[3].sub(/\A[\r\n]+/, '').sub(/[\r\n]+\z/, '')
+						lname = array[4]
+						if lname.nil? or lname.empty?
+							lname = 'some luser'
 						end
-					end
-					while body =~ /\[i\].+\[\/i\]/
-						body.sub!(/\[i\](.+?)\[\/i\]/, '<em>\1</em>')
-					end
-					while body =~ /\[b\].+\[\/b\]/
-						body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
-					end
-					if body =~ /http:\/\/.*http:\/\//m
-						body = "i'm gay SPAM SPAM SPAM"
-					end
-					comments_body +=
+						if body =~ /\A\[thumb\]([\w+\/]+)\[\/thumb\]/
+							if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
+								body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+								body += '<br class="clear" />'
+							elsif body =~ /\A\[thumb\]v([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
+								body.sub!(/\[thumb\]v([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+								body += '<br class="clear" />'
+							elsif body =~ /\A\[thumb\]i([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
+								body.sub!(/\[thumb\]i([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+								body += '<br class="clear" />'
+							end
+						end
+						while body =~ /\[i\].+\[\/i\]/
+							body.sub!(/\[i\](.+?)\[\/i\]/, '<em>\1</em>')
+						end
+						while body =~ /\[b\].+\[\/b\]/
+							body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
+						end
+						if body =~ /http:\/\/.*http:\/\//m
+							body = "i'm gay SPAM SPAM SPAM"
+						end
+						comments_body +=
 						"\t\t\t" + '<a name="comment_' + cid + '"></a>' + "\n" +
 						"\t\t\t" + '<div class="content comment left-align">' + "\n" +
 						"\t\t\t\t" + '<div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
@@ -215,8 +230,10 @@ FCGI.each_cgi {|cgi|
 						"\t\t\t\t" + '<br class="clear" />' + "\n" +
 						"\t\t\t\t" + '<pre>' + body + '</pre>' + "\n" +
 						"\t\t\t" + '</div>' + "\n"
-				}
+					}
+				end
 			end
+			Cache.set($0 + 'comments' + id, comments_body, Default_cache_expiry_short)
 		end
 		query = db.prepare('select count from upload_throttle where visitor_id = ?')
 		throttle = query.execute(visitor_id).fetch.to_s
@@ -251,9 +268,13 @@ FCGI.each_cgi {|cgi|
 		if content_type_main == 'image'
 			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
 		elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
-			query = db.prepare('select n1.name, n2.name, n3.name, n4.name from metadata left join names as n1 on n1.id = metadata.artist_id left join names as n2 on n2.id = metadata.title_id left join names as n3 on n3.id = metadata.album_id left join names as n4 on n4.id = metadata.year_id where metadata.id = ?')
-			res = query.execute(id).fetch
-			query.close
+			res = Cache.get($0 + 'meta' + id)
+			if res.nil?
+				query = db.prepare('select n1.name, n2.name, n3.name, n4.name from metadata left join names as n1 on n1.id = metadata.artist_id left join names as n2 on n2.id = metadata.title_id left join names as n3 on n3.id = metadata.album_id left join names as n4 on n4.id = metadata.year_id where metadata.id = ?')
+				res = query.execute(id).fetch
+				query.close
+				Cache.set($0 + 'meta' + id, res, Default_cache_expiry_long)
+			end
 			artist = res[0].to_s
 			title = res[1].to_s
 			album = res[2].to_s

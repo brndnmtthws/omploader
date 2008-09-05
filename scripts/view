@@ -24,18 +24,25 @@ FCGI.each_cgi {|cgi|
 		if id !~ /\A\d+\z/
 			raise 'You are a trad.'
 		end
-		query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
-		stmt = query.execute(id)
 
-		# Verify that id exists in database.
-		if stmt.num_rows < 1
+		info = Cache.get($0 + id)
+		if info.nil?
+			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
+			stmt = query.execute(id)
+
+			# Verify that id exists in database.
+			if stmt.num_rows < 1
+				stmt.close
+				raise 'Nothing to pee here.'
+			end
+			info = stmt.fetch
 			stmt.close
-			raise 'Nothing to pee here.'
+			Cache.set($0 + id, info, Default_cache_expiry_long)
 		end
-		info = stmt.fetch
-		stmt.close
 		name = info[0].to_s
 		content_type = info[1]+ '/' + info[2]
+
+		cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64) {''}
 
 		# Increment vote number if this is first view from visitor.
 		query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
@@ -64,11 +71,6 @@ FCGI.each_cgi {|cgi|
 		end
 
 		db.commit
-
-		datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r')
-
-		cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=604800', 'expires' => Time.now + 604800) { datum.to_str }
-		datum.munmap
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
