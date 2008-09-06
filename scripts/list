@@ -251,8 +251,8 @@ FCGI.each_cgi {|cgi|
 						'          <tr class="even">' + "\n"
 					end
 
-					if name.length > 25
-						name_displayed = name[0..23] + '…'
+					if name.length > 50
+						name_displayed = name[0..48] + '…'
 					else
 						name_displayed = name
 					end
@@ -368,7 +368,8 @@ FCGI.each_cgi {|cgi|
 				prefs[0] = mine_only.to_s
 				prefs[1] = list_images.to_s
 				prefs[2] = results.to_s
-				Cache.set($0 + 'prefs' + owner_id, prefs, Default_cache_expiry_long)
+				Cache.set($0 + 'prefs' + owner_id.to_s, prefs, Default_cache_expiry_long)
+				Cache.delete($0 + 'filescolumn=t&page=1')
 			end
 		end
 		db.commit
