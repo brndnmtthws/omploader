@@ -303,6 +303,21 @@ FCGI.each_cgi {|cgi|
 		log.error(cgi.script_name)
 		log.error(cgi.params)
 		log.error(err)
+	rescue MemCache::MemCacheError => err
+		db.rollback unless db.nil?
+		if Debug
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
+		else
+			errmsg = err.to_s
+		end
+		cgi.out('text/html') {
+			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		}
+		log = Logger.new(Paths['log'])
+		log.error(cgi.host)
+		log.error(cgi.script_name)
+		log.error(cgi.params)
+		log.error(err)
 	rescue
 		db.rollback unless db.nil?
 		if Debug

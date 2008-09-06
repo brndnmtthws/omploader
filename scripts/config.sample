@@ -55,3 +55,10 @@ captcha:
 debug:
   # Enable extra debug info? (true/false)
   enabled: false
+
+memcached:
+  # Longer expiry time (in seconds)
+  expiry_long: 600
+  # Shorter expiry time (in seconds)
+  expiry_short: 60
+  servers: [ '192.168.1.1:11211', '192.168.1.2:11211' ]

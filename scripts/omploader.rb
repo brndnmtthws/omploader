@@ -207,11 +207,11 @@ class String
 	end
 end
 
-Cache = MemCache::new	'192.168.1.1:11211',
-								'192.168.1.2:11211',
-								:debug => false,
-								:c_threshold => 100_000,
-								:namespace => 'omploader'
+Cache = MemCache::new(:debug => false,
+							 :c_threshold => 100_000,
+							 :namespace => 'omploader')
 
-Default_cache_expiry_long = 600
-Default_cache_expiry_short = 60
+Cache.servers += ConfigFile['memcached']['servers']
+
+Default_cache_expiry_long = ConfigFile['memcached']['expiry_long']
+Default_cache_expiry_short = ConfigFile['memcached']['expiry_short']
