@@ -93,7 +93,7 @@ div#container {
 	text-align: center;
 	margin: auto;
 	padding: 0;
-	width: 622px;
+	width: 746px;
 }
 
 div#container div.title {
@@ -162,8 +162,8 @@ div#container div.content div.thumb {
 
 div#container div.content div.thumb div.container {
 	vertical-align: middle;
-	height: 75px;
-	width: 100px;
+	height: 90px;
+	width: 120px;
 	display: table-cell;
 }
 
@@ -181,7 +181,7 @@ div#container div.content div.info {
 	text-align: center;
 	margin: 0 5px 5px 5px;
 	padding: 3px 5px 3px 5px;
-	width: 100px;
+	width: 120px;
 }
 
 div#container div.content div.thumb:hover, div#container div.content div.info:hover {

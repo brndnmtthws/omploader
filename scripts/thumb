@@ -22,6 +22,7 @@ FCGI.each_cgi {|cgi|
 		if id !~ /\A\d+\z/
 			raise 'You are a trad.'
 		end
+		Cache.delete($0 + id + 'name')
 		thumb_name = Cache.get($0 + id + 'name')
 		thumb_type = Cache.get($0 + id + 'type')
 		if thumb_name.nil? or thumb_type.nil?
@@ -67,18 +68,18 @@ FCGI.each_cgi {|cgi|
 
 					# Determine best thumbnail size.
 					if (thumb.columns.to_f / thumb.rows.to_f) == (4/3.0)
-						thumb = thumb.thumbnail(100, 75)
+						thumb = thumb.thumbnail(120, 90)
 					elsif (thumb.columns.to_f / thumb.rows.to_f) > (4/3.0)
-						if (((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f))*75).to_i == 0
-							thumb = thumb.thumbnail(100, 1)
+						if (((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f))*90).to_i == 0
+							thumb = thumb.thumbnail(120, 1)
 						else
-							thumb = thumb.thumbnail(100, 75 * ((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f)))
+							thumb = thumb.thumbnail(120, 90 * ((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f)))
 						end
 					else
-						if (((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0))*100).to_i == 0
-							thumb = thumb.thumbnail(1, 75)
+						if (((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0))*120).to_i == 0
+							thumb = thumb.thumbnail(1, 90)
 						else
-							thumb = thumb.thumbnail(100 * ((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0)), 75)
+							thumb = thumb.thumbnail(120 * ((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0)), 90)
 						end
 					end
 					datum.munmap
