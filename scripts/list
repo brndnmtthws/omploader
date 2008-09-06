@@ -376,7 +376,7 @@ FCGI.each_cgi {|cgi|
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
@@ -396,7 +396,7 @@ FCGI.each_cgi {|cgi|
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
@@ -411,7 +411,7 @@ FCGI.each_cgi {|cgi|
 	rescue StandardError => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
@@ -426,7 +426,7 @@ FCGI.each_cgi {|cgi|
 	rescue
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
