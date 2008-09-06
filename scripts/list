@@ -193,7 +193,7 @@ FCGI.each_cgi {|cgi|
 			page = 1
 		end
 
-		files_list = Cache.get($0 + 'files' + cgi.query_string.to_s)
+		files_list = Cache.get($0 + 'files' + cgi.query_string.to_s + prefs.to_s)
 		if files_list.nil?
 			query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if images_only
@@ -278,7 +278,7 @@ FCGI.each_cgi {|cgi|
 				files_list += '        </table>' + "\n"
 			end
 			files_list += '      </div>' + "\n"
-			Cache.set($0 + 'files' + cgi.query_string.to_s, files_list, Default_cache_expiry_short)
+			Cache.set($0 + 'files' + cgi.query_string.to_s + prefs.to_s, files_list, Default_cache_expiry_short)
 		end
 
 		page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
@@ -369,7 +369,6 @@ FCGI.each_cgi {|cgi|
 				prefs[1] = list_images.to_s
 				prefs[2] = results.to_s
 				Cache.set($0 + 'prefs' + owner_id.to_s, prefs, Default_cache_expiry_long)
-				Cache.delete($0 + 'filescolumn=t&page=1')
 			end
 		end
 		db.commit
