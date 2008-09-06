@@ -117,7 +117,7 @@ FCGI.each_cgi {|cgi|
 			end
 			info = query.fetch
 			query.close
-			Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_short)
+			Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
 		else
 			info = Marshal.load(Base64.decode64(info))
 		end
