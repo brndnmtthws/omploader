@@ -177,7 +177,7 @@ FCGI.each_cgi {|cgi|
 			where_clause = my_where_clause
 		end
 
-		count = Cache.get($0 + 'count' + where_clause)
+		count = Cache.get($0 + 'count' + where_clause + wheres.to_s)
 		if count.nil?
 			query = db.prepare('select count(*) from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause)
 			if !wheres.empty?
@@ -187,7 +187,7 @@ FCGI.each_cgi {|cgi|
 			end
 			count = stmt.fetch.to_s.to_i
 			stmt.close
-			Cache.set($0 + 'count' + where_clause, count, Default_cache_expiry_short)
+			Cache.set($0 + 'count' + where_clause + wheres.to_s, count, Default_cache_expiry_short)
 		end
 		if page > count / results + 1
 			page = 1

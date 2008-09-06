@@ -143,7 +143,7 @@ div#container div.content div.form div.label {
 
 div#container div.content div.form textarea {
 	font-size: 1.2em;
-	width: 602px;
+	width: 701px;
 	height: 200px;
 }
 
@@ -203,7 +203,7 @@ div#container div.content div.left {
 div#container div.content div.right {
 	text-align: left;
 	overflow: hidden;
-	width: 488px;
+	width: 588px;
 	float: right;
 }
 
@@ -311,6 +311,10 @@ div#container div.content div.faq div.q {
 div#container div.content div.faq div.a {
 	padding-left: 1em;
 	margin-bottom: 1.2em;
+}
+
+div#container div.content div.form div.recaptcha {
+	margin-left: 201px;
 }
 
 /*div#container div.content ol li + li + li p > strong { display: block; width: 250px; height: 200px; background-image: url('http://omploader.org/vNzdu'); }
