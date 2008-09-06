@@ -123,7 +123,11 @@ FCGI.each_cgi {|cgi|
 			end
 		else
 			thumb = Marshal.load(Base64.decode64(thumb))
-			cgi.out('type' => thumb[0], 'Content-Disposition' => 'inline; filename="' + thumb[1] + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+			file = Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64
+			if !File.exists?(file)
+				file = Dir.pwd + '/../omploader_thumb.png'
+			end
+			cgi.out('type' => thumb[0], 'Content-Disposition' => 'inline; filename="' + thumb[1] + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => file) {''}
 			visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
 			if visitor_id.nil?
 				db_check(db)
