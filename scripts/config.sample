@@ -62,3 +62,5 @@ memcached:
   # Shorter expiry time (in seconds)
   expiry_short: 60
   servers: [ '192.168.1.1:11211', '192.168.1.2:11211' ]
+  # A unique name to associate the cache with this particular instance
+  namespace: omploader

@@ -209,7 +209,7 @@ end
 
 Cache = MemCache::new(:debug => false,
 							 :c_threshold => 100_000,
-							 :namespace => 'omploader')
+							 :namespace => ConfigFile['memcached']['namespace'])
 
 Cache.servers += ConfigFile['memcached']['servers']
 
