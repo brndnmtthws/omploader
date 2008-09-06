@@ -119,7 +119,7 @@ FCGI.each_cgi {|cgi|
 									xhtml = gen_stats + new_disc + top_refs
 
 									cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
-									Cache.set($0, xhtml_pre + xhtml + xhtml_post, Default_cache_expiry_long)
+									Cache.set($0, xhtml_pre + xhtml + xhtml_post, Default_cache_expiry_long * 36)
 		end
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
