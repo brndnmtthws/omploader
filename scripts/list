@@ -193,7 +193,7 @@ FCGI.each_cgi {|cgi|
 			page = 1
 		end
 
-		files_list = Cache.get($0 + 'files' + where_clause + column + order + results.to_s + page.to_s + wheres.to_s)
+		files_list = Cache.get($0 + 'files' + cgi.query_string.to_s)
 		if files_list.nil?
 			query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if images_only
@@ -278,8 +278,7 @@ FCGI.each_cgi {|cgi|
 				files_list += '        </table>' + "\n"
 			end
 			files_list += '      </div>' + "\n"
-			Cache.set($0 + 'files' + where_clause + column + order + results.to_s + page.to_s + wheres.to_s, files_list, Default_cache_expiry_short)
-		else
+			Cache.set($0 + 'files' + cgi.query_string.to_s, files_list, Default_cache_expiry_short)
 		end
 
 		page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
@@ -288,7 +287,7 @@ FCGI.each_cgi {|cgi|
 		else
 			page_links += '        First <span class="separator">&#x2503;</span> Previous'
 		end
-		num_rows = Cache.get($0 + 'num_rows' + where_clause + column + order + results.to_s + page.to_s + wheres.to_s)
+		num_rows = Cache.get($0 + 'num_rows' + cgi.query_string.to_s)
 		if num_rows.nil?
 		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 		if !wheres.empty?
@@ -301,7 +300,7 @@ FCGI.each_cgi {|cgi|
 		end
 		num_rows = stmt.num_rows
 		stmt.close
-		Cache.set($0 + 'num_rows' + where_clause + column + order + results.to_s + page.to_s + wheres.to_s, num_rows, Default_cache_expiry_short)
+		Cache.set($0 + 'num_rows' + cgi.query_string.to_s, num_rows, Default_cache_expiry_short)
 		end
 		if num_rows > 0
 			page_links += ' <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
