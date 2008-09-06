@@ -106,6 +106,7 @@ FCGI.each_cgi {|cgi|
 		if id !~ /\A\d+\z/
 			raise 'You are a trad.'
 		end
+#		Cache.delete($0 + id)
 		info = Cache.get($0 + id)
 		if info.nil?
 			query = db.prepare('select n1.name, metadata.size, metadata.hits, metadata.comment_count, metadata.creation_time, content_types_main.type, content_types_sub.type, n2.name from metadata inner join names as n1 on n1.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join owners on owners.id = metadata.owner_id left join names as n2 on n2.id = owners.name_id where metadata.id = ?')
@@ -117,7 +118,9 @@ FCGI.each_cgi {|cgi|
 			end
 			info = query.fetch
 			query.close
-			Cache.set($0 + id, info, Default_cache_expiry_short)
+			Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_short)
+		else
+			info = Marshal.load(Base64.decode64(info))
 		end
 		name = info[0]
 		size = info[1]

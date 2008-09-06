@@ -22,10 +22,8 @@ FCGI.each_cgi {|cgi|
 		if id !~ /\A\d+\z/
 			raise 'You are a trad.'
 		end
-		Cache.delete($0 + id + 'name')
-		thumb_name = Cache.get($0 + id + 'name')
-		thumb_type = Cache.get($0 + id + 'type')
-		if thumb_name.nil? or thumb_type.nil?
+		thumb = Cache.get($0 + id)
+		if thumb.nil?
 			visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
 			if visitor_id.nil?
 				db_check(db)
@@ -100,25 +98,32 @@ FCGI.each_cgi {|cgi|
 
 					cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
 					db.commit
-					Cache.set($0 + id + 'name', name, Default_cache_expiry_long)
-					Cache.set($0 + id + 'type', content_type, Default_cache_expiry_long)
+					thumb = Array.new
+					thumb[0] = content_type
+					thumb[1] = name
+					Cache.set($0 + id, Base64.encode64(Marshal.dump(thumb)), Default_cache_expiry_long)
 					GC.start
 				elsif result[0] == 'image'
 					query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
 					query.execute(thumbnail_id).close
 					cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
 					db.commit
-					Cache.set($0 + id + 'name', name, Default_cache_expiry_long)
-					Cache.set($0 + id + 'type', content_type, Default_cache_expiry_long)
+					thumb = Array.new
+					thumb[0] = content_type
+					thumb[1] = name
+					Cache.set($0 + id, Base64.encode64(Marshal.dump(thumb)), Default_cache_expiry_long)
 				else
 					cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/../omploader_thumb.png') {''}
 					db.commit
-					Cache.set($0 + id + 'name', 'omploader-thumb.png', Default_cache_expiry_long)
-					Cache.set($0 + id + 'type', 'image/png', Default_cache_expiry_long)
+					thumb = Array.new
+					thumb[0] = 'image/png'
+					thumb[1] = 'omploader-thumb.png'
+					Cache.set($0 + id, Base64.encode64(Marshal.dump(thumb)), Default_cache_expiry_long)
 				end
 			end
 		else
-			cgi.out('type' => thumb_type, 'Content-Disposition' => 'inline; filename="' + thumb_name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+			thumb = Marshal.load(Base64.decode64(thumb))
+			cgi.out('type' => thumb[0], 'Content-Disposition' => 'inline; filename="' + thumb[1] + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
 			visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
 			if visitor_id.nil?
 				db_check(db)
