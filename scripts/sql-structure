@@ -196,20 +196,6 @@ CREATE TABLE `thumbnails` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Table structure for table `upload_throttle`
---
-
-CREATE TABLE `upload_throttle` (
-  `id` int(10) NOT NULL auto_increment,
-  `count` int(10) NOT NULL default '0',
-  `visitor_id` int(10) unsigned NOT NULL,
-  `date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `visitor_id` (`visitor_id`),
-  CONSTRAINT `upload_throttle_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
 -- Table structure for table `visitors`
 --
 

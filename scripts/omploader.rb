@@ -111,8 +111,6 @@ def run_cron(db)
 	q.execute(Vote_expiry)
 	q = db.prepare('delete from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Visitor_expiry)
-	q = db.prepare('delete from upload_throttle where unix_timestamp(date) < unix_timestamp(current_timestamp) - ?')
-	q.execute(Max_upload_period)
 	q = db.prepare('select metadata.id from metadata inner join thumbnails on metadata.thumbnail_id = thumbnails.id where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	stmt = q.execute(Thumbnail_expiry)
 	num_rows = stmt.num_rows
