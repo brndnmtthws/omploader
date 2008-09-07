@@ -64,7 +64,7 @@ def xhtml_pre(title = '', search = '', showsearch = true)
 		"\t\t" + '<div id="container">' + "\n" +
 		"\t\t\t" + '<div id="header">' + "\n" +
 		"\t\t\t\t" + '<div id="title"><a href="/"><img src="omploader.png" alt="omploader" /></a></div>'  + "\n" +
-		"\t\t\t\t" + '<div id="slogan"><h2>free, lean and mean image & file hosting™</h2></div>'  + "\n" +
+		"\t\t\t\t" + '<div id="slogan"><h2>free, lean and mean image &amp; file hosting™</h2></div>'  + "\n" +
 		"\t\t\t\t" + '<form enctype="multipart/form-data" action="l" method="post">' + "\n"
 	if showsearch
 		xhtml_pre +=

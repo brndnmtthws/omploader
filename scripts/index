@@ -165,7 +165,7 @@ FCGI.each_cgi {|cgi|
 			end
 			if big == 1 and paste != 1
 				form =
-					"\t\t\t\t" + '<form name="ompload' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t" + '<form id="ompload' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
 					"\t\t\t\t\t" + '<div class="form">' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '2" size="25" class="input field" /><br />' + "\n" +
@@ -177,18 +177,18 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t" + '</form>'
 			elsif paste == 1
 				form =
-					"\t\t\t\t" + '<form name="omploadpaste"' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t" + '<form id="omploadpaste"' + encoding + ' action="upload" method="post">' + "\n" +
 					"\t\t\t\t\t" + '<div class="form">' + "\n" +
 					"\t\t\t\t\t\t\t" + '<div class="float name left-align">' + "\n" +
 					"\t\t\t\t\t\t\t" + '<div class="label">Name</div>' + "\n" +
-					"\t\t\t\t\t\t\t" + '<input type="line" name="name" size="25" class="input field" />' + "\n" +
+					"\t\t\t\t\t\t\t" + '<input type="text" name="name" size="25" class="input field" />' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n" +
 					"\t\t\t\t\t" + '<div class="float left-align">' + "\n" +
 					"\t\t\t\t\t\t" + '<div class="label">Syntax</div>' + "\n" +
 					"\t\t\t\t\t\t\t" + '<select name="syntax" class="input">' + "\n" +
-					"\t\t\t\t\t\t\t\t" + '<option selected value="raw">Plain Text</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option selected="selected" value="raw">Plain Text</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="">Auto detect</option>' + "\n" +
-					"\t\t\t\t\t\t\t\t" + '<option disabled>––––––––––</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option disabled="disabled">––––––––––</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="c">C</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="cobol">COBOL</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="cpp">C++</option>' + "\n" +
@@ -214,14 +214,14 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t\t\t\t" + '</select>' + "\n" +
 					"\t\t\t\t\t\t" + '</div>' + "\n" +
 					"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
-					"\t\t\t\t\t\t" + '<div class="float"><textarea name="paste" class="input"></textarea></div>' + "\n" +
+					"\t\t\t\t\t\t" + '<div class="float"><textarea name="paste" class="input" rows="10" cols="10"></textarea></div>' + "\n" +
 					"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n" +
 					"\t\t\t\t" + '</form>'
 			else
 				form =
-					"\t\t\t\t" + '<form name="ompload' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
+					"\t\t\t\t" + '<form id="ompload' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
 					"\t\t\t\t\t" + '<div class="form">' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
 					"\t\t\t\t\t\t" + '<input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
@@ -252,7 +252,7 @@ FCGI.each_cgi {|cgi|
 			top_files
 
 			db.commit
-			cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
+			cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post }
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
@@ -260,7 +260,7 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -270,7 +270,7 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
 		}
 	rescue SyntaxError, NameError => err
@@ -280,7 +280,7 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -295,7 +295,7 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -310,7 +310,7 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -325,7 +325,7 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
