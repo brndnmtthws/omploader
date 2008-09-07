@@ -5,6 +5,7 @@
 
 import sys
 import re
+from random import choice
 
 f = open(sys.path[0] + '/rewrites.txt', 'r')
 rewrites = f.readlines()
@@ -26,10 +27,12 @@ regex_s = regex_s[:len(regex_s)-1]
 regex_s += ')'
 regex = re.compile(regex_s, re.IGNORECASE)
 
+lottery = range(1, 5)
+
 while 1:
 	line = sys.stdin.readline()
 	if line:
-		if regex.search(line):
+		if regex.search(line) and choice(lottery) == 1:
 			print 'match'
 		else:
 			print ''
