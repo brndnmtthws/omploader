@@ -29,6 +29,7 @@ Vote_expiry = ConfigFile['limits']['vote_expiry'] * 86400
 Visitor_expiry = ConfigFile['limits']['visitor_expiry'] * 86400
 Thumbnail_expiry = ConfigFile['limits']['thumbnail_expiry'] * 86400
 Owner_expiry = ConfigFile['limits']['owner_expiry'] * 86400
+Max_file_size = ConfigFile['limits']['max_file_size']
 
 Pub_key = ConfigFile['captcha']['pub_key']
 Priv_key = ConfigFile['captcha']['priv_key']

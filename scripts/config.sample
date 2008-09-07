@@ -39,6 +39,8 @@ limits:
   thumbnail_expiry: 1
   # Number of days after which owners expire
   owner_expiry: 365.25
+  # Maximum file size (in bytes)
+  max_file_size: 67108864
 
 paths:
   # Path of data store (relative to scripts)

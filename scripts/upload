@@ -126,7 +126,8 @@ FCGI.each_cgi {|cgi|
 			if cgi.has_key?('file' + i.to_s)
 				file = cgi['file' + i.to_s]
 				datum = file.read
-				next if datum.length > 2**25 or datum.empty?
+				cgi.out('text/plain') { datum.length.to_s + Max_file_size.to_s }
+				next if datum.length > Max_file_size or datum.empty?
 				name = file.original_filename.chomp
 				name = 'ompload' if name !~ /\S/
 			elsif cgi.has_key?('url' + i.to_s)
@@ -151,14 +152,14 @@ FCGI.each_cgi {|cgi|
 					next if url =~ /:\/\/127\.0\.0\.1\//i
 					next if url =~ /:\/\/localhost\//i
 					datum = Curl::Easy.perform(url).body_str
-					next if datum.length > 2**24 or datum.empty?
+					next if datum.length > Max_file_size or datum.empty?
 				rescue
 					next
 				end
 			elsif cgi.has_key?('paste')
 				syntax = cgi['syntax'].read
 				datum = cgi['paste'].read.gsub("\r", '')
-				next if datum.length > 2**24 or datum.empty?
+				next if datum.length > Max_file_size or datum.empty?
 				name = cgi['name'].read
 				name = 'pasta' if name !~ /\S/
 					if syntax != 'raw'
