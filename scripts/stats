@@ -24,7 +24,7 @@ FCGI.each_cgi {|cgi|
 
 		html = Cache.get($0)
 		if !html.nil?
-			cgi.out('text/html') { html }
+			cgi.out('application/xhtml+xml') { html }
 		else
 			gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
@@ -118,17 +118,17 @@ FCGI.each_cgi {|cgi|
 
 									xhtml = gen_stats + new_disc + top_refs
 
-									cgi.out('text/html') { xhtml_pre + xhtml + xhtml_post }
+									cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post }
 									Cache.set($0, xhtml_pre + xhtml + xhtml_post, Default_cache_expiry_long * 36)
 		end
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -138,17 +138,17 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -159,11 +159,11 @@ FCGI.each_cgi {|cgi|
 	rescue StandardError => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -178,7 +178,7 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -189,11 +189,11 @@ FCGI.each_cgi {|cgi|
 	rescue
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])

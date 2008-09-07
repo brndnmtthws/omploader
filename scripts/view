@@ -79,11 +79,11 @@ FCGI.each_cgi {|cgi|
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -93,17 +93,17 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -114,11 +114,11 @@ FCGI.each_cgi {|cgi|
 	rescue StandardError => err
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -133,7 +133,7 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
@@ -144,11 +144,11 @@ FCGI.each_cgi {|cgi|
 	rescue
 		db.rollback unless db.nil?
 		if Debug
-			errmsg = err.to_s + '<br />' + err.backtrace.to_s
+			errmsg = err.to_s + '<br />' + err.backtrace.join('<br />')
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('text/html') {
+		cgi.out('application/xhtml+xml') {
 			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
 		}
 		log = Logger.new(Paths['log'])
