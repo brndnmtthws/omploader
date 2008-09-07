@@ -258,7 +258,7 @@ FCGI.each_cgi {|cgi|
 					end
 
 					files_list +=
-					'            <td><a href="v' + id + '" title="' + name + '">' + name_displayed + '</a></td>' + "\n" +
+					'            <td><a href="v' + id + '" title="' + name.gsub(/&/, '&amp;') + '">' + name_displayed.gsub(/&/, '&amp;') + '</a></td>' + "\n" +
 					'            <td class="small"><a href="i' + id + '">Info</a></td>' + "\n" +
 					'            <td class="small">' + hits + '</td>' + "\n" +
 					'            <td class="small">' + comment_count + '</td>' + "\n" +

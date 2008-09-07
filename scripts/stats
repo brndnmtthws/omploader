@@ -70,7 +70,7 @@ FCGI.each_cgi {|cgi|
 				address.length > 60 ? address_listed = address[0..58] + '…' : address_listed = address
 				count = res[1].to_s
 				top_refs += "\t\t\t\t\t" + '<div class="file">' + "\n" +
-				"\t\t\t\t\t\t" + '<span class="filename"><a href="' + address + '" title="' + address + '">' + address_listed + '</a></span>' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><a href="' + address.gsub(/&/, '&amp;') + '" title="' + address.gsub(/&/, '&amp;') + '">' + address_listed.gsub(/&/, '&amp;') + '</a></span>' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="fileinfo">' + count + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
 			end

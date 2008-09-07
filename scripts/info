@@ -144,7 +144,7 @@ FCGI.each_cgi {|cgi|
 				res = query.fetch
 				address = res[0].to_s
 				count = res[1].to_s
-				referrers += "\t\t\t\t" + '<div class="left">' + count + ' from</div><div class="right"><a href="' + address + '">' + address + '</a></div><br class="clear" />' + "\n"
+				referrers += "\t\t\t\t" + '<div class="left">' + count + ' from</div><div class="right"><a href="' + address.gsub(/&/, '&amp;') + '">' + address.gsub(/&/, '&amp;') + '</a></div><br class="clear" />' + "\n"
 			end
 			query.close
 			referrers = "\t\t\t\t" + 'No referrers!' + "\n" if referrers.empty?
