@@ -1,0 +1,10 @@
+#
+# Apache rewrite map
+# everything here gets rewritten to 'gay.png'
+#
+# then reload apache to apply changes
+hardforum\.com
+everyonedoesit\.co\.uk
+420chan\.org
+zybez\.net
+netsons\.org

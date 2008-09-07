@@ -14,6 +14,13 @@ DirectoryIndex scripts/index
 </FilesMatch>
 
 RewriteEngine on
+
+# These tards use too much bandwidth (edit rewrites.txt)
+# Note that you must define the omprewrites RewriteMap in the apache config to
+# run rewrite.py
+RewriteCond ${omprewrites:%{HTTP_REFERER}} !=""
+RewriteRule ^v(.*) gay.png [L]
+
 RewriteRule ^favicon.ico$ omploader_icon.png [L]
 
 RewriteRule ^small$ scripts/index?big=0 [L]
