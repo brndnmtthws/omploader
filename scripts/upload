@@ -17,6 +17,20 @@ require 'id3lib'
 require 'digest/sha1'
 require 'vorbisfile'
 
+def get_output(id, name, name_displayed, type, host)
+	ret =	'<div class="upload">View file: <a href="v' + id + '">http://' + host + '/v' + id + '</a><br />' + "\n" +
+			'View info: <a href="i' + id + '">http://' + host + '/i' + id + '</a><br />' + "\n" +
+			'With name: <a href="v' + id + '/' + name + '">http://' + host + '/v' + id + '/' + name_displayed + '</a><br />' + "\n"
+	if type == 'image'
+		ret +=	'Thumbnail: <a href="t' + id + '">http://' + host + '/t' + id + '</a><br />' + "\n" +
+					'BBCode:<br /><span>[url=http://' + host + '/v' + id + '][img]http://' + host + '/t' + id + '[/img][/url]</span>' + "\n"
+	else
+		ret += 'BBCode:<br /><span>[url=http://' + host + '/v' + id + ']http://' + host + '/v' + id + '[/url]</span>' + "\n"
+	end
+	ret += '</div><br />' + "\n"
+	return ret
+end
+
 db = db_connect
 
 # Method for using Vim's syntax highlighting and improving the generated code.
@@ -264,10 +278,7 @@ FCGI.each_cgi {|cgi|
 				else
 					name_displayed = name
 				end
-				output = output +
-					'      View file: <a href="v' + id + '">' + 'v' + id + '</a><br />' + "\n" +
-					'      View info: <a href="i' + id + '">' + 'i' + id + '</a><br />' + "\n" +
-					'      With name: <a href="v' + id + '/' + name + '">' + 'v' + id + '/' + name_displayed + '</a><br /><br />' + "\n"
+				output = output + get_output(id, name, name_displayed, content_type_main, cgi.host)
 			rescue Mysql::Error => err
 				db.rollback
 				if err.errno == 1062
@@ -284,10 +295,7 @@ FCGI.each_cgi {|cgi|
 					else
 						name_displayed = name
 					end
-					output = output +
-						'      View file: <a href="v' + old_id + '">' + 'v' + old_id + '</a><br />' + "\n" +
-						'      View info: <a href="i' + old_id + '">' + 'i' + old_id + '</a><br />' + "\n" +
-						'      With name: <a href="v' + old_id + '/' + name + '">' + 'v' + old_id + '/' + name_displayed + '</a><br /><br />' + "\n"
+					output = output + get_output(old_id, name, name_displayed, '', cgi.host)
 					saved += 1
 					db.commit
 					next

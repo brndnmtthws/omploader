@@ -317,5 +317,39 @@ div#container div.content div.form div.recaptcha {
 	margin-left: 201px;
 }
 
+div#slogan h2 {
+	color: #666;
+}
+
+div#container div.content div.upload {
+	background-color: #E5D5D5;
+	padding: 5px;
+	text-align: left;
+/*	float: left;*/
+}
+
+div#container div.content div.upload a {
+/*	text-align: left;
+	float: right;*/
+	width: 80%;
+}
+
+div#container div.content div.upload span {
+	font-size: 0.75em;
+	font-family: monospace;
+	background: #efefef;
+	margin: 5px 0px 5px 0px;
+	overflow: hidden;
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -o-pre-wrap;
+/*	float: right;*/
+}
+
+
+div#container div.content div.form textarea.comment {
+	height: 100px;
+}
+
 /*div#container div.content ol li + li + li p > strong { display: block; width: 250px; height: 200px; background-image: url('http://omploader.org/vNzdu'); }
 div#container div.content ol li + li + li p > strong + strong { display: inline; background-image: none; }*/
