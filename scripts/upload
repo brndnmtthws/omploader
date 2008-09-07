@@ -126,7 +126,6 @@ FCGI.each_cgi {|cgi|
 			if cgi.has_key?('file' + i.to_s)
 				file = cgi['file' + i.to_s]
 				datum = file.read
-				cgi.out('text/plain') { datum.length.to_s + Max_file_size.to_s }
 				next if datum.length > Max_file_size or datum.empty?
 				name = file.original_filename.chomp
 				name = 'ompload' if name !~ /\S/
