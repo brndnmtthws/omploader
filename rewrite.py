@@ -1,6 +1,6 @@
 #!/usr/bin/python -u
 #
-# returns '' if no match for rewrite
+# returns 'match' if there is a match, otherwise returns ''
 #
 
 import sys
