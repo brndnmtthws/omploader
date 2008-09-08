@@ -19,6 +19,7 @@ Requirements:
  * ruby-mmap (http://moulon.inra.fr/ruby/mmap.html)
  * CodeRay (http://coderay.rubychan.de/)
  * recaptcha (http://www.loonsoft.com/recaptcha/)
+ * Ruby-MemCache (http://www.deveiate.org/projects/RMemCache/)
 
 the code for libvorbisfile-ruby and ruby-mmap are available from the omploader svn repo
 
