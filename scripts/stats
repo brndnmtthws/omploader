@@ -18,7 +18,7 @@ FCGI.each_cgi {|cgi|
 
 		html = Cache.get($0)
 		if !html.nil?
-			cgi.out('application/xhtml+xml') { html }
+			cgi.out('application/xhtml+xml') { Base64.decode64(html) }
 		else
 			gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
@@ -113,7 +113,7 @@ FCGI.each_cgi {|cgi|
 									xhtml = gen_stats + new_disc + top_refs
 
 									cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post }
-									Cache.set($0, xhtml_pre + xhtml + xhtml_post, Default_cache_expiry_long * 36)
+									Cache.set($0, Base64.encode64(xhtml_pre + xhtml + xhtml_post), Default_cache_expiry_long * 36)
 		end
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
