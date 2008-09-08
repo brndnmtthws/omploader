@@ -24,14 +24,7 @@ FCGI.each_cgi {|cgi|
 		end
 		thumb = Cache.get($0 + id)
 		if thumb.nil?
-			visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
-			if visitor_id.nil?
-				db_check(db)
-				visitor_id = register_visit(cgi, db)
-				Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
-			else
-				db_check(db)
-			end
+			visitor_id = get_cached_visitor_id(cgi, db)
 
 			query = db.prepare('select metadata.content_type_id, metadata.thumbnail_id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
 			stmt = query.execute(id)

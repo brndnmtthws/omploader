@@ -14,19 +14,9 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
 	begin
-		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
-		if visitor_id.nil?
-			db_check(db)
-			visitor_id = register_visit(cgi, db)
-			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
-		end
+		visitor_id = get_cached_visitor_id(cgi, db)
 
-		owner_id = Cache.get('owner_id' + session_id(cgi))
-		if owner_id.nil?
-			db_check(db)
-			owner_id = get_owner_id(cgi, db)
-			Cache.set('owner_id' + session_id(cgi), owner_id, Default_cache_expiry_short)
-		end
+		owner_id = get_cached_owner_id(cgi, db)
 
 		prefs = Cache.get($0 + 'prefs' + owner_id.to_s)
 		if !owner_id.nil? and prefs.nil?

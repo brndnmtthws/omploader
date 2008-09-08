@@ -100,7 +100,7 @@ def db_check(db)
 end
 
 # Update visitors table in database.
-def register_visit(cgi, db)
+def get_visitor_id(cgi, db)
 	query = db.prepare('insert into visitors (address) values (?) on duplicate key update last_visit = current_timestamp, id = last_insert_id(id)')
 	stmt = query.execute(cgi.remote_addr.to_s)
 	visitor_id = stmt.insert_id.to_s
@@ -215,3 +215,28 @@ Cache.servers += ConfigFile['memcached']['servers']
 
 Default_cache_expiry_long = ConfigFile['memcached']['expiry_long']
 Default_cache_expiry_short = ConfigFile['memcached']['expiry_short']
+			
+def get_cached_visitor_id(cgi, db)
+	visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
+	if visitor_id.nil?
+		db_check(db)
+		visitor_id = get_visitor_id(cgi, db)
+		Cache.set('visitor_id' + cgi.remote_addr.to_s, Base64.encode64(Marshal.dump(visitor_id)), Default_cache_expiry_long)
+	else
+		visitor_id = Marshal.load(Base64.decode64(visitor_id))
+	end
+	return visitor_id
+end
+
+def get_cached_owner_id(cgi, db)
+	owner_id = Cache.get('owner_id' + session_id(cgi))
+	if owner_id.nil?
+		db_check(db)
+		owner_id = get_owner_id(cgi, db)
+		Cache.set('owner_id' + session_id(cgi), Base64.encode64(Marshal.dump(owner_id)), Default_cache_expiry_short)
+	else
+		owner_id = Marshal.load(Base64.decode64(owner_id))
+	end
+	return owner_id
+end
+

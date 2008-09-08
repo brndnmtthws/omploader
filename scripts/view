@@ -35,19 +35,16 @@ FCGI.each_cgi {|cgi|
 			end
 			info = stmt.fetch
 			stmt.close
-			Cache.set($0 + id, info, Default_cache_expiry_long)
+			Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
+		else
+			info = Marshal.load(Base64.decode64(info))
 		end
 		name = info[0].to_s
 		content_type = info[1]+ '/' + info[2]
 
 		cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64) {''}
 
-		visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
-		if visitor_id.nil?
-			db_check(db)
-			visitor_id = register_visit(cgi, db)
-			Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
-		end
+		visitor_id = get_cached_visitor_id(cgi, db)
 
 		# Increment vote number if this is first view from visitor.
 		query = db.prepare('select id from votes where visitor_id = ? and metadata_id = ?')
