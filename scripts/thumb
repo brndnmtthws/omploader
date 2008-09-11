@@ -121,12 +121,7 @@ FCGI.each_cgi {|cgi|
 				file = Dir.pwd + '/../omploader_thumb.png'
 			end
 			cgi.out('type' => thumb[0], 'Content-Disposition' => 'inline; filename="' + thumb[1] + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => file) {''}
-			visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
-			if visitor_id.nil?
-				db_check(db)
-				visitor_id = register_visit(cgi, db)
-				Cache.set('visitor_id' + cgi.remote_addr.to_s, visitor_id, Default_cache_expiry_long)
-			end
+			visitor_id = get_cached_visitor_id(cgi, db)
 			db.commit
 		end
 	rescue Magick::ImageMagickError => err
