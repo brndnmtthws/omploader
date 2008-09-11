@@ -111,8 +111,18 @@ end
 def run_cron(db)
 	q = db.prepare('delete from votes where unix_timestamp(date) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Vote_expiry)
+	q.close
+	q = db.prepare('select address from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ?')
+	stmt = q.execute(Visitor_expiry)
+	num_rows = stmt.num_rows
+	num_rows.times do
+		addr = stmt.fetch.to_s
+		Cache.delete('visitor_id' + addr)
+	end
+	stmt.close
 	q = db.prepare('delete from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Visitor_expiry)
+	q.close
 	q = db.prepare('select metadata.id from metadata inner join thumbnails on metadata.thumbnail_id = thumbnails.id where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	stmt = q.execute(Thumbnail_expiry)
 	num_rows = stmt.num_rows
@@ -123,10 +133,13 @@ def run_cron(db)
 	stmt.close
 	q = db.prepare('update metadata inner join thumbnails on thumbnails.id = metadata.thumbnail_id set metadata.thumbnail_id = null where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Thumbnail_expiry)
+	q.close
 	q = db.prepare('delete from thumbnails where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Thumbnail_expiry)
+	q.close
 	q = db.prepare('update metadata inner join owners on owners.id = metadata.owner_id set metadata.owner_id = null where unix_timestamp(owners.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Owner_expiry)
+	q.close
 	q = db.prepare('delete from owners where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Owner_expiry)
 	q.close
