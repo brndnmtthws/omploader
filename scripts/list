@@ -319,11 +319,11 @@ FCGI.each_cgi {|cgi|
 
 		results_html = ''
 		if results < maxres and results > 5
-			results_html = '        <a href="l' + (results + 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">More Results</a> | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Less Results</a><br />' + "\n"
+			results_html = '        <a href="l' + (results + 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">More Results</a> | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Fewer Results</a><br />' + "\n"
 		elsif results < maxres
-			results_html = '        <a href="l' + (results + 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">More Results</a> | Less Results<br />' + "\n"
+			results_html = '        <a href="l' + (results + 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">More Results</a> | Fewer Results<br />' + "\n"
 		elsif results > 5
-			results_html = '        More Results | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Less Results</a><br />' + "\n"
+			results_html = '        More Results | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Fewer Results</a><br />' + "\n"
 		end
 
 		if shown.to_i == 0
