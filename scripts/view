@@ -54,7 +54,7 @@ FCGI.each_cgi {|cgi|
 		if rows == 0
 			query = db.prepare('update metadata set hits = hits + 1 where id = ?')
 			query.execute(id).close
-			if visitor_id:
+			if visitor_id.to_i:
 				query = db.prepare('insert into votes (visitor_id, metadata_id) values (?,?)')
 				query.execute(visitor_id, id).close
 			end
