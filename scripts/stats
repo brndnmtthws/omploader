@@ -14,8 +14,6 @@ db = db_connect
 
 FCGI.each_cgi {|cgi|
 	begin
-		visitor_id = get_cached_visitor_id(cgi, db)
-
 		html = Cache.get($0)
 		if !html.nil?
 			cgi.out('application/xhtml+xml') { Base64.decode64(html) }
@@ -113,7 +111,7 @@ FCGI.each_cgi {|cgi|
 									xhtml = gen_stats + new_disc + top_refs
 
 									cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post }
-									Cache.set($0, Base64.encode64(xhtml_pre + xhtml + xhtml_post), Default_cache_expiry_long * 36)
+									Cache.set($0, Base64.encode64(xhtml_pre + xhtml + xhtml_post), Default_cache_expiry_long * 18)
 		end
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
