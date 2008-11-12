@@ -56,7 +56,7 @@ def xhtml_pre(title = '', search = '', showsearch = true)
 		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
 		"\t" + '<head>' + "\n" +
 		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
-		"\t\t" + '<link rel="stylesheet" type="text/css" href="style1.css" />' + "\n" +
+		"\t\t" + '<link rel="stylesheet" type="text/css" href="style2.css" />' + "\n" +
 		"\t\t" + '<link rel="shortcut icon" href="omploader_icon.png" type="image/x-icon" />' + "\n" +
 		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
 		"\t" + '</head>' + "\n" +
