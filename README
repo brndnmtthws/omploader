@@ -21,7 +21,7 @@ Requirements:
  * recaptcha (http://www.loonsoft.com/recaptcha/)
  * Ruby-MemCache (http://www.deveiate.org/projects/RMemCache/)
 
-the code for libvorbisfile-ruby and ruby-mmap are available from the omploader svn repo
+the code for libvorbisfile-ruby and ruby-mmap are available in the hax/ subdirectory.
 
 structure is as follows:
 
