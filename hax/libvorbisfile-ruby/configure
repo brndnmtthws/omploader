@@ -1,0 +1,2 @@
+# vim: set syntax=sh
+ruby extconf.rb $*

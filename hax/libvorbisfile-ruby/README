@@ -1,0 +1,33 @@
+Ruby extension for libvorbisfile.
+
+libvorbisfile is a decoder library provided with the Ogg Vorbis
+distribution. See http://xiph.org/ogg/vorbis/ for details.
+
+The API of this extension is virtually identical to that of
+vorbisfile.h, with a couple of exceptions:
+
+* Prefixes have been removed (ov_open -> open).
+* The OggVorbis_File parameter is removed, as the VorbisFile object
+  encapsulates this.
+
+You can read the vorbisfile API at the above URL.
+
+Installation:
+
+./configure
+make
+make install
+
+Note that you must pass an existing (and opened) IO object to
+VorbisFile::open(). This means you are not restricted to files -
+reading from (e.g.) a socket is fine.
+
+See test.rb for an example.
+
+Note that Vorbis comments are in UTF-8 and test.rb uses iconv to convert
+back to latin-1. Is there a more portable way of doing this ?
+
+Feedback welcome.
+
+Rik Hemsley (rikkus) <rik@kde.org>
+

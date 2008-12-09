@@ -1,0 +1,11 @@
+0.2 Second release
+  * Now uses _one_ string as a buffer, instead of passing you one back
+    after each read(). I had to do this, because the GC couldn't keep
+    up. Thanks to the bloke who showed me his example code for this,
+    and the ruby-audiofile author, whose idea I eventually used.
+    NOTE: This means the API has changed for read() !
+  * Put class VorbisFile into module 'Ogg' - so now you need to use
+    Ogg::Vorbisfile.
+  
+0.1 Initial relese
+  

@@ -1,0 +1,68 @@
+have_library: checking for vorbis_analysis() in -lvorbis... -------------------- yes
+
+"/usr/lib/ccache/bin/gcc -o conftest -I. -I/usr/lib64/ruby/1.8/x86_64-linux -I.  -march=athlon64 -O2 -ftracer -pipe -fno-strict-aliasing  -fPIC conftest.c  -L'.' -L'/usr/lib64' -Wl,-R'/usr/lib64' -L.  -rdynamic -Wl,-export-dynamic     -lruby18-static -lvorbis  -lpthread -ldl -lcrypt -lm   -lc"
+conftest.c: In function `t':
+conftest.c:3: error: `vorbis_analysis' undeclared (first use in this function)
+conftest.c:3: error: (Each undeclared identifier is reported only once
+conftest.c:3: error: for each function it appears in.)
+checked program was:
+/* begin */
+1: /*top*/
+2: int main() { return 0; }
+3: int t() { void ((*volatile p)()); p = (void ((*)()))vorbis_analysis; return 0; }
+/* end */
+
+"/usr/lib/ccache/bin/gcc -o conftest -I. -I/usr/lib64/ruby/1.8/x86_64-linux -I.  -march=athlon64 -O2 -ftracer -pipe -fno-strict-aliasing  -fPIC conftest.c  -L'.' -L'/usr/lib64' -Wl,-R'/usr/lib64' -L.  -rdynamic -Wl,-export-dynamic     -lruby18-static -lvorbis  -lpthread -ldl -lcrypt -lm   -lc"
+checked program was:
+/* begin */
+1: /*top*/
+2: int main() { return 0; }
+3: int t() { vorbis_analysis(); return 0; }
+/* end */
+
+--------------------
+
+have_library: checking for ov_open_callbacks() in -lvorbisfile... -------------------- yes
+
+"/usr/lib/ccache/bin/gcc -o conftest -I. -I/usr/lib64/ruby/1.8/x86_64-linux -I.  -march=athlon64 -O2 -ftracer -pipe -fno-strict-aliasing  -fPIC conftest.c  -L'.' -L'/usr/lib64' -Wl,-R'/usr/lib64' -L.  -rdynamic -Wl,-export-dynamic    -lvorbis  -lruby18-static -lvorbisfile -lvorbis  -lpthread -ldl -lcrypt -lm   -lc"
+conftest.c: In function `t':
+conftest.c:3: error: `ov_open_callbacks' undeclared (first use in this function)
+conftest.c:3: error: (Each undeclared identifier is reported only once
+conftest.c:3: error: for each function it appears in.)
+checked program was:
+/* begin */
+1: /*top*/
+2: int main() { return 0; }
+3: int t() { void ((*volatile p)()); p = (void ((*)()))ov_open_callbacks; return 0; }
+/* end */
+
+"/usr/lib/ccache/bin/gcc -o conftest -I. -I/usr/lib64/ruby/1.8/x86_64-linux -I.  -march=athlon64 -O2 -ftracer -pipe -fno-strict-aliasing  -fPIC conftest.c  -L'.' -L'/usr/lib64' -Wl,-R'/usr/lib64' -L.  -rdynamic -Wl,-export-dynamic    -lvorbis  -lruby18-static -lvorbisfile -lvorbis  -lpthread -ldl -lcrypt -lm   -lc"
+checked program was:
+/* begin */
+1: /*top*/
+2: int main() { return 0; }
+3: int t() { ov_open_callbacks(); return 0; }
+/* end */
+
+--------------------
+
+have_header: checking for vorbis/codec.h... -------------------- yes
+
+"/usr/lib/ccache/bin/gcc -E -I. -I/usr/lib64/ruby/1.8/x86_64-linux -I.  -march=athlon64 -O2 -ftracer -pipe -fno-strict-aliasing  -fPIC  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include <vorbis/codec.h>
+/* end */
+
+--------------------
+
+have_header: checking for vorbis/vorbisfile.h... -------------------- yes
+
+"/usr/lib/ccache/bin/gcc -E -I. -I/usr/lib64/ruby/1.8/x86_64-linux -I.  -march=athlon64 -O2 -ftracer -pipe -fno-strict-aliasing  -fPIC  conftest.c -o conftest.i"
+checked program was:
+/* begin */
+1: #include <vorbis/vorbisfile.h>
+/* end */
+
+--------------------
+
