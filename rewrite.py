@@ -28,7 +28,7 @@ if len(regex_s) > 1:
 regex_s += ')'
 regex = re.compile(regex_s, re.IGNORECASE)
 
-lottery = range(1, 5)
+lottery = range(1, 3)
 
 while 1:
 	line = sys.stdin.readline()

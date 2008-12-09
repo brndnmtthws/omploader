@@ -1,5 +1,5 @@
 /*
-$Id$
+$Id: style.css 322 2008-11-12 06:37:27Z brenden $
 
 Copyright 2007 David Shakaryan <omp@gentoo.org>
 Copyright 2007 Brenden Matthews <brenden@rty.ca>
@@ -10,7 +10,7 @@ Distributed under the terms of the GNU General Public License v3
 body {
 	color: #333;
 	background-color: #fbfbfb;
-	font-family: "DejaVu Sans", "Bitstream Vera Sans", "Wingdings", Arial, sans-serif;
+	font-family: "DejaVu Sans", "Bitstream Vera Sans", Arial, sans-serif;
 	font-size: 0.9em;
 	text-align: center;
 	margin: 0;
