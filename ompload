@@ -76,8 +76,8 @@ argv.each do |arg|
 		$stderr.puts "Invalid argument '#{arg}': file does not exist"
 		errors += 1
 		next
-	elsif File.size(arg) > 2**25
-		$stderr.puts "Error omploading '#{arg}': file exceeds " + (2**25).to_s + " bytes (size was " + File.size(arg).to_s + ")."
+	elsif File.size(arg) > 2**26
+		$stderr.puts "Error omploading '#{arg}': file exceeds " + (2**26).to_s + " bytes (size was " + File.size(arg).to_s + ")."
 		errors += 1
 		new_poop = Time.now
 		next
