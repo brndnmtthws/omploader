@@ -17,9 +17,9 @@ Requirements:
  * ruby-fcgi (http://rubyforge.org/projects/fcgi/)
  * libvorbisfile-ruby
  * ruby-mmap (http://moulon.inra.fr/ruby/mmap.html)
- * CodeRay (http://coderay.rubychan.de/)
  * recaptcha (http://www.loonsoft.com/recaptcha/)
  * Ruby-MemCache (http://www.deveiate.org/projects/RMemCache/)
+ * Vim (http://www.vim.org/)
 
 the code for libvorbisfile-ruby and ruby-mmap are available in the hax/ subdirectory.
 
