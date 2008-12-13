@@ -42,13 +42,15 @@ FCGI.each_cgi {|cgi|
 			top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" +
 			"\t\t\t" + '</div>' + "\n"
 
-			Cache.set($0, top_files, Default_cache_expiry_long)
+			xhtml = top_files
+
+			Cache.set($0, Base64.encode64(xhtml_pre + xhtml + xhtml_post), Default_cache_expiry_long)
+
+			cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post }
+			db.commit
+		else
+			cgi.out('application/xhtml+xml') { Base64.decode64(top_files) }
 		end
-
-		xhtml = top_files
-
-		cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post }
-		db.commit
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
