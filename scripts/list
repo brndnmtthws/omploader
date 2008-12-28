@@ -70,9 +70,9 @@ FCGI.each_cgi {|cgi|
 		end
 
 		if images_only
-			maxres = 30
+			maxres = 50
 		else
-			maxres = 60
+			maxres = 100
 		end
 
 		if !cgi.params['results'].to_s.empty?
