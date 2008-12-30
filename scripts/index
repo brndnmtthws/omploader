@@ -11,6 +11,8 @@
 require 'omploader'
 
 db = db_connect
+diseases = ['happy', 'rabid', 'ugly', 'christian', 'brazilian', 'zombie', 'scientologist', 'retarded', 'horny']
+animals = ['gerbils', 'kitties', 'geese', 'turkeys', 'honey badgers', 'Javeeds', 'nerds', 'ninjas', 'vaginas', 'kiwis', 'baby seals', 'gnus']
 
 FCGI.each_cgi {|cgi|
 	begin
@@ -227,10 +229,12 @@ FCGI.each_cgi {|cgi|
 		else
 			bigger = 'small'
 		end
+		animal = animals[rand(animals.size)]
+		disease = diseases[rand(diseases.size)]
 		xhtml =
 			"\t\t\t" + '<div class="content large">' + "\n" +
 			"\t\t\t\t" + '<a href="' + bigger + '">' + bigger + ' loader</a> | <a href="l">list</a> | <a href="r">random</a> | <a href="s">stats</a>' + "\n" +
-			"\t\t\t\t" + '<div class="powered">powered by web ' + (rand(8999999) + 1000000).to_s + '.' + (rand(899) + 100).to_s.sub(/0$/, (rand(8) + 1).to_s) + ' technology</div>' + "\n" +
+			"\t\t\t\t" + '<div class="powered">powered by ' + rand(1000).to_s + " #{disease} #{animal}</div>\n" +
 			"\t\t\t" + '</div>' + "\n" +
 			"\t\t\t" + '<div class="title">' + "\n" +
 			"\t\t\t\t" + '<div class="links"><a href="file">From File</a> <span class="separator">&#x2503;</span> <a href="curl">From URL</a> <span class="separator">&#x2503;</span> <a href="paste">Pasta!</a></div>' + "\n" +

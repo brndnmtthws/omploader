@@ -21,9 +21,9 @@ img {
 }
 
 input.button, input.field, textarea {
-	color: #a8002b;
+	color: #8000a0;
 	background-color: #f0e1e5;
-	border: 1px solid #cc5271;
+	border: 1px solid #8b00ff;
 	font-size: 1.0em;
 }
 
@@ -38,7 +38,7 @@ input.button {
 
 input.button:hover {
 	color: #f0e1e5;
-	background-color: #a8002b;
+	background-color: #8000a0;
 }
 
 br.clear {
@@ -66,9 +66,9 @@ div#header div#search input.field {
 }
 
 div#footer {
-	color: #a8002b;
+	color: #8000a0;
 	background-color: #f0e1e5;
-	border: 1px solid #cc5271;
+	border: 1px solid #8b00ff;
 	font-size: 0.8em;
 	text-align: left;
 	padding: 5px;
@@ -80,13 +80,13 @@ div#footer div.right {
 }
 
 div#container div.title a, div#footer a {
-	color: #a8002b;
+	color: #8000a0;
 	text-decoration: none;
 }
 
 div#container div.title a:hover, div #footer a:hover {
 	color: #f0e1e5;
-	background-color: #a8002b;
+	background-color: #8000a0;
 }
 
 div#container {
@@ -97,9 +97,9 @@ div#container {
 }
 
 div#container div.title {
-	color: #a8002b;
+	color: #8000a0;
 	background-color: #f0e1e5;
-	border: 1px solid #cc5271;
+	border: 1px solid #8b00ff;
 	font-weight: bold;
 	text-align: left;
 	padding: 3px;
@@ -118,13 +118,13 @@ div#container div.content {
 }
 
 div#container div.content a {
-	color: #a8002b;
+	color: #8000a0;
 	text-decoration: none;
 }
 
 div#container div.content a:hover {
 	color: #f6f6f6;
-	background-color: #a8002b;
+	background-color: #8000a0;
 }
 
 div#container div.content div.form .input {
@@ -136,7 +136,7 @@ div#container div.content div.form div.name {
 }
 
 div#container div.content div.form div.label {
-	color: #a8002b;
+	color: #8000a0;
 	font-weight: bold;
 	margin-bottom: 3px;
 }
@@ -237,7 +237,7 @@ div#container div.content table {
 }
 
 div#container div.content th {
-	color: #a8002b;
+	color: #8000a0;
 	background-color: #f0e1e5;
 	padding: 0 3px 0 3px;
 }
@@ -302,7 +302,7 @@ div#container div.content div.faq ol li {
 }
 
 div#container div.content div.faq div.q {
-	color: #a8002b;
+	color: #8000a0;
 	font-weight: bold;
 	font-size: 1.2em;
 	margin-bottom: 0.2em;
@@ -317,7 +317,7 @@ div#container div.content div.form div.recaptcha {
 	margin-left: 201px;
 }
 
-div#slogan h2 {
+div#slogan h1 {
 	color: #666;
 }
 

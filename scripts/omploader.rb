@@ -20,6 +20,9 @@ require 'logger'
 require 'find'
 require 'memcache'
 
+Slogan = ['hi!', 'free, lean and mean image &amp; file hosting', 'just doit']
+Slogan = Slogan[rand(Slogan.size)]
+
 ConfigFile = YAML::load(File.open('config'))
 
 Max_upload_count = ConfigFile['limits']['upload_count']
@@ -56,15 +59,15 @@ def xhtml_pre(title = '', search = '', showsearch = true)
 		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
 		"\t" + '<head>' + "\n" +
 		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
-		"\t\t" + '<link rel="stylesheet" type="text/css" href="style.css" />' + "\n" +
-		"\t\t" + '<link rel="shortcut icon" href="omploader_icon.png" type="image/x-icon" />' + "\n" +
+		"\t\t" + '<link rel="stylesheet" type="text/css" href="style3.css" />' + "\n" +
+		"\t\t" + '<link rel="shortcut icon" href="omploader_icon2.png" type="image/x-icon" />' + "\n" +
 		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
 		"\t" + '</head>' + "\n" +
 		"\t" + '<body>' + "\n" +
 		"\t\t" + '<div id="container">' + "\n" +
 		"\t\t\t" + '<div id="header">' + "\n" +
-		"\t\t\t\t" + '<div id="title"><a href="/"><img src="omploader.png" alt="omploader" /></a></div>'  + "\n" +
-		"\t\t\t\t" + '<div id="slogan"><h2>free, lean and mean image &amp; file hosting™</h2></div>'  + "\n" +
+		"\t\t\t\t" + '<div id="title"><a href="/"><img src="omploader2.png" alt="omploader" /></a></div>'  + "\n" +
+		"\t\t\t\t" + '<div id="slogan"><h1>' + Slogan + '™</h1></div>'  + "\n" +
 		"\t\t\t\t" + '<form enctype="multipart/form-data" action="l" method="post">' + "\n"
 	if showsearch
 		xhtml_pre +=

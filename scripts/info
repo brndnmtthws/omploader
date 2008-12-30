@@ -257,7 +257,7 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t\t\t\t" + '<div class="float"><textarea name="loldongs' + owner_id + '" class="input comment"></textarea></div>' + "\n" +
 				"\t\t\t\t\t\t" + '<br class="clear" />' + "\n" +
 				"\t\t\t\t\t\t" + '<div class="recaptcha">' + "\n" +
-				"\t\t\t\t\t\t\t" + Captcha.get_challenge() + "\n" +
+				"\t\t\t\t\t\t\t" + Captcha.get_challenge('error', :options => {:theme => 'white'}) + "\n" +
 				"\t\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t\t" + '<input type="hidden" name="cocks' + owner_id + '" value="' + id.to_b64 + '" />' + "\n" +
 				"\t\t\t\t\t\t" + '<input type="submit" value="COMMENT!" class="button" />' + "\n" +
