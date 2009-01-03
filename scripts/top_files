@@ -44,10 +44,9 @@ FCGI.each_cgi {|cgi|
 
 			xhtml = top_files
 
-			Cache.set($0, Base64.encode64(xhtml_pre + xhtml + xhtml_post), Default_cache_expiry_long)
-
 			cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post }
-			db.commit
+			
+			Cache.set($0, Base64.encode64(xhtml_pre + xhtml + xhtml_post), Default_cache_expiry_long)
 		else
 			cgi.out('application/xhtml+xml') { Base64.decode64(top_files) }
 		end
