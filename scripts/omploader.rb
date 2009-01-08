@@ -20,8 +20,14 @@ require 'logger'
 require 'find'
 require 'memcache'
 
-Slogan = ['hi!', 'free, lean and mean image &amp; file hosting', 'just doit']
-Slogan = Slogan[rand(Slogan.size)]
+Slogans = [
+	'hi!',
+	'free, lean and mean image &amp; file hosting',
+	'just doit',
+	'butts',
+	'brasil rulah',
+]
+Slogan = Slogans[rand(Slogans.size)]
 
 ConfigFile = YAML::load(File.open('config'))
 
