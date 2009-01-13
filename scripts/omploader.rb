@@ -26,6 +26,12 @@ Slogans = [
 	'just doit',
 	'butts',
 	'brasil rulah',
+	'i like cheese',
+	'thanks for coming',
+	'Omploader Recommends Windows Vista',
+	'have you checked your blood pressure?',
+	'floss daily',
+	'(null)',
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
