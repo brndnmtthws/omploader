@@ -141,17 +141,7 @@ FCGI.each_cgi {|cgi|
 			Cache.set($0 + 'refs' + id, referrers, Default_cache_expiry_short)
 		end
 
-		if size > 1024*1024
-			n = (size.to_i/1024.0/1024.0).to_s
-			size = n.split('.')[0] + '.' + n.split('.')[1][0...2] + ' MiB'
-		elsif size > 1024
-			n = (size.to_i/1024.0).to_s
-			size = n.split('.')[0] + '.' + n.split('.')[1][0...2] + ' KiB'
-		elsif size == 1
-			size = size.to_s + ' byte'
-		else
-			size = size.to_s + ' bytes'
-		end
+		size = to_readable_bytes(size.to_f)
 
 		owner_name = Cache.get($0 + 'name' + id)
 		if owner_name.nil?

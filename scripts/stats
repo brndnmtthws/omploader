@@ -25,7 +25,7 @@ FCGI.each_cgi {|cgi|
 			stmt = query.execute
 			res = stmt.fetch
 			count = res[0]
-			size = res[1].to_f/1024.0/1024.0/1024.0
+			size = to_readable_bytes(res[1].to_f)
 			query = db.prepare('select count(id) from visitors;')
 			stmt = query.execute
 			res = stmt.fetch
@@ -38,7 +38,7 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Number of files:</b> </span><span class="filename">' + count.to_s + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
-				"\t\t\t\t\t\t" + '<span class="filename"><b>Data store size:</b> </span><span class="filename">' + sprintf("%.2f", size) + ' GiB</span>' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><b>Data store size:</b> </span><span class="filename">' + size + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Unique visitors in last ' + (Visitor_expiry/3600).to_s + ' hours:</b> </span><span class="filename">' + visitors.to_s + '</span>' + "\n" +
