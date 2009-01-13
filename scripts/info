@@ -162,19 +162,19 @@ FCGI.each_cgi {|cgi|
 			hide_link = '<a href="i' + id.to_b64 + '-hide">Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
 		end
 
-#		cgi.out('text/plain') { comment_count.to_s }
-#		db.commit
-#		next
+		#		cgi.out('text/plain') { comment_count.to_s }
+		#		db.commit
+		#		next
 
-		if hide_comments == 0
-			comments_body = Cache.get($0 + 'comments' + id)
-			if comments_body.nil?
-				comments_body =
+		comments_body = Cache.get($0 + 'comments' + id)
+		if comments_body.nil? or update_prefs
+			comments_body =
 					"\t\t\t" + '<a name="comment_top">' + "\n" +
 					"\t\t\t" + '<div class="title">' + "\n" + 
 					"\t\t\t\t" + '<div class="links">' + hide_link + '</div>' + "\n" +
 					"\t\t\t\t" + '<div>Comments</div>' + "\n" +
 					"\t\t\t" + '</div>' + "\n"
+			if hide_comments == 0
 				cnum = 0
 				if comment_count > 0
 					query = db.prepare('select	comments.id, comments.creation_date, comments_body.body,	names.name from comments inner join metadata on metadata.id = comments.metadata_id inner join comments_body on comments_body.id = comments.comment_id	left join owners on owners.id = comments.owner_id left join names on names.id = owners.name_id where metadata.id = ? order by comments.creation_date asc')
