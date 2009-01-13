@@ -264,7 +264,7 @@ end
 
 def to_readable_bytes(bytes)
 	kibyte = 1024.0
-	suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
+	suffixes = ['Byte(s)', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
 	index = 0
 	while bytes > kibyte ** (index + 1) and index + 1 < suffixes.size
 		index += 1
