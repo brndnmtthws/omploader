@@ -10,14 +10,13 @@
 
 require 'omploader'
 
-db = db_connect
-
 FCGI.each_cgi {|cgi|
 	begin
 		html = Cache.get($0)
 		if !html.nil?
 			cgi.out('application/xhtml+xml') { Base64.decode64(html) }
 		else
+			db = db_connect
 			gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
 			"\t\t\t\t" + '<div class="filelist">' + "\n"
