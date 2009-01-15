@@ -1,7 +1,5 @@
 #!/bin/env ruby
 #
-# $Id: delete 275 2008-07-12 23:05:40Z brenden $
-#
 # Copyright 2007-2009 David Shakaryan <omp@gentoo.org>
 # Copyright 2007-2009 Brenden Matthews <brenden@rty.ca>
 #

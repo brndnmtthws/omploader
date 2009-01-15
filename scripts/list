@@ -1,7 +1,5 @@
 #!/bin/env ruby
 #
-# $Id: list 319 2008-09-24 00:58:33Z brenden $
-#
 # Copyright 2007-2009 David Shakaryan <omp@gentoo.org>
 # Copyright 2007-2009 Brenden Matthews <brenden@rty.ca>
 #

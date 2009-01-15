@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 #
-# $Id: omploader.rb 323 2008-11-12 06:38:14Z brenden $
-#
 # Copyright 2007-2009 David Shakaryan <omp@gentoo.org>
 # Copyright 2007-2009 Brenden Matthews <brenden@rty.ca>
 #
