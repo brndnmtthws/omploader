@@ -10,35 +10,26 @@
 
 require 'omploader'
 
-FCGI.each_cgi {|cgi|
-	begin
-		html = Cache.get('stats')
-		time = Cache.get('statstime')
-		poo_sent = false
-		if !html.nil?
-			cgi.out('application/xhtml+xml') { Base64.decode64(html) }
-			poo_sent = true
-			next if !time.nil? and Time.now.to_i - time.to_i < Default_cache_expiry_long
-		end
-		Cache.set('statstime', Time.now.to_i, Default_cache_expiry_long)
-		db = db_connect
-		gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
+def do_stats
+	Cache.set('statstime', Time.now.to_i, Default_cache_expiry_long)
+	db = db_connect
+	gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
 			"\t\t\t\t" + '<div class="filelist">' + "\n"
-		query = db.prepare('select count(id), sum(size) from metadata;')
-		stmt = query.execute
-		res = stmt.fetch
-		count = res[0]
-		size = to_readable_bytes(res[1].to_f)
-		query = db.prepare('select count(id) from visitors;')
-		stmt = query.execute
-		res = stmt.fetch
-		visitors = res[0]
-		query = db.prepare('select count(id) from comments;')
-		stmt = query.execute
-		res = stmt.fetch
-		comments = res[0]
-		gen_stats += "\t\t\t\t\t" + '<div class="file">' + "\n" +
+	query = db.prepare('select count(id), sum(size) from metadata;')
+	stmt = query.execute
+	res = stmt.fetch
+	count = res[0]
+	size = to_readable_bytes(res[1].to_f)
+	query = db.prepare('select count(id) from visitors;')
+	stmt = query.execute
+	res = stmt.fetch
+	visitors = res[0]
+	query = db.prepare('select count(id) from comments;')
+	stmt = query.execute
+	res = stmt.fetch
+	comments = res[0]
+	gen_stats += "\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Number of files:</b> </span><span class="filename">' + count.to_s + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
@@ -51,30 +42,30 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Comments:</b> </span><span class="filename">' + comments.to_s + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
 
-		gen_stats += "\t\t\t\t" + '</div>' + "\n" +
+	gen_stats += "\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t" + '</div>' + "\n"
-		stmt.close
+	stmt.close
 
-		query = db.prepare('select referrers.address, sum(count) from referrals inner join referrers on referrers.id = referrals.referrer_id group by referrals.referrer_id order by sum(count) desc limit 15;')
-		stmt = query.execute
-		top_refs = "\t\t\t" + '<div class="title">Top Referrers</div>' + "\n" +
+	query = db.prepare('select referrers.address, sum(count) from referrals inner join referrers on referrers.id = referrals.referrer_id group by referrals.referrer_id order by sum(count) desc limit 15;')
+	stmt = query.execute
+	top_refs = "\t\t\t" + '<div class="title">Top Referrers</div>' + "\n" +
 				"\t\t\t" + '<div class="content">' + "\n" +
 				"\t\t\t\t" + '<div class="filelist">' + "\n"
-		stmt.num_rows.times do
-			res = stmt.fetch
-			address = res[0].to_s
-			address.length > 60 ? address_listed = address[0..58] + '…' : address_listed = address
-			count = res[1].to_s
-			top_refs += "\t\t\t\t\t" + '<div class="file">' + "\n" +
+	stmt.num_rows.times do
+		res = stmt.fetch
+		address = res[0].to_s
+		address.length > 60 ? address_listed = address[0..58] + '…' : address_listed = address
+		count = res[1].to_s
+		top_refs += "\t\t\t\t\t" + '<div class="file">' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="filename"><a href="' + address.gsub(/&/, '&amp;') + '" title="' + address.gsub(/&/, '&amp;') + '">' + address_listed.gsub(/&/, '&amp;') + '</a></span>' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="fileinfo">' + count + '</span>' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n"
-		end
-		top_refs += "\t\t\t\t" + '</div>' + "\n" +
+	end
+	top_refs += "\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t" + '</div>' + "\n"
-		stmt.close
+	stmt.close
 
-		query = db.prepare('select
+	query = db.prepare('select
 										metadata.id,
 										metadata.comment_count,
 										names.name,
@@ -86,37 +77,55 @@ FCGI.each_cgi {|cgi|
 									group by metadata.id
 									order by c1.creation_date desc
 									limit 20')
-		stmt = query.execute
-		new_disc = "\t\t\t" + '<div class="title">Recently Discussed</div>' + "\n" +
+	stmt = query.execute
+	new_disc = "\t\t\t" + '<div class="title">Recently Discussed</div>' + "\n" +
 				"\t\t\t" + '<div class="content">' + "\n" +
 				"\t\t\t\t" + '<div class="filelist">' + "\n"
-		stmt.num_rows.times do
-			res = stmt.fetch
-			id = res[0].to_s
-			count = res[1].to_s
-			name = res[2].to_s
-			date = res[3].to_s
+	stmt.num_rows.times do
+		res = stmt.fetch
+		id = res[0].to_s
+		count = res[1].to_s
+		name = res[2].to_s
+		date = res[3].to_s
 
-			if name.length > 50
-				name_displayed = name[0..48] + '…'
-			else
-				name_displayed = name
-			end
-			new_disc += "\t\t\t\t\t" + '<div class="file">' + "\n" +
+		if name.length > 50
+			name_displayed = name[0..48] + '…'
+		else
+			name_displayed = name
+		end
+		new_disc += "\t\t\t\t\t" + '<div class="file">' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="filename"><a href="i' + id.to_b64 + '#comment_top" title="' + name + '">' + name_displayed + '</a></span>' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="fileinfo">' + count + '</span>' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="fileinfo">' + date.sub(' ', '&nbsp;') + '</span>' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n"
-		end
-		new_disc += "\t\t\t\t" + '</div>' + "\n" +
+	end
+	new_disc += "\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t" + '</div>' + "\n"
-		stmt.close
+	stmt.close
 
-		xhtml = gen_stats + new_disc + top_refs
+	xhtml = gen_stats + new_disc + top_refs
 
-		cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post } if !poo_sent
+	Cache.set('stats', Base64.encode64(xhtml_pre + xhtml + xhtml_post), 0)
+	return xhtml_pre + xhtml + xhtml_post
+end
 
-		Cache.set('stats', Base64.encode64(xhtml_pre + xhtml + xhtml_post), 0)
+FCGI.each_cgi {|cgi|
+	begin
+		html = Cache.get('stats')
+		time = Cache.get('statstime')
+		poo_sent = false
+		if !html.nil?
+			cgi.out('application/xhtml+xml') { Base64.decode64(html) }
+			poo_sent = true
+			next if !time.nil? and Time.now.to_i - time.to_i < Default_cache_expiry_long
+		end
+		if !poo_sent
+			cgi.out('application/xhtml+xml') { do_stats() }
+		else
+			Thread.new do
+				do_stats()
+			end
+		end
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
