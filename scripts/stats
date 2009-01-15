@@ -109,6 +109,8 @@ def do_stats
 	return xhtml_pre + xhtml + xhtml_post
 end
 
+threads = []
+
 FCGI.each_cgi {|cgi|
 	begin
 		html = Cache.get('stats')
@@ -122,9 +124,7 @@ FCGI.each_cgi {|cgi|
 		if !poo_sent
 			cgi.out('application/xhtml+xml') { do_stats() }
 		else
-			Thread.new do
-				do_stats()
-			end
+			threads << Thread.new { do_stats() }
 		end
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
@@ -208,3 +208,5 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	end
 }
+
+threads.each { |thread| thread.join }
