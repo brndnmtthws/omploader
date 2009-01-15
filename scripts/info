@@ -83,6 +83,7 @@ FCGI.each_cgi {|cgi|
 				Cache.set('throttle' + visitor_id, thottle.to_i + 1, Max_upload_period)
 				Cache.delete($0 + id)
 				Cache.delete($0 + 'comments' + id)
+				Cache.delete('statstime') # the stats page should update now
 				redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
 				db.commit
 				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
