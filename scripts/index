@@ -121,6 +121,7 @@ FCGI.each_cgi {|cgi|
 					else
 						name_displayed = name
 					end
+					name_displayed.gsub!(/&/, '&amp;')
 
 					top_files += 
 					"\t\t\t\t\t" + '<div class="file">' + "\n" +
