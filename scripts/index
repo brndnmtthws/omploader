@@ -112,14 +112,13 @@ FCGI.each_cgi {|cgi|
 				stmt.num_rows.times do
 					result = stmt.fetch
 					id = result.first.to_s.to_b64
-					name = result.last.to_s
+					name = result.last.to_s.gsub(/&/, '&amp;')
 
 					if name.length > 60
 						name_displayed = name[0..58] + '…'
 					else
 						name_displayed = name
 					end
-					name_displayed.gsub!(/&/, '&amp;')
 
 					top_files += 
 					"\t\t\t\t\t" + '<div class="file">' + "\n" +
