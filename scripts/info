@@ -78,13 +78,17 @@ FCGI.each_cgi {|cgi|
 					query.execute(name_id, owner_id)
 					query.close
 				end
+				redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
+				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
+				db.commit
 				Cache.set('throttle' + visitor_id, thottle.to_i + 1, Max_upload_period)
 				Cache.delete($0 + id)
 				Cache.delete($0 + 'comments' + id)
-				Cache.delete('statstime') # the stats page should update now
-				redirect = 'i' + id.to_b64 + '#comment_' + comment_id.to_s
-				db.commit
-				print cgi.header({'Status' => '302 Moved', 'location' => redirect})
+				last_comment_time = Cache.get('lastcomment')
+				if last_comment_time.nil? or Time.now.to_i - Default_cache_expiry_short > last_comment_time.to_i
+					Cache.delete('statstime') # the stats page should update now
+				end
+				Cache.set('lastcomment', Time.now.to_i, Default_cache_expiry_long)
 				next
 			end
 		else
