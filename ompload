@@ -11,6 +11,7 @@ require 'tempfile'
 argv = Array.new
 
 quiet = false
+url_only = false
 help = false
 skip = false
 filename = 'pasta'
@@ -28,6 +29,8 @@ ARGV.each_index do |i|
 	end
 	if ARGV[i] =~ /-q|--quiet/
 		quiet = true
+	elsif ARGV[i] =~ /-u|--url/
+		url_only = true
 	elsif ARGV[i] =~ /-h|--help/
 		help = true
 	elsif ARGV[i] =~ /-f|--filename/
@@ -49,6 +52,7 @@ end
 if (ARGV.size < 1 and (stdin.nil? or stdin.empty?)) or help or nocurl
 	$stderr.puts 'Usage:  ompload [-h|--help] [options] [file(s)]'
 	$stderr.puts '  -q, --quiet     Only output errors and warnings'
+	$stderr.puts '  -u, --url       Only output URL when finished'
 	$stderr.puts '  -f, --filename  Filename to use when posting data'
 	$stderr.puts '                  from stdin'
 	$stderr.puts 
@@ -60,40 +64,38 @@ end
 
 errors = 0
 
-wait = 15
-old_poop = Time.now - wait
-new_poop = Time.now
+wait = 5
 
 Url = 'http://omploader.org/'
 
 used_stdin = false
+first = true
 
 argv.each do |arg|
 
-	if stdin.nil? and !used_stdin and !File.exists?(arg)
-		$stderr.puts "Invalid argument '#{arg}': file does not exist"
+	if stdin.nil? and !used_stdin and !File.file?(arg)
+		$stderr.puts "Invalid argument '#{arg}': file does not exist (or is not a regular file)."
 		errors += 1
 		next
-	elsif File.size(arg) > 2**26
-		$stderr.puts "Error omploading '#{arg}': file exceeds " + (2**26).to_s + " bytes (size was " + File.size(arg).to_s + ")."
+	elsif File.size(arg) > 2**28
+		$stderr.puts "Error omploading '#{arg}': file exceeds " + (2**28).to_s + " bytes (size was " + File.size(arg).to_s + ")."
 		errors += 1
-		new_poop = Time.now
 		next
 	end
 
-	# no more than 1 every 15 seconds is common courtesy
-	turd = new_poop - old_poop
-	if turd < wait
-		puts 'Sleeping for ' + (wait - turd).to_s if !quiet
-		sleep(wait - turd)
+	if !first
+		# try not to hammer the server
+		puts 'Sleeping for ' + wait.to_s + 's' if !quiet and !url_only
+		sleep(wait)
+	else
+		first = false
 	end
-	old_poop = new_poop
 
 	tmp = Tempfile.new(filename)
 	if !stdin.nil? and !used_stdin
 		# upload from stdin
-		puts "Progress for '#{arg}'" if !quiet
-		if quiet
+		puts "Progress for '#{arg}'" if !quiet and !url_only
+		if quiet or url_only
 			p = IO.popen("curl -s -F 'file1=@-;filename=\"#{filename}\"' #{Url}upload -o '#{tmp.path}'", "w+")
 		else
 			p = IO.popen("curl -# -F 'file1=@-;filename=\"#{filename}\"' #{Url}upload -o '#{tmp.path}'", "w+")
@@ -104,10 +106,10 @@ argv.each do |arg|
 		used_stdin = true
 	else
 		# upload file
-		puts "Progress for '#{arg}'" if !quiet
+		puts "Progress for '#{arg}'" if !quiet and !url_only
 		# escape quotes
 		tmp_path = arg.gsub('"', '\"')
-		if quiet
+		if quiet or url_only
 			%x{curl -s -F file1=@"#{tmp_path}" #{Url}upload -o '#{tmp.path}'}
 		else
 			%x{curl -# -F file1=@"#{tmp_path}" #{Url}upload -o '#{tmp.path}'}
@@ -116,7 +118,6 @@ argv.each do |arg|
 	if !File.size?(tmp.path)
 		$stderr.puts "Error omploading '#{arg}'"
 		errors += 1
-		new_poop = Time.now
 		next
 	end
 	output = IO.read(tmp.path)
@@ -125,8 +126,9 @@ argv.each do |arg|
 	if output =~ /View file: <a href="v([A-Za-z0-9+\/]+)">/
 		id = $1
 		puts "Omploaded '#{arg}' to #{Url}v#{id}" if !quiet
+		wait = 5
 	elsif output =~ /Slow down there, cowboy\./
-		wait += 5
+		wait += 60
 		argv << arg
 		$stderr.puts "Got throttled when trying to ompload '#{arg}'"
 		$stderr.puts "Increasing wait and attempting to continue..."
@@ -136,10 +138,9 @@ argv.each do |arg|
 		errors += 1
 	end
 
-	new_poop = Time.now
 end
 
-if !quiet
+if !quiet and !url_only
 	if errors < 1
 		puts "Success."
 	else
