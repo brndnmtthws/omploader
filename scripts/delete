@@ -216,6 +216,8 @@ if cleanup
 		$stderr.puts err
 		log = Logger.new(Paths['log'])
 		log.error(err)
+	ensure
+		db.close if db
 	end
 end
 

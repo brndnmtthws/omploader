@@ -53,8 +53,14 @@ FCGI.each_cgi {|cgi|
 			query = db.prepare('update metadata set hits = hits + 1 where id = ?')
 			query.execute(id).close
 			if visitor_id.to_i:
-				query = db.prepare('insert into votes (visitor_id, metadata_id) values (?,?)')
-				query.execute(visitor_id, id).close
+				begin
+					query = db.prepare('insert into votes (visitor_id, metadata_id) values (?,?)')
+					query.execute(visitor_id, id)
+				rescue Mysql::Error => err
+					# ignore
+				ensure
+					query.close
+				end
 			end
 			referrer = cgi.referer.to_s
 			referrer = URI.extract(referrer).first
@@ -153,5 +159,7 @@ FCGI.each_cgi {|cgi|
 		log.error(cgi.script_name)
 		log.error(cgi.params)
 		log.error(err)
+	ensure
+		db.close if db
 	end
 }

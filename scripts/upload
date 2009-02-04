@@ -389,6 +389,7 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	ensure
 		tmpfile.close! unless tmpfile.nil?
+		db.close if db
 	end
 }
 

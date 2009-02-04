@@ -162,5 +162,7 @@ FCGI.each_cgi {|cgi|
 		log.error(cgi.script_name)
 		log.error(cgi.params)
 		log.error(err)
+	ensure
+		db.close if db
 	end
 }
