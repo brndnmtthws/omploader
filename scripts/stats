@@ -10,7 +10,7 @@ require 'omploader'
 
 def do_stats
 	begin
-		Cache.set('statstime', Time.now.to_i, Default_cache_expiry_long)
+		Cache.set('statstime', Time.now.to_i, Default_cache_expiry_long * 10)
 		db = db_connect
 		gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
@@ -121,7 +121,7 @@ FCGI.each_cgi {|cgi|
 		if !html.nil?
 			cgi.out('application/xhtml+xml') { Base64.decode64(html) }
 			poo_sent = true
-			next if !time.nil? and Time.now.to_i - time.to_i < Default_cache_expiry_long
+			next if !time.nil? and Time.now.to_i - time.to_i < Default_cache_expiry_long * 10
 		end
 		if !poo_sent
 			cgi.out('application/xhtml+xml') { do_stats() }
