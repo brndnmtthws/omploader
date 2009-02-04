@@ -9,10 +9,10 @@
 require 'omploader'
 require 'uri'
 
-db = db_connect
-
 FCGI.each_cgi {|cgi|
 	begin
+		db = db_connect
+
 		id = cgi.params['id'].to_s.to_id
 
 		# Verify that id is strictly numeric.

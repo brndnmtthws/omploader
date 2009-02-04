@@ -8,12 +8,12 @@
 
 require 'omploader'
 
-db = db_connect
 diseases = ['happy', 'rabid', 'ugly', 'christian', 'brazilian', 'zombie', 'scientologist', 'retarded', 'horny']
 animals = ['gerbils', 'kitties', 'geese', 'turkeys', 'honey badgers', 'Javeeds', 'nerds', 'ninjas', 'vaginas', 'kiwis', 'baby seals', 'gnus']
 
 FCGI.each_cgi {|cgi|
 	begin
+		db = db_connect
 		visitor_id = get_cached_visitor_id(cgi, db)
 
 		owner_id = get_cached_owner_id(cgi, db)

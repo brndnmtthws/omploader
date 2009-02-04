@@ -9,10 +9,10 @@
 require 'omploader'
 require 'set'
 
-db = db_connect
-
 FCGI.each_cgi {|cgi|
 	begin
+		db = db_connect
+
 		db_check(db)
 
 		top_files =

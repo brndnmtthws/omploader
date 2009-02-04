@@ -217,7 +217,7 @@ if cleanup
 		log = Logger.new(Paths['log'])
 		log.error(err)
 	ensure
-		db.close if db
+		Db.close if Db
 	end
 end
 

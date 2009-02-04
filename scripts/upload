@@ -29,8 +29,6 @@ def get_output(id, name, name_displayed, type, host)
 	return ret
 end
 
-db = db_connect
-
 # Method for using Vim's syntax highlighting and improving the generated code.
 def vimcolour(datum, filetype, title)
 	# Store the datum in a temporary file for Vim to open.
@@ -105,6 +103,8 @@ end
 
 FCGI.each_cgi {|cgi|
 	begin
+		db = db_connect
+
 		output = ''
 		visitor_id = get_cached_visitor_id(cgi, db)
 
