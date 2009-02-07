@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: omploader
 -- ------------------------------------------------------
--- Server version	5.0.44-log
+-- Server version	5.0.60
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,15 +16,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `omploader`
---
-
--- USE `omploader`;
-
---
 -- Table structure for table `comments`
 --
 
+DROP TABLE IF EXISTS `comments`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `comments` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `metadata_id` int(10) unsigned NOT NULL,
@@ -37,21 +34,29 @@ CREATE TABLE `comments` (
   CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments_body` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `comments_body`
 --
 
+DROP TABLE IF EXISTS `comments_body`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `comments_body` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `body` varchar(750) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `content_types`
 --
 
+DROP TABLE IF EXISTS `content_types`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `content_types` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `content_type_main_id` int(10) unsigned NOT NULL,
@@ -62,33 +67,45 @@ CREATE TABLE `content_types` (
   CONSTRAINT `content_types_ibfk_1` FOREIGN KEY (`content_type_main_id`) REFERENCES `content_types_main` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `content_types_ibfk_2` FOREIGN KEY (`content_type_sub_id`) REFERENCES `content_types_sub` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `content_types_main`
 --
 
+DROP TABLE IF EXISTS `content_types_main`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `content_types_main` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `content_types_sub`
 --
 
+DROP TABLE IF EXISTS `content_types_sub`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `content_types_sub` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `type` varchar(50) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `metadata`
 --
 
+DROP TABLE IF EXISTS `metadata`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `metadata` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `content_type_id` int(10) unsigned NOT NULL,
@@ -123,22 +140,30 @@ CREATE TABLE `metadata` (
   CONSTRAINT `metadata_ibfk_21` FOREIGN KEY (`content_type_id`) REFERENCES `content_types` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `metadata_ibfk_22` FOREIGN KEY (`name_id`) REFERENCES `names` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `names`
 --
 
+DROP TABLE IF EXISTS `names`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `names` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `name` varchar(200) character set utf8 collate utf8_unicode_ci NOT NULL,
+  `name` varchar(200) character set utf8 collate utf8_unicode_ci default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `owners`
 --
 
+DROP TABLE IF EXISTS `owners`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `owners` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `hide_top_files` tinyint(1) NOT NULL default '0',
@@ -157,11 +182,15 @@ CREATE TABLE `owners` (
   KEY `name_id` (`name_id`),
   CONSTRAINT `owners_ibfk_1` FOREIGN KEY (`name_id`) REFERENCES `names` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `referrals`
 --
 
+DROP TABLE IF EXISTS `referrals`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `referrals` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `referrer_id` int(10) unsigned NOT NULL,
@@ -173,32 +202,44 @@ CREATE TABLE `referrals` (
   CONSTRAINT `referrals_ibfk_1` FOREIGN KEY (`referrer_id`) REFERENCES `referrers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `referrals_ibfk_2` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `referrers`
 --
 
+DROP TABLE IF EXISTS `referrers`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `referrers` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `address` varchar(100) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `thumbnails`
 --
 
+DROP TABLE IF EXISTS `thumbnails`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `thumbnails` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `last_accessed` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `visitors`
 --
 
+DROP TABLE IF EXISTS `visitors`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `visitors` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `address` varchar(20) character set utf8 collate utf8_unicode_ci NOT NULL,
@@ -206,11 +247,15 @@ CREATE TABLE `visitors` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `address` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `votes`
 --
 
+DROP TABLE IF EXISTS `votes`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
 CREATE TABLE `votes` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `visitor_id` int(10) unsigned NOT NULL,
@@ -219,9 +264,11 @@ CREATE TABLE `votes` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `visitor_id` (`visitor_id`,`metadata_id`),
   KEY `metadata_id` (`metadata_id`),
-  CONSTRAINT `votes_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `votes_ibfk_3` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `votes_ibfk_2` FOREIGN KEY (`metadata_id`) REFERENCES `metadata` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
@@ -231,4 +278,4 @@ CREATE TABLE `votes` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-08-30 18:31:02
+-- Dump completed on 2009-02-07 22:26:38
