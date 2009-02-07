@@ -30,6 +30,12 @@ Slogans = [
 	'have you checked your blood pressure?',
 	'floss daily',
 	'(null)',
+	'blah blah blah',
+	'Nobody Does it Like Omp',
+	'Made in Taiwan',
+	'I Saw Omp and I Though of You',
+	'Omp Tested, Mother Approved',
+	'You\'ve Got Questions. We\'ve got Omp'
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
