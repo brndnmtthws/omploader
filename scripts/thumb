@@ -75,8 +75,9 @@ FCGI.each_cgi {|cgi|
 
 					file = File.new(Paths['thumbnails'] + '/' + id.to_b64, File::CREAT|File::TRUNC|File::RDWR, 0664)
 					file.close
+					thumb = thumb.quantize(number_colors=256)
 					datum = Mmap.new(file.path, 'rw')
-					datum.insert(0, thumb.to_blob { self.format = 'png'; self.total_colors = 256 }.to_s)
+					datum.insert(0, thumb.to_blob { self.format = 'png'; self.quality = 95; self.depth = 8 }.to_s)
 					datum.unmap
 
 					query = db.prepare('insert into thumbnails (last_accessed) values (current_timestamp)')
