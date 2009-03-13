@@ -35,7 +35,8 @@ Slogans = [
 	'Made in Taiwan',
 	'I Saw Omp and I Thought of You',
 	'Omp Tested, Mother Approved',
-	'You\'ve Got Questions. We\'ve got Omp'
+	'You\'ve Got Questions. We\'ve got Omp',
+	'~ ~ ~ ~ ~ ~',
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
