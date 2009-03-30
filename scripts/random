@@ -77,7 +77,7 @@ FCGI.each_cgi {|cgi|
 
 		xhtml =
 			"\t\t\t" + '<div class="content large">' + "\n" +
-			"\t\t\t\t" + '<a href="r">MOAR!</a>' + "\n" +
+			"\t\t\t\t" + '<a href="r">ENCORE UNE FOIS!</a>' + "\n" +
 			"\t\t\t" + '</div>' + "\n" +
 			top_files
 

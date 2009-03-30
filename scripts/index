@@ -80,7 +80,7 @@ FCGI.each_cgi {|cgi|
 		if hide_top_files == 1
 			top_files =
 				"\t\t\t" + '<div class="title">' + "\n" +
-				"\t\t\t\t" + '<div class="links"><a href="ftop">Moar</a> <span class="separator">&#x2503;</span> <a href="show">Show</a></div>' + "\n" +
+				"\t\t\t\t" + '<div class="links"><a href="ftop">Encore</a> <span class="separator">&#x2503;</span> <a href="show">Show</a></div>' + "\n" +
 				"\t\t\t\t" + 'Top Files' + "\n" +
 				"\t\t\t" + '</div>'
 		else
@@ -88,7 +88,7 @@ FCGI.each_cgi {|cgi|
 			if top_files.nil?
 				top_files =
 				"\t\t\t" + '<div class="title">' + "\n" +
-				"\t\t\t\t" + '<div class="links"><a href="ftop">Moar</a> <span class="separator">&#x2503;</span> <a href="hide">Hide</a></div>' + "\n" +
+				"\t\t\t\t" + '<div class="links"><a href="ftop">Encore</a> <span class="separator">&#x2503;</span> <a href="hide">Hide</a></div>' + "\n" +
 				"\t\t\t\t" + 'Top Files' + "\n" +
 				"\t\t\t" + '</div>' + "\n" +
 				"\t\t\t" + '<div class="content">' + "\n"
