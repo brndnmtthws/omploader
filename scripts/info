@@ -160,9 +160,9 @@ FCGI.each_cgi {|cgi|
 		end
 
 		if hide_comments == 1
-			hide_link = '<a href="i' + id.to_b64 + '-show">Show (' + comment_count.to_s + ')</a> <span class="separator">&#x2503;</span> <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
+			hide_link = '<a href="i' + id.to_b64 + '-show">+ Show (' + comment_count.to_s + ')</a> <span class="separator">&#x2503;</span> <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
 		else
-			hide_link = '<a href="i' + id.to_b64 + '-hide">Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
+			hide_link = '<a href="i' + id.to_b64 + '-hide">- Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
 		end
 
 		#		cgi.out('text/plain') { comment_count.to_s }
