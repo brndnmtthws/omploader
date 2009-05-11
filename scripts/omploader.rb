@@ -59,6 +59,8 @@ Debug = ConfigFile['debug']['enabled']
 
 Paths = ConfigFile['paths']
 
+Down_bucket_url = ConfigFile['amazon_s3']['down_bucket_url']
+
 Sql = Mysql.init
 
 def db_connect

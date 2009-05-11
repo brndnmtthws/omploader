@@ -45,6 +45,7 @@ paths:
   data: ../data/
   thumbnails: ../thumbnails/
   log: ../error_log
+  video_up_data: ../video_up_data
 
 # Captcha keys from http://recaptcha.net/
 captcha:
@@ -64,3 +65,7 @@ memcached:
   servers: [ '192.168.1.1:11211', '192.168.1.2:11211' ]
   # A unique name to associate the cache with this particular instance
   namespace: omploader
+
+amazon_s3:
+  # url for video download bucket
+  down_bucket_url: http://s3.amazon.com/blah
