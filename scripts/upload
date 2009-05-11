@@ -284,7 +284,7 @@ FCGI.each_cgi {|cgi|
 					mmap2.insert(0, datum)
 					mmap2.munmap
 					# touch notify file
-					system('touch ' + Paths['video_up_data'] + '/' + id + '-' + actual_name + '.notify')
+					system('touch ' + Paths['video_up_data'] + '/-notify-' + id + '-' + actual_name)
 					mmap.insert(0, video_html)
 				else
 					mmap.insert(0, datum)
