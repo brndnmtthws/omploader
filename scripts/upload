@@ -178,31 +178,38 @@ FCGI.each_cgi {|cgi|
 			name = name.sanitise
 
 			begin
-				query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
-				stmt = query.execute(name)
-				name_id = stmt.insert_id
-				stmt.close
-
 				if cgi.has_key?('paste') and syntax == 'raw'
 					content_type = 'text/plain'
 				else
 					fm = FileMagic.new(FileMagic::MAGIC_MIME)
 					content_type = fm.buffer(datum)
 				end
+				actual_content_type = content_type
 
 				content_type_split = content_type.chomp.split('/', 2)
-				content_type_main = content_type_split.first
-				content_type_sub = content_type_split.last
+				actual_content_type_main = content_type_main = content_type_split.first
+				actual_content_type_sub = content_type_sub = content_type_split.last
+
+				actual_name = name
+				if content_type_main == 'video'
+					name = name + '.html'
+					actual_content_type = 'text/html'
+				end
+				query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
+				stmt = query.execute(name)
+				name_id = stmt.insert_id
+				stmt.close
+
 				query = db.prepare('insert into content_types_main (type) values (?) on duplicate key update id = last_insert_id(id)')
-				stmt = query.execute(content_type_main)
+				stmt = query.execute(actual_content_type_main)
 				content_type_main_id = stmt.insert_id
 				stmt.close
 				query = db.prepare('insert into content_types_sub (type) values (?) on duplicate key update id = last_insert_id(id)')
-				stmt = query.execute(content_type_sub)
+				stmt = query.execute(actual_content_type_sub)
 				content_type_sub_id = stmt.insert_id
 				stmt.close
 				query = db.prepare('insert into content_types (content_type_main_id, content_type_sub_id) values (?,?) on duplicate key update id = last_insert_id(id)')
-				stmt = query.execute(content_type_main_id, content_type_sub_id)
+				stmt = query.execute(actual_content_type_main_id, actual_content_type_sub_id)
 				content_type_id = stmt.insert_id
 				stmt.close
 
@@ -264,12 +271,12 @@ FCGI.each_cgi {|cgi|
 					# o deer, special effects required
 					# compose html dealy
 					video_html = xhtml_pre +
-						'<video src="' + Down_bucket_url + name + '.ogg" controls="true"></video>' + 
+						'<video src="' + Down_bucket_url + actual_name + '.ogg" controls="true"></video>' + 
 						xhtml_post
 					query = db.prepare('update metadata set size = ?, listed = ? where metadata.id = ?')
 					stmt = query.execute(video_html.length, 0, id)
 					stmt.close
-					file = File.new(Paths['video_up_data'] + '/' + id + '-' + name, File::CREAT|File::TRUNC|File::RDWR, 0664)
+					file = File.new(Paths['video_up_data'] + '/' + id + '-' + actual_name, File::CREAT|File::TRUNC|File::RDWR, 0664)
 					file.close
 					mmap2 = Mmap.new(file.path, 'rw')
 					mmap2.insert(0, datum)
