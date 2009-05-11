@@ -22,10 +22,11 @@ def get_output(id, name, name_displayed, type, host)
 	if type == 'image'
 		ret +=	'Thumbnail: <a href="t' + id + '">http://' + host + '/t' + id + '</a><br />' + "\n" +
 					'BBCode:<br /><span>[url=http://' + host + '/v' + id + '][img]http://' + host + '/t' + id + '[/img][/url]</span>' + "\n"
+	elsif type == 'video'
+		ret += 'It may take a while for your video to appear, so check back periodically.' + "\n"
+		ret += 'BBCode:<br /><span>[url=http://' + host + '/v' + id + ']http://' + host + '/v' + id + '[/url]</span>' + "\n"
 	else
 		ret += 'BBCode:<br /><span>[url=http://' + host + '/v' + id + ']http://' + host + '/v' + id + '[/url]</span>' + "\n"
-	elsif type == 'video'
-		ret += 'It may take a while for your video to appear, so check back periodically.'
 	end
 	ret += '</div><br />' + "\n"
 	return ret
