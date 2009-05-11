@@ -194,6 +194,8 @@ FCGI.each_cgi {|cgi|
 				if content_type_main == 'video'
 					name = name + '.html'
 					actual_content_type = 'text/html'
+					actual_content_type_main = 'text'
+					actual_content_type_sub = 'html'
 				end
 				query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
 				stmt = query.execute(name)
@@ -209,7 +211,7 @@ FCGI.each_cgi {|cgi|
 				content_type_sub_id = stmt.insert_id
 				stmt.close
 				query = db.prepare('insert into content_types (content_type_main_id, content_type_sub_id) values (?,?) on duplicate key update id = last_insert_id(id)')
-				stmt = query.execute(actual_content_type_main_id, actual_content_type_sub_id)
+				stmt = query.execute(content_type_main_id, content_type_sub_id)
 				content_type_id = stmt.insert_id
 				stmt.close
 
