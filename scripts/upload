@@ -17,6 +17,7 @@ require 'vorbisfile'
 
 def get_output(id, name, name_displayed, type, host)
 	ret = <<-EOF;
+		<div class="thumb automargin"><div class="container"><a href="v#{id}"><img src="t#{id}" alt="View file!" /></a></div></div>
 		<div class="upload">
 		<div class="left">Info:</div><div class="right"><a href="i#{id}">http://#{host}/i#{id}</a></div>
 		<div class="left">File:</div><div class="right"><a href="v#{id}">http://#{host}/v#{id}</a></div>
@@ -281,18 +282,19 @@ FCGI.each_cgi {|cgi|
 				if err.errno == 1062
 					# duplicate key
 					# get id for the dupe one
-					query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.fingerprint = ?')
+					query = db.prepare('select metadata.id, names.name, content_types_main.type from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.fingerprint = ?')
 					stmt = query.execute(fingerprint)
 					res = stmt.fetch
 					stmt.close
 					old_id = res[0].to_s.to_b64
 					name = res[1].to_s
+					content_type_main = res[2].to_s
 					if name.length > 15
 						name_displayed = name[0..13] + '…'
 					else
 						name_displayed = name
 					end
-					output = output + get_output(old_id, name, name_displayed, '', cgi.host)
+					output = output + get_output(old_id, name, name_displayed, content_type_main, cgi.host)
 					saved += 1
 					db.commit
 					next
@@ -310,8 +312,7 @@ FCGI.each_cgi {|cgi|
 		cgi.out {
 			xhtml_pre +
 			'        <div class="content large">' + "\n" +
-			'          omploaded!<br />' + "\n" +
-			'          <br />' + "\n" +
+			'          omploaded!' + "\n" +
 			output +
 			'        </div>' + "\n" +
 			xhtml_post
