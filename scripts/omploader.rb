@@ -38,6 +38,7 @@ Slogans = [
 	'You\'ve Got Questions. We\'ve got Omp',
 	'~ ~ ~ ~ ~ ~',
 	'<em>Yes We Can!</em>',
+	'Beta since 2004',
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
