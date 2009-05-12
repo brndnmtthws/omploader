@@ -16,14 +16,23 @@ require 'digest/sha1'
 require 'vorbisfile'
 
 def get_output(id, name, name_displayed, type, host)
-	ret =	'<div class="upload">View file: <a href="v' + id + '">http://' + host + '/v' + id + '</a><br />' + "\n" +
-			'View info: <a href="i' + id + '">http://' + host + '/i' + id + '</a><br />' + "\n" +
-			'With name: <a href="v' + id + '/' + name + '">http://' + host + '/v' + id + '/' + name_displayed + '</a><br />' + "\n"
+	ret = <<-EOF;
+		<div class="upload">
+		<div class="left">Info:</div><div class="right"><a href="i#{id}">http://#{host}/i#{id}</a></div>
+		<div class="left">File:</div><div class="right"><a href="v#{id}">http://#{host}/v#{id}</a></div>
+		<div class="left">&nbsp;</div><div class="right"><a href="v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
+	EOF
 	if type == 'image'
-		ret +=	'Thumbnail: <a href="t' + id + '">http://' + host + '/t' + id + '</a><br />' + "\n" +
-					'BBCode:<br /><span>[url=http://' + host + '/v' + id + '][img]http://' + host + '/t' + id + '[/img][/url]</span>' + "\n"
+		ret += <<-EOF;
+		<div class="left">Thumbnail:</div><div class="right"><a href="t#{id}">http://#{host}/t#{id}</a></div>
+		<br class="clear" />
+		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}][img]http://#{host}/t#{id}[/img][/url]</div></div>
+	EOF
 	else
-		ret += 'BBCode:<br /><span>[url=http://' + host + '/v' + id + ']http://' + host + '/v' + id + '[/url]</span>' + "\n"
+		ret += <<-EOF;
+		<br class="clear" />
+		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}]http://#{host}/v#{id}[/url]</div></div>
+	EOF
 	end
 	ret += '</div><br />' + "\n"
 	return ret
@@ -117,7 +126,7 @@ FCGI.each_cgi {|cgi|
 		if throttle.to_i > Max_upload_count
 			raise 'Slow down there, cowboy.'
 		end
-		
+
 		db.commit
 
 		saved = 0

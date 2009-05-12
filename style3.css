@@ -26,7 +26,7 @@ input.button, input.field, textarea {
 	font-size: 1.0em;
 }
 
-input.field, textarea { 
+input.field, textarea {
 	padding: 3px;
 }
 
@@ -324,24 +324,37 @@ div#container div.content div.upload {
 	background-color: #E5D5D5;
 	padding: 5px;
 	text-align: left;
+	font-size: 0.75em;
 /*	float: left;*/
 }
 
-div#container div.content div.upload a {
-/*	text-align: left;
-	float: right;*/
-	width: 80%;
+div#container div.content div.upload div.left {
+	float: left;
+	width: 6em;
+	margin-right: 0.3em;
 }
 
-div#container div.content div.upload span {
-	font-size: 0.75em;
+div#container div.content div.upload div.right {
+	float: none;
+	width: auto;
+}
+
+/*div#container div.content div.upload a {
+	width: 80%;
+}*/
+
+div#container div.content div.upload div.code {
+	font-size: 1em;
 	font-family: monospace;
 	background: #efefef;
 	margin: 5px 0px 5px 0px;
+	padding: 3px;
+	border:1px solid #BBBBBB;
 	overflow: hidden;
 	white-space: pre-wrap;
 	white-space: -moz-pre-wrap;
 	white-space: -o-pre-wrap;
+	width: auto;
 /*	float: right;*/
 }
 
