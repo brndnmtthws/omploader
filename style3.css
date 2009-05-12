@@ -321,6 +321,7 @@ div#slogan h1 {
 }
 
 div#container div.content div.upload {
+	margin-top: 0.3em;
 	background-color: #E5D5D5;
 	padding: 5px;
 	text-align: left;

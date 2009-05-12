@@ -16,27 +16,29 @@ require 'digest/sha1'
 require 'vorbisfile'
 
 def get_output(id, name, name_displayed, type, host)
-	ret = <<-EOF;
-		<div class="thumb automargin"><div class="container"><a href="v#{id}"><img src="t#{id}" alt="View file!" /></a></div></div>
-		<div class="upload">
+	top = ''
+	common = <<-EOF;
 		<div class="left">Info:</div><div class="right"><a href="i#{id}">http://#{host}/i#{id}</a></div>
 		<div class="left">File:</div><div class="right"><a href="v#{id}">http://#{host}/v#{id}</a></div>
 		<div class="left">&nbsp;</div><div class="right"><a href="v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
 	EOF
 	if type == 'image'
-		ret += <<-EOF;
+		top = <<-EOF;
+		<div class="thumb automargin"><div class="container"><a href="v#{id}"><img src="t#{id}" alt="View file!" /></a></div></div>
+		EOF
+		common += <<-EOF;
 		<div class="left">Thumbnail:</div><div class="right"><a href="t#{id}">http://#{host}/t#{id}</a></div>
 		<br class="clear" />
 		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}][img]http://#{host}/t#{id}[/img][/url]</div></div>
-	EOF
+		EOF
 	else
-		ret += <<-EOF;
+		common += <<-EOF;
 		<br class="clear" />
 		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}]http://#{host}/v#{id}[/url]</div></div>
-	EOF
+		EOF
 	end
-	ret += '</div><br />' + "\n"
-	return ret
+
+	return top + '<div class="upload">' + common + '</div><br />' + "\n"
 end
 
 # Method for using Vim's syntax highlighting and improving the generated code.
