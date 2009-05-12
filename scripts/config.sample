@@ -28,7 +28,7 @@ limits:
   upload_count: 10
   upload_period: 2
   max_random_rows: 2
-  
+
   # Number of days after which 'votes' (hit counts) expire
   vote_expiry: 1
   # Number of days after which 'visitors' (IP addresses used to count votes) expire
@@ -64,3 +64,9 @@ memcached:
   servers: [ '192.168.1.1:11211', '192.168.1.2:11211' ]
   # A unique name to associate the cache with this particular instance
   namespace: omploader
+
+httpd:
+  # use the CGI header X-Sendfile to image data
+  # not all httpd servers support this
+  # an apache2 module can be found here: http://tn123.ath.cx/mod_xsendfile/
+  xsendfile: true

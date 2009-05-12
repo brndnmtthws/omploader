@@ -39,8 +39,19 @@ FCGI.each_cgi {|cgi|
 		end
 		name = info[0].to_s
 		content_type = info[1]+ '/' + info[2]
+		cgi_head = {'type' => content_type,
+					'Content-Disposition' => 'inline; filename="' + name + '"',
+					'Cache-Control' => 'min-fresh=31536000',
+					'expires' => Time.now + 31536000 }
 
-		cgi.out('type' => content_type, 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64) {''}
+		if Xsendfile
+			cgi_head['X-Sendfile'] = Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64
+			cgi.out(cgi_head) {''}
+		else
+			file = File.new(Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64, mode='r')
+			cgi.out(cgi_head) {file.read}
+			file.close
+		end
 
 		visitor_id = get_cached_visitor_id(cgi, db)
 
