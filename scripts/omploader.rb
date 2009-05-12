@@ -38,6 +38,7 @@ Slogans = [
 	'You\'ve Got Questions. We\'ve got Omp',
 	'~ ~ ~ ~ ~ ~',
 	'<em>Yes We Can!</em>',
+	'Beta since 2004',
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
@@ -51,6 +52,7 @@ Visitor_expiry = ConfigFile['limits']['visitor_expiry'] * 86400
 Thumbnail_expiry = ConfigFile['limits']['thumbnail_expiry'] * 86400
 Owner_expiry = ConfigFile['limits']['owner_expiry'] * 86400
 Max_file_size = ConfigFile['limits']['max_file_size']
+Xsendfile = ConfigFile['httpd']['xsendfile']
 
 Pub_key = ConfigFile['captcha']['pub_key']
 Priv_key = ConfigFile['captcha']['priv_key']
@@ -74,12 +76,12 @@ def db_connect
 end
 
 def xhtml_pre(title = '', search = '', showsearch = true)
-	xhtml_pre = 
+	xhtml_pre =
 		'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' + "\n" +
 		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
 		"\t" + '<head>' + "\n" +
 		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
-		"\t\t" + '<link rel="stylesheet" type="text/css" href="style3.css" />' + "\n" +
+		"\t\t" + '<link rel="stylesheet" type="text/css" href="style4.css" />' + "\n" +
 		"\t\t" + '<link rel="shortcut icon" href="omploader_icon2.png" type="image/x-icon" />' + "\n" +
 		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
 		"\t" + '</head>' + "\n" +
@@ -104,7 +106,7 @@ def xhtml_post
 	xhtml_post =
 		"\t\t\t" + '<div id="footer">' + "\n" +
 		"\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>' + "\n" +
-		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##bikes">bikes</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://git.omp.am/?p=omploader.git">git</a> <span class="separator">&#x2503;</span> <a href="faq.xhtml">faq</a>' + "\n" + 
+		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##bikes">bikes</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://git.omp.am/?p=omploader.git">git</a> <span class="separator">&#x2503;</span> <a href="faq.xhtml">faq</a>' + "\n" +
 		"\t\t\t" + '</div>' + "\n" +
 		"\t\t" + '</div>' + "\n" +
 		"\t" + '</body>' + "\n" +
@@ -245,7 +247,7 @@ Cache.servers += ConfigFile['memcached']['servers']
 
 Default_cache_expiry_long = ConfigFile['memcached']['expiry_long']
 Default_cache_expiry_short = ConfigFile['memcached']['expiry_short']
-			
+
 def get_cached_visitor_id(cgi, db)
 	visitor_id = Cache.get('visitor_id' + cgi.remote_addr.to_s)
 	if visitor_id.nil?

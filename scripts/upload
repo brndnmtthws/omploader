@@ -16,20 +16,30 @@ require 'digest/sha1'
 require 'vorbisfile'
 
 def get_output(id, name, name_displayed, type, host)
-	ret =	'<div class="upload">View file: <a href="v' + id + '">http://' + host + '/v' + id + '</a><br />' + "\n" +
-			'View info: <a href="i' + id + '">http://' + host + '/i' + id + '</a><br />' + "\n" +
-			'With name: <a href="v' + id + '/' + name + '">http://' + host + '/v' + id + '/' + name_displayed + '</a><br />' + "\n"
+	top = ''
+	common = <<-EOF;
+		<!-- View file: <a href="v#{id}">http://#{host}/v#{id}</a> -->
+		<div class="left">Info:</div><div class="right"><a href="i#{id}">http://#{host}/i#{id}</a></div>
+		<div class="left">File:</div><div class="right"><a href="v#{id}">http://#{host}/v#{id}</a></div>
+		<div class="left">&nbsp;</div><div class="right"><a href="v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
+	EOF
 	if type == 'image'
-		ret +=	'Thumbnail: <a href="t' + id + '">http://' + host + '/t' + id + '</a><br />' + "\n" +
-					'BBCode:<br /><span>[url=http://' + host + '/v' + id + '][img]http://' + host + '/t' + id + '[/img][/url]</span>' + "\n"
-	elsif type == 'video'
-		ret += 'It may take a while for your video to appear, so check back periodically.' + "\n"
-		ret += 'BBCode:<br /><span>[url=http://' + host + '/v' + id + ']http://' + host + '/v' + id + '[/url]</span>' + "\n"
+		top = <<-EOF;
+		<div class="thumb automargin"><div class="container"><a href="v#{id}"><img src="t#{id}" alt="View file!" /></a></div></div>
+		EOF
+		common += <<-EOF;
+		<div class="left">Thumbnail:</div><div class="right"><a href="t#{id}">http://#{host}/t#{id}</a></div>
+		<br class="clear" />
+		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}][img]http://#{host}/t#{id}[/img][/url]</div></div>
+		EOF
 	else
-		ret += 'BBCode:<br /><span>[url=http://' + host + '/v' + id + ']http://' + host + '/v' + id + '[/url]</span>' + "\n"
+		common += <<-EOF;
+		<br class="clear" />
+		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}]http://#{host}/v#{id}[/url]</div></div>
+		EOF
 	end
-	ret += '</div><br />' + "\n"
-	return ret
+
+	return top + '<div class="upload">' + common + '</div><br />' + "\n"
 end
 
 # Method for using Vim's syntax highlighting and improving the generated code.
@@ -120,7 +130,7 @@ FCGI.each_cgi {|cgi|
 		if throttle.to_i > Max_upload_count
 			raise 'Slow down there, cowboy.'
 		end
-		
+
 		db.commit
 
 		saved = 0
@@ -301,18 +311,19 @@ FCGI.each_cgi {|cgi|
 				if err.errno == 1062
 					# duplicate key
 					# get id for the dupe one
-					query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.fingerprint = ?')
+					query = db.prepare('select metadata.id, names.name, content_types_main.type from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.fingerprint = ?')
 					stmt = query.execute(fingerprint)
 					res = stmt.fetch
 					stmt.close
 					old_id = res[0].to_s.to_b64
 					name = res[1].to_s
+					content_type_main = res[2].to_s
 					if name.length > 15
 						name_displayed = name[0..13] + '…'
 					else
 						name_displayed = name
 					end
-					output = output + get_output(old_id, name, name_displayed, '', cgi.host)
+					output = output + get_output(old_id, name, name_displayed, content_type_main, cgi.host)
 					saved += 1
 					db.commit
 					next
@@ -330,8 +341,7 @@ FCGI.each_cgi {|cgi|
 		cgi.out {
 			xhtml_pre +
 			'        <div class="content large">' + "\n" +
-			'          omploaded!<br />' + "\n" +
-			'          <br />' + "\n" +
+			'          omploaded!' + "\n" +
 			output +
 			'        </div>' + "\n" +
 			xhtml_post
