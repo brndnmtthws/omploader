@@ -21,12 +21,12 @@ FCGI.each_cgi {|cgi|
 		if !owner_id.nil? and prefs.nil?
 			query = db.prepare('select show_mine, list_images, list_results from owners where id = ?')
 			stmt = query.execute(owner_id)
-			res = stmt.fetch
+			prefs = stmt.fetch
 			stmt.close
-			mine_only = res[0].to_s.to_i
-			list_images = res[1].to_s.to_i
-			results = res[2].to_s.to_i
-			Cache.set($0 + 'prefs' + owner_id, res, Default_cache_expiry_long)
+			mine_only = prefs[0].to_s.to_i
+			list_images = prefs[1].to_s.to_i
+			results = prefs[2].to_s.to_i
+			Cache.set($0 + 'prefs' + owner_id, prefs, Default_cache_expiry_long)
 		elsif !prefs.nil?
 			mine_only = prefs[0].to_s.to_i
 			list_images = prefs[1].to_s.to_i
