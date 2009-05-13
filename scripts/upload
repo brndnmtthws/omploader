@@ -282,7 +282,7 @@ FCGI.each_cgi {|cgi|
 				if content_type_main == 'video'
 					# o deer, special effects required
 					# compose html dealy
-					video_html = xhtml_pre('', '', true, true) +
+					video_html = xhtml_pre('', '', false, true) +
 						'<video src="' + Down_bucket_url + id + '/' + actual_name + '.ogg" controls="true"></video>' + 
 						xhtml_post
 					query = db.prepare('update metadata set size = ?, listed = ? where metadata.id = ?')
