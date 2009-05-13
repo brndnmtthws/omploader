@@ -283,7 +283,7 @@ FCGI.each_cgi {|cgi|
 					# o deer, special effects required
 					# compose html dealy
 					video_html = xhtml_pre +
-						'<video src="' + Down_bucket_url + actual_name + '.ogg" controls="true"></video>' + 
+						'<video src="' + Down_bucket_url + id + '/' + actual_name + '.ogg" controls="true"></video>' + 
 						xhtml_post
 					query = db.prepare('update metadata set size = ?, listed = ? where metadata.id = ?')
 					stmt = query.execute(video_html.length, 0, id)
@@ -294,7 +294,7 @@ FCGI.each_cgi {|cgi|
 					mmap2.insert(0, datum)
 					mmap2.munmap
 					# touch notify file
-					system('touch ' + Paths['video_up_data'] + '/-notify-' + id + '-' + actual_name)
+					system('touch', Paths['video_up_data'] + '/-notify-' + id + '-' + actual_name)
 					mmap.insert(0, video_html)
 				else
 					mmap.insert(0, datum)

@@ -15,6 +15,10 @@ body {
 	margin: 0;
 }
 
+body.video {
+	background-color: #010101;
+}
+
 img {
 	border: 0;
 }
