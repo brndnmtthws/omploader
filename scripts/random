@@ -23,16 +23,17 @@ FCGI.each_cgi {|cgi|
 		query = db.prepare('select max(id), min(id) from metadata')
 		stmt = query.execute
 		res = stmt.fetch
-		max = res[0].to_i
+		max = res[0].to_i + 1
 		min = res[1].to_i
 		count = Max_rand
 		rands = Set.new
+		is_videors = Hash.new
 		try = 0
 		overall_tries = 0
 		while count > 0
 			rand_id = rand(max - min) + min
-			query = db.prepare('select metadata.id from metadata inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where metadata.id = ? and metadata.valid = ? and (content_types_main.type = "image" or content_types_main.type = "video")')
-			stmt = query.execute(rand_id, 1)
+			query = db.prepare('select metadata.id, metadata.is_video from metadata inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where metadata.id = ? and metadata.valid = ? and (content_types_main.type = "image" or metadata.is_video = ?)')
+			stmt = query.execute(rand_id, 1, 1)
 			res = stmt.fetch
 			num_rows = stmt.num_rows
 			stmt.close
@@ -43,6 +44,7 @@ FCGI.each_cgi {|cgi|
 					try = 0
 				end
 			elsif rands.add?(res[0])
+				is_videors[res[0]] = res[1].to_i
 				count -= 1
 			else
 				overall_tries += 1
@@ -60,8 +62,16 @@ FCGI.each_cgi {|cgi|
 			result = stmt.fetch
 			stmt.close
 			name = result.first.to_s
+			is_video = is_videors[id].to_i
 
-			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id.to_s.to_b64 + '"><img src="t' + id.to_s.to_b64 + '" alt="View file!" /></a></div></div>' + "\n"
+			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id.to_s.to_b64 + '">'
+			if is_video > 0
+				top_files +=
+					'<img src="' + "#{Down_bucket_url}#{id.to_s.to_b64}/#{name.chomp(".html")}.gif" + '" alt="View file!" /></a></div></div>' + "\n"
+			else
+				top_files +=
+					'<img src="t' + id.to_s.to_b64 + '" alt="View file!" /></a></div></div>' + "\n"
+			end
 			top_files_info += "\t\t\t\t" + '<div class="info float"><a href="i' + id.to_s.to_b64 + '">Info</a></div>' + "\n"
 			if count % 5 == 0
 				top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n"
