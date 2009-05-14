@@ -82,6 +82,11 @@ div#footer {
 	margin: 20px 0 10px 0;
 }
 
+body.video div#footer {
+	width: 722px;
+	margin: auto;
+}
+
 div#footer.video {
 	background-color: #c0b1b5;
 }
@@ -110,6 +115,10 @@ div#container {
 	margin: auto;
 	padding: 0;
 	width: 722px;
+}
+
+body.video div#container {
+	width: 100%;
 }
 
 div#container div.title {
