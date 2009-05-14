@@ -165,7 +165,11 @@ FCGI.each_cgi {|cgi|
 					next if url =~ /127\.0\.0\.1/i
 					next if url =~ /:\/\/127\.0\.0\.1\//i
 					next if url =~ /:\/\/localhost\//i
-					datum = Curl::Easy.perform(url).body_str
+					c = Curl::Easy.perform(url) do |curl|
+						curl.follow_location = true
+						curl.max_redirects = 10
+					end
+					datum = c.body_str
 					next if datum.length > Max_file_size or datum.empty?
 				rescue
 					next
