@@ -342,8 +342,8 @@ FCGI.each_cgi {|cgi|
 		end
 
 		db.commit
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre('', search) +
+		cgi.out('text/html') {
+			html_pre('', search) +
 			'      <div class="content large">' + "\n" +
 			'        ' + mine_only_msg + '<br />' + "\n" +
 			'        ' + images_only_msg + "\n" +
@@ -352,7 +352,7 @@ FCGI.each_cgi {|cgi|
 			page_links +
 			files_list +
 			page_links +
-			xhtml_post
+			html_post
 		}
 
 		if update_prefs
@@ -374,8 +374,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -384,8 +384,8 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">' + err + '</div>' + html_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
@@ -394,8 +394,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -409,8 +409,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -424,8 +424,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -439,8 +439,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)

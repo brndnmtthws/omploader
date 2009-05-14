@@ -304,9 +304,9 @@ FCGI.each_cgi {|cgi|
 				if content_type_main == 'video'
 					# o deer, special effects required
 					# compose html dealy
-					video_html = xhtml_pre('', '', false, true) +
+					video_html = html_pre('', '', false, true) +
 						'<video src="' + Down_bucket_url + id + '/' + actual_name + '.ogg" controls="true"></video>' + 
-						xhtml_post
+						html_post
 					query = db.prepare('update metadata set size = ?, valid = ?, is_video = ? where metadata.id = ?')
 					stmt = query.execute(video_html.length, 0, 1, id.to_id)
 					stmt.close
@@ -361,12 +361,12 @@ FCGI.each_cgi {|cgi|
 		Cache.set('throttle' + visitor_id, throttle.to_i + 1, Max_upload_period)
 		db.commit
 		cgi.out {
-			xhtml_pre +
+			html_pre +
 			'        <div class="content large">' + "\n" +
 			'          omploaded!' + "\n" +
 			output +
 			'        </div>' + "\n" +
-			xhtml_post
+			html_post
 		}
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
@@ -375,8 +375,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -385,8 +385,8 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">' + err + '</div>' + html_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
@@ -395,8 +395,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -410,8 +410,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -425,8 +425,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -440,8 +440,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)

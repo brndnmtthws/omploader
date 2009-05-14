@@ -78,10 +78,10 @@ def db_connect
 	return db
 end
 
-def xhtml_pre(title = '', search = '', showsearch = true, video = false)
-	xhtml_pre =
-		'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' + "\n" +
-		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
+def html_pre(title = '', search = '', showsearch = true, video = false)
+	html_pre =
+		'<!DOCTYPE html>' + "\n" +
+		'<html xml:lang="en" lang="en">' + "\n" +
 		"\t" + '<head>' + "\n" +
 		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
 		"\t\t" + '<link rel="stylesheet" type="text/css" href="/style5.css" />' + "\n" +
@@ -89,29 +89,29 @@ def xhtml_pre(title = '', search = '', showsearch = true, video = false)
 		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
 		"\t" + '</head>' + "\n"
 	if video
-		xhtml_pre += "\t" + '<body class="video">' + "\n"
+		html_pre += "\t" + '<body class="video">' + "\n"
 	else
-		xhtml_pre += "\t" + '<body>' + "\n"
+		html_pre += "\t" + '<body>' + "\n"
 	end
-	xhtml_pre +=
+	html_pre +=
 		"\t\t" + '<div id="container">' + "\n" +
 		"\t\t\t" + '<div id="header">' + "\n" +
 		"\t\t\t\t" + '<div id="title"><a href="/"><img src="/omploader2.png" alt="omploader" /></a></div>'  + "\n" +
 		"\t\t\t\t" + '<div id="slogan"><h1>' + Slogan + '™</h1></div>'  + "\n" +
 		"\t\t\t\t" + '<form enctype="multipart/form-data" action="l" method="post">' + "\n"
 	if showsearch
-		xhtml_pre +=
+		html_pre +=
 			"\t\t\t\t\t" + '<div id="search">' + "\n" +
 			"\t\t\t\t\t\t" + '<input name="search_post" size="20" class="field" type="text" value="' + search.gsub(/\\/, '\\') + '" /><input value="search" class="button" type="submit" />' + "\n" +
 			"\t\t\t\t\t" + '</div>' + "\n"
 	end
-	xhtml_pre +=
+	html_pre +=
 		"\t\t\t\t" + '</form>' + "\n" +
 		"\t\t\t" + '</div>' + "\n"
 end
 
-def xhtml_post
-	xhtml_post =
+def html_post
+	html_post =
 		"\t\t\t" + '<div id="footer">' + "\n" +
 		"\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>' + "\n" +
 		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##bikes">bikes</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://git.omp.am/?p=omploader.git">git</a> <span class="separator">&#x2503;</span> <a href="faq.xhtml">faq</a>' + "\n" +

@@ -50,8 +50,8 @@ FCGI.each_cgi {|cgi|
 		if !owner_id.nil? and cgi.has_key?('loldongs' + owner_id) and throttle.to_i < Max_upload_count
 			lolres = Captcha.validate(cgi.remote_addr, cgi['recaptcha_challenge_field'].read.to_s, cgi['recaptcha_response_field'].read.to_s)
 			if !lolres
-				cgi.out('application/xhtml+xml') {
-					xhtml_pre + '        <div class="content large">Captcha failure :(</div>' + xhtml_post
+				cgi.out('text/html') {
+					html_pre + '        <div class="content large">Captcha failure :(</div>' + html_post
 				}
 				db.commit
 				next
@@ -295,7 +295,7 @@ FCGI.each_cgi {|cgi|
 		end
 
 		cgi.out('type' => 'text/html') {
-			xhtml_pre(' – ' + name + ' (' + content_type + ')') +
+			html_pre(' – ' + name + ' (' + content_type + ')') +
 			"\t\t\t" + '<div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
 			"\t\t\t\t" + '<div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
@@ -312,7 +312,7 @@ FCGI.each_cgi {|cgi|
 			referrers +
 			"\t\t\t" + '</div>' + "\n" +
 			comments_body +
-			xhtml_post
+			html_post
 		}
 		if update_prefs
 			if !owner_id.nil?
@@ -330,8 +330,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -340,8 +340,8 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">' + err + '</div>' + html_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
@@ -350,8 +350,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -365,8 +365,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -380,8 +380,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -395,8 +395,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)

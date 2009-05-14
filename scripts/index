@@ -11,6 +11,21 @@ require 'omploader'
 diseases = ['happy', 'rabid', 'ugly', 'christian', 'brazilian', 'zombie', 'scientologist', 'retarded', 'horny']
 animals = ['gerbils', 'kitties', 'geese', 'turkeys', 'honey badgers', 'Javeeds', 'nerds', 'ninjas', 'vaginas', 'kiwis', 'baby seals', 'gnus']
 
+
+def form_input(input_type, input_name, count=1)
+	ret = ''
+	if input_type != "file"
+		count.times do
+			ret += "\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n"
+		end
+	else
+		count.times do
+			ret += "\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" class="input field" /><br />' + "\n"
+		end
+	end
+	return ret
+end
+
 FCGI.each_cgi {|cgi|
 	begin
 		db = db_connect
@@ -160,23 +175,21 @@ FCGI.each_cgi {|cgi|
 
 		if throttle.to_i < Max_upload_count
 			if curl == 1 and paste != 1
-				input_type = 'field'
+				input_type = 'text'
 				input_name = 'url'
 				encoding = ''
+				allow_size = true
 			else
 				input_type = 'file'
 				input_name = 'file'
 				encoding = ' enctype="multipart/form-data"'
+				allow_size = false
 			end
 			if big == 1 and paste != 1
 				form =
 					"\t\t\t\t" + '<form id="ompload' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
 					"\t\t\t\t\t" + '<div class="form">' + "\n" +
-					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
-					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '2" size="25" class="input field" /><br />' + "\n" +
-					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '3" size="25" class="input field" /><br />' + "\n" +
-					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '4" size="25" class="input field" /><br />' + "\n" +
-					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '5" size="25" class="input field" /><br />' + "\n" +
+					form_input(input_type, input_name, 5) +
 					"\t\t\t\t\t\t" + '<input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n" +
 					"\t\t\t\t" + '</form>'
@@ -227,8 +240,7 @@ FCGI.each_cgi {|cgi|
 			else
 				form =
 					"\t\t\t\t" + '<form id="ompload' + input_name + '"' + encoding + ' action="upload" method="post">' + "\n" +
-					"\t\t\t\t\t" + '<div class="form">' + "\n" +
-					"\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n" +
+					"\t\t\t\t\t" + '<div class="form">' + "\n" + form_input(input_type, input_name) +
 					"\t\t\t\t\t\t" + '<input type="submit" value="OMPLOAD!" class="button" />' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n" +
 					"\t\t\t\t" + '</form>'
@@ -259,7 +271,7 @@ FCGI.each_cgi {|cgi|
 			top_files
 
 			db.commit
-			cgi.out('application/xhtml+xml') { xhtml_pre + xhtml + xhtml_post }
+			cgi.out('text/html') { html_pre + xhtml + html_post }
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug
@@ -267,8 +279,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -277,8 +289,8 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">' + err + '</div>' + html_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
@@ -287,8 +299,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -302,8 +314,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -317,8 +329,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -332,8 +344,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
