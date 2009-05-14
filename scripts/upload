@@ -291,7 +291,7 @@ FCGI.each_cgi {|cgi|
 						'<video src="' + Down_bucket_url + id + '/' + actual_name + '.ogg" controls="true"></video>' + 
 						xhtml_post
 					query = db.prepare('update metadata set size = ?, valid = ?, is_video = ? where metadata.id = ?')
-					stmt = query.execute(video_html.length, 0, 1, id)
+					stmt = query.execute(video_html.length, 0, 1, id.to_id)
 					stmt.close
 					file = File.new(Paths['video_up_data'] + '/' + id + '-' + actual_name, File::CREAT|File::TRUNC|File::RDWR, 0664)
 					file.close

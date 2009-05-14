@@ -84,8 +84,8 @@ def xhtml_pre(title = '', search = '', showsearch = true, video = false)
 		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' + "\n" +
 		"\t" + '<head>' + "\n" +
 		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
-		"\t\t" + '<link rel="stylesheet" type="text/css" href="style5.css" />' + "\n" +
-		"\t\t" + '<link rel="shortcut icon" href="omploader_icon2.png" type="image/x-icon" />' + "\n" +
+		"\t\t" + '<link rel="stylesheet" type="text/css" href="/style5.css" />' + "\n" +
+		"\t\t" + '<link rel="shortcut icon" href="/omploader_icon2.png" type="image/x-icon" />' + "\n" +
 		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
 		"\t" + '</head>' + "\n"
 	if video
@@ -96,7 +96,7 @@ def xhtml_pre(title = '', search = '', showsearch = true, video = false)
 	xhtml_pre +=
 		"\t\t" + '<div id="container">' + "\n" +
 		"\t\t\t" + '<div id="header">' + "\n" +
-		"\t\t\t\t" + '<div id="title"><a href="/"><img src="omploader2.png" alt="omploader" /></a></div>'  + "\n" +
+		"\t\t\t\t" + '<div id="title"><a href="/"><img src="/omploader2.png" alt="omploader" /></a></div>'  + "\n" +
 		"\t\t\t\t" + '<div id="slogan"><h1>' + Slogan + '™</h1></div>'  + "\n" +
 		"\t\t\t\t" + '<form enctype="multipart/form-data" action="l" method="post">' + "\n"
 	if showsearch
