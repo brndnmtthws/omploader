@@ -17,6 +17,9 @@ require 'tempfile'
 require 'logger'
 require 'find'
 require 'memcache'
+require 'pathname'
+
+path = Pathname.new(__FILE__).dirname
 
 Slogans = [
 	'hi!',
@@ -42,7 +45,7 @@ Slogans = [
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
-ConfigFile = YAML::load(File.open('config'))
+ConfigFile = YAML::load(File.open(path + 'config'))
 
 Max_upload_count = ConfigFile['limits']['upload_count']
 Max_upload_period = ConfigFile['limits']['upload_period'] * 60
