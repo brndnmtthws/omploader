@@ -242,6 +242,10 @@ class String
 	def sanitise
 		self.gsub('<', '&lt;').gsub('>', '&gt;')
 	end
+	# remove spaces from video names so s3 doesn't choke
+	def video_sanitise
+		self.gsub(' ', '.')
+	end
 end
 
 Cache = MemCache::new(:debug => false,

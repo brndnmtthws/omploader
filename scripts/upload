@@ -207,6 +207,7 @@ FCGI.each_cgi {|cgi|
 				actual_name = name
 				if content_type_main == 'video'
 					name = name + '.html'
+					actual_name = actual_name.video_sanitise
 					actual_content_type = 'text/html'
 					actual_content_type_main = 'text'
 					actual_content_type_sub = 'html'
@@ -231,8 +232,8 @@ FCGI.each_cgi {|cgi|
 
 				fingerprint = Digest::SHA1.hexdigest(datum)
 
-				query = db.prepare('insert into metadata (content_type_id, name_id, size, owner_id, fingerprint) values (?,?,?,?,?)')
-				stmt = query.execute(content_type_id, name_id, datum.length, owner_id, fingerprint)
+				query = db.prepare('insert into metadata (content_type_id, name_id, size, displayed_size, owner_id, fingerprint) values (?,?,?,?,?,?)')
+				stmt = query.execute(content_type_id, name_id, datum.length, datum.length, owner_id, fingerprint)
 				id = stmt.insert_id
 				stmt.close
 
@@ -289,8 +290,8 @@ FCGI.each_cgi {|cgi|
 					video_html = xhtml_pre('', '', false, true) +
 						'<video src="' + Down_bucket_url + id + '/' + actual_name + '.ogg" controls="true"></video>' + 
 						xhtml_post
-					query = db.prepare('update metadata set size = ?, listed = ? where metadata.id = ?')
-					stmt = query.execute(video_html.length, 0, id)
+					query = db.prepare('update metadata set size = ?, valid = ?, is_video = ? where metadata.id = ?')
+					stmt = query.execute(video_html.length, 0, 1, id)
 					stmt.close
 					file = File.new(Paths['video_up_data'] + '/' + id + '-' + actual_name, File::CREAT|File::TRUNC|File::RDWR, 0664)
 					file.close
