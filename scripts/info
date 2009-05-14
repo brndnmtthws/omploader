@@ -101,8 +101,8 @@ FCGI.each_cgi {|cgi|
 		end
 		info = Cache.get($0 + id)
 		if info.nil?
-			query = db.prepare('select n1.name, metadata.displayed_size, metadata.hits, metadata.comment_count, metadata.creation_time, content_types_main.type, content_types_sub.type, n2.name, metadata.is_video from metadata inner join names as n1 on n1.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join owners on owners.id = metadata.owner_id left join names as n2 on n2.id = owners.name_id where metadata.id = ? and metadata.valid = ?')
-			query.execute(id, 1)
+			query = db.prepare('select n1.name, metadata.displayed_size, metadata.hits, metadata.comment_count, metadata.creation_time, content_types_main.type, content_types_sub.type, n2.name, metadata.is_video, metadata.valid from metadata inner join names as n1 on n1.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join owners on owners.id = metadata.owner_id left join names as n2 on n2.id = owners.name_id where metadata.id = ?')
+			query.execute(id)
 
 			# Verify that id exists in database.
 			if query.num_rows < 1
@@ -123,6 +123,14 @@ FCGI.each_cgi {|cgi|
 		content_type_sub = info[6].to_s
 		info_owner_name = info[7].to_s
 		is_video = info[8].to_i
+		valid = info[9].to_i
+		if valid < 1
+			if is_video > 0
+				raise 'Sorry, we\'re still working on it.  Go grab some lunch or something.'
+			else
+				raise 'Nothing to pee here.'
+			end
+		end
 		content_type = content_type_main + '/' + content_type_sub
 
 		if info_owner_name.nil? or info_owner_name.empty?

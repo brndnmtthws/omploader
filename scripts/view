@@ -23,8 +23,8 @@ FCGI.each_cgi {|cgi|
 		info = Cache.get($0 + id)
 		if info.nil?
 			db_check(db)
-			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ? and metadata.valid = ?')
-			stmt = query.execute(id, 1)
+			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type, metadata.valid, metadata.is_video from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
+			stmt = query.execute(id)
 
 			# Verify that id exists in database.
 			if stmt.num_rows < 1
@@ -39,6 +39,15 @@ FCGI.each_cgi {|cgi|
 		end
 		name = info[0].to_s
 		content_type = info[1]+ '/' + info[2]
+		valid = info[3].to_i
+		is_video = info[4].to_i
+		if valid < 1
+			if is_video > 0
+				raise 'Sorry, we\'re still working on it.  Go grab some lunch or something.'
+			else
+				raise 'Nothing to pee here.'
+			end
+		end
 		cgi_head = {'type' => content_type,
 					'Content-Disposition' => 'inline; filename="' + name + '"',
 					'Cache-Control' => 'min-fresh=31536000',
@@ -97,8 +106,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Ouch, db error: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -107,8 +116,8 @@ FCGI.each_cgi {|cgi|
 		log.error(err)
 	rescue RuntimeError => err
 		db.rollback unless db.nil?
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">' + err + '</div>' + html_post
 		}
 	rescue SyntaxError, NameError => err
 		db.rollback unless db.nil?
@@ -117,8 +126,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  String won\'t compile: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -132,8 +141,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -147,8 +156,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  Error running script: ' + errmsg + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
@@ -162,8 +171,8 @@ FCGI.each_cgi {|cgi|
 		else
 			errmsg = err.to_s
 		end
-		cgi.out('application/xhtml+xml') {
-			xhtml_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + xhtml_post
+		cgi.out('text/html') {
+			html_pre + '        <div class="content large">Oops, we screwed up.  This error isn\'t being handled: ' + err + '</div>' + html_post
 		}
 		log = Logger.new(Paths['log'])
 		log.error(cgi.host)
