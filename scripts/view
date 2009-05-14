@@ -23,8 +23,8 @@ FCGI.each_cgi {|cgi|
 		info = Cache.get($0 + id)
 		if info.nil?
 			db_check(db)
-			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
-			stmt = query.execute(id)
+			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type	from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ? and metadata.valid = ?')
+			stmt = query.execute(id, 1)
 
 			# Verify that id exists in database.
 			if stmt.num_rows < 1

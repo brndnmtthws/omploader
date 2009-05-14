@@ -140,29 +140,22 @@ FCGI.each_cgi {|cgi|
 		param_search = param_search.gsub(/:/, '%3A').gsub(/\//, '%2F')
 		param_search = URI.escape(param_search)
 
-		my_where_clause = ''
+		where_clause = 'where metadata.valid = 1 '
 		if mine_only != 0 and !owner_id.nil?
-			my_where_clause = 'where metadata.owner_id = ' + owner_id + ' '
+			where_clause += ' and metadata.owner_id = ' + owner_id + ' '
 		end
-		if images_only and !my_where_clause.empty?
-			my_where_clause += ' and content_types_main.type like "image" '
-		elsif images_only
-			my_where_clause = ' where content_types_main.type like "image" '
+		if images_only
+			where_clause += ' and (content_types_main.type like "image" or content_types_main.type like "video") '
 		end
 		where_clause = ' '
 		wheres = search.gsub(/%/, '\\%').gsub(/_/, '\\_').split(' ')
 		wheres.each_index{|i| wheres[i] = '%' + wheres[i] + '%'}
 		for item in wheres
-			where_clause += 'names.name like ? and '
+			names_where_clause += ' names.name like ? and'
 		end
-		where_clause = where_clause.chop.chop.chop.chop
-		if my_where_clause.empty? and !where_clause.empty?
-			where_clause = 'where ' + where_clause
-		end
-		if !my_where_clause.empty? and !where_clause.empty?
-			where_clause = my_where_clause + ' and (' + where_clause + ') '
-		elsif !my_where_clause.empty?
-			where_clause = my_where_clause
+		where_clause = where_clause.chomp("and")
+		if !names_where_clause.empty?
+			where_clause = where_clause + ' and (' + names_where_clause + ') '
 		end
 
 		count = Cache.get($0 + 'count' + where_clause + wheres.to_s)
@@ -304,9 +297,9 @@ FCGI.each_cgi {|cgi|
 		end
 
 		if images_only
-			images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'n' + page.to_s + param_search + '" style="text-decoration: none">show all files</a> [ <span class="pink">showing images</span> ]'
+			images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'n' + page.to_s + param_search + '" style="text-decoration: none">show all files</a> [ <span class="pink">showing visuals</span> ]'
 		else
-			images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'y' + page.to_s + param_search + '" style="text-decoration: none">show images</a> [ <span class="pink">showing all files</span> ]'
+			images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'y' + page.to_s + param_search + '" style="text-decoration: none">show visuals</a> [ <span class="pink">showing all files</span> ]'
 		end
 
 		if count > (page - 1) * results + results
