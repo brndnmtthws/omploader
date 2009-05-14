@@ -19,16 +19,16 @@ def get_output(id, name, name_displayed, type, host)
 	top = ''
 	common = <<-EOF;
 		<!-- View file: <a href="v#{id}">http://#{host}/v#{id}</a> -->
-		<div class="left">Info:</div><div class="right"><a href="i#{id}">http://#{host}/i#{id}</a></div>
-		<div class="left">File:</div><div class="right"><a href="v#{id}">http://#{host}/v#{id}</a></div>
-		<div class="left">&nbsp;</div><div class="right"><a href="v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
+		<div class="left">Info:</div><div class="right"><a href="/i#{id}">http://#{host}/i#{id}</a></div>
+		<div class="left">File:</div><div class="right"><a href="/v#{id}">http://#{host}/v#{id}</a></div>
+		<div class="left">&nbsp;</div><div class="right"><a href="/v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
 	EOF
 	if type == 'image'
 		top = <<-EOF;
-		<div class="thumb automargin"><div class="container"><a href="v#{id}"><img src="t#{id}" alt="View file!" /></a></div></div>
+		<div class="thumb automargin"><div class="container"><a href="/v#{id}"><img src="/t#{id}" alt="View file!" /></a></div></div>
 		EOF
 		common += <<-EOF;
-		<div class="left">Thumbnail:</div><div class="right"><a href="t#{id}">http://#{host}/t#{id}</a></div>
+		<div class="left">Thumbnail:</div><div class="right"><a href="/t#{id}">http://#{host}/t#{id}</a></div>
 		<br class="clear" />
 		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}][img]http://#{host}/t#{id}[/img][/url]</div></div>
 		EOF
@@ -304,9 +304,13 @@ FCGI.each_cgi {|cgi|
 				if content_type_main == 'video'
 					# o deer, special effects required
 					# compose html dealy
+					html5_notice = "\t\t\t\t" + '<h2>Can\'t see anything?  Try a browser that can playback Ogg media using &lt;video&gt; and &lt;audio&gt;. Try <a href="http://www.mozilla.com/en-US/firefox/all-beta.html">Firefox 3.5 beta</a>, <a href="http://labs.opera.com/news/2008/07/18/">Opera experimental builds</a> or <a href="http://www.apple.com/safari/">Safari</a> with <a href="http://xiph.org/quicktime/">XiphQT</a>.</h2>' + "\n"
 					video_html = html_pre('', '', false, true) +
-						'<video src="' + Down_bucket_url + id + '/' + actual_name + '.ogg" controls="true"></video>' + 
-						html_post
+						"\t\t\t" +'<video src="' + Down_bucket_url + id + '/' + actual_name + '.ogg" controls="true">' + "\n" +
+						html5_notice + "\t\t\t" + '</video>' + "\n" +
+						"\t\t\t" +'<div id="vidinfos"><a href="' + Down_bucket_url + id + '/' + actual_name + '.ogg?torrent">Download</a>' +
+						' <span class="separator">&#x2503;</span> <a href="/i' + id + '">Video Info</a></div>' + "\n" +
+						html_post(true)
 					query = db.prepare('update metadata set size = ?, valid = ?, is_video = ? where metadata.id = ?')
 					stmt = query.execute(video_html.length, 0, 1, id.to_id)
 					stmt.close

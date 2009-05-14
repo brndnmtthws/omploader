@@ -169,9 +169,9 @@ FCGI.each_cgi {|cgi|
 		end
 
 		if hide_comments == 1
-			hide_link = '<a href="i' + id.to_b64 + '-show">+ Show (' + comment_count.to_s + ')</a> <span class="separator">&#x2503;</span> <a href="i' + id.to_b64 + '-show#comment_post">Post</a>'
+			hide_link = '<a href="/i' + id.to_b64 + '-show">+ Show (' + comment_count.to_s + ')</a> <span class="separator">&#x2503;</span> <a href="/i' + id.to_b64 + '-show#comment_post">Post</a>'
 		else
-			hide_link = '<a href="i' + id.to_b64 + '-hide">- Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
+			hide_link = '<a href="/i' + id.to_b64 + '-hide">- Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
 		end
 
 		#		cgi.out('text/plain') { comment_count.to_s }
@@ -209,13 +209,13 @@ FCGI.each_cgi {|cgi|
 						end
 						if body =~ /\A\[thumb\]([\w+\/]+)\[\/thumb\]/
 							if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-								body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+								body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
 								body += '<br class="clear" />'
 							elsif body =~ /\A\[thumb\]v([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-								body.sub!(/\[thumb\]v([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+								body.sub!(/\[thumb\]v([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
 								body += '<br class="clear" />'
 							elsif body =~ /\A\[thumb\]i([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-								body.sub!(/\[thumb\]i([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="t\1" alt="View file!" /></a></div></div>')
+								body.sub!(/\[thumb\]i([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
 								body += '<br class="clear" />'
 							end
 						end
@@ -271,7 +271,7 @@ FCGI.each_cgi {|cgi|
 		end
 		meta = ''
 		if content_type_main == 'image'
-			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
+			file_link = '<img src="/t' + id.to_b64 + '" alt="View file!" />'
 		elsif is_video
 			turls = "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}-still.gif"
 			turl = "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}.gif"
@@ -297,9 +297,9 @@ FCGI.each_cgi {|cgi|
 			meta += "\t\t\t\t" + '<div class="left"><strong>Album:</strong></div><div class="right">' + album + '</div><br class="clear" />' + "\n" if album and !album.empty?
 			meta += "\t\t\t\t" + '<div class="left"><strong>Date:</strong></div><div class="right">' + year + '</div><br class="clear" />' + "\n" if year and !year.empty?
 			meta = meta.insert(0, "\t\t\t\t<br />\n") if !meta.empty?
-			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
+			file_link = '<img src="/t' + id.to_b64 + '" alt="View file!" />'
 		else
-			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
+			file_link = '<img src="/t' + id.to_b64 + '" alt="View file!" />'
 		end
 
 		cgi.out('type' => 'text/html') {

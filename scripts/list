@@ -220,15 +220,15 @@ FCGI.each_cgi {|cgi|
 						turls = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}-still.gif"
 						turl = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif"
 
-						files_list += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + turls +
+						files_list += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="' + turls +
 							"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
 							"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
 							"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
 							'/></a></div></div>' + "\n"
 					else
-						files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+						files_list += '        <div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 					end
-					files_list_info += '        <div class="info float"><a href="i' + id + '">Info</a></div>' + "\n"
+					files_list_info += '        <div class="info float"><a href="/i' + id + '">Info</a></div>' + "\n"
 					if file_number == 5
 						file_number = 0
 						files_list += '        <br class="clear" />' + "\n"
@@ -253,8 +253,8 @@ FCGI.each_cgi {|cgi|
 					end
 
 					files_list +=
-					'            <td><a href="v' + id + '" title="' + name.gsub(/&/, '&amp;') + '">' + name_displayed.gsub(/&/, '&amp;') + '</a></td>' + "\n" +
-					'            <td class="small"><a href="i' + id + '">Info</a></td>' + "\n" +
+					'            <td><a href="/v' + id + '" title="' + name.gsub(/&/, '&amp;') + '">' + name_displayed.gsub(/&/, '&amp;') + '</a></td>' + "\n" +
+					'            <td class="small"><a href="/i' + id + '">Info</a></td>' + "\n" +
 					'            <td class="small">' + hits + '</td>' + "\n" +
 					'            <td class="small">' + comment_count + '</td>' + "\n" +
 					'            <td class="small">' + time.sub(' ', '&nbsp;') + '</td>' + "\n" +

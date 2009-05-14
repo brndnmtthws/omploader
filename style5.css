@@ -68,6 +68,10 @@ div#header div#search input.field {
 	margin-right: 5px;
 }
 
+div#vidnfos {
+	text-align: center;
+}
+
 div#footer {
 	color: #8000a0;
 	background-color: #f0e1e5;
@@ -78,16 +82,25 @@ div#footer {
 	margin: 20px 0 10px 0;
 }
 
+div#footer.video {
+	background-color: #c0b1b5;
+}
+
 div#footer div.right {
 	float: right;
 }
 
-div#container div.title a, div#footer a {
+div#container div.title a, div#footer a, div#vidinfos a {
 	color: #8000a0;
 	text-decoration: none;
 }
 
-div#container div.title a:hover, div #footer a:hover {
+div#vidinfos a {
+	color: #500070;
+	text-decoration: none;
+}
+
+div#container div.title a:hover, div #footer a:hover, div#vidinfos a:hover {
 	color: #f0e1e5;
 	background-color: #8000a0;
 }

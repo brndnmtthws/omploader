@@ -93,7 +93,7 @@ def do_stats
 											name_displayed = name
 										end
 										new_disc += "\t\t\t\t\t" + '<div class="file">' + "\n" +
-					"\t\t\t\t\t\t" + '<span class="filename"><a href="i' + id.to_b64 + '#comment_top" title="' + name + '">' + name_displayed + '</a></span>' + "\n" +
+					"\t\t\t\t\t\t" + '<span class="filename"><a href="/i' + id.to_b64 + '#comment_top" title="' + name + '">' + name_displayed + '</a></span>' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="fileinfo">' + count + '</span>' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="fileinfo">' + date.sub(' ', '&nbsp;') + '</span>' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n"

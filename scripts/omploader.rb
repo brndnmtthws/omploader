@@ -22,18 +22,9 @@ require 'pathname'
 path = Pathname.new(__FILE__).dirname
 
 Slogans = [
-	'hi!',
 	'free, lean and mean image &amp; file hosting',
-	'just doit',
-	'butts',
-	'brasil rulah',
-	'i like cheese',
 	'thanks for coming',
 	'Omploader Recommends Windows Vista',
-	'have you checked your blood pressure?',
-	'floss daily',
-	'(null)',
-	'blah blah blah',
 	'Nobody Does it Like Omp',
 	'Made in Taiwan',
 	'I Saw Omp and I Thought of You',
@@ -110,10 +101,14 @@ def html_pre(title = '', search = '', showsearch = true, video = false)
 		"\t\t\t" + '</div>' + "\n"
 end
 
-def html_post
-	html_post =
-		"\t\t\t" + '<div id="footer">' + "\n" +
-		"\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>' + "\n" +
+def html_post(video = false)
+	html_post = ''
+	if video
+		html_post += "\t\t\t" + '<div id="footer" class="video">' + "\n"
+	else
+		html_post += "\t\t\t" + '<div id="footer">' + "\n"
+	end
+		html_post += "\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>' + "\n" +
 		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##bikes">bikes</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://git.omp.am/?p=omploader.git">git</a> <span class="separator">&#x2503;</span> <a href="faq.xhtml">faq</a>' + "\n" +
 		"\t\t\t" + '</div>' + "\n" +
 		"\t\t" + '</div>' + "\n" +
