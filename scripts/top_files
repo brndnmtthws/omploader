@@ -22,6 +22,7 @@ FCGI.each_cgi {|cgi|
 			top_files_info = ''
 			query = db.prepare('select metadata.id, names.name, metadata.is_video from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where (content_types_main.type = "image" or metadata.is_video = 1) and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 20')
 			stmt = query.execute
+			tid = 0
 			(stmt.num_rows.to_f / 5).ceil.times do
 				top_files_info = ''
 
@@ -33,7 +34,15 @@ FCGI.each_cgi {|cgi|
 					is_video = result[2].to_i
 
 					if is_video > 0
-						top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif" + '" alt="View file!" /></a></div></div>' + "\n"
+						tid += 1
+						turls = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}-still.gif"
+						turl = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif"
+
+						top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + turls +
+							"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
+							"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
+							"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
+							'/></a></div></div>' + "\n"
 					else
 						top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 					end

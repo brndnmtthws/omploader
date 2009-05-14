@@ -54,6 +54,7 @@ FCGI.each_cgi {|cgi|
 			end
 		end
 		count = 0
+		tid = 0
 		top_files_info = ''
 		rands.each {|id|
 			count += 1
@@ -66,8 +67,14 @@ FCGI.each_cgi {|cgi|
 
 			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id.to_s.to_b64 + '">'
 			if is_video > 0
-				top_files +=
-					'<img src="' + "#{Down_bucket_url}#{id.to_s.to_b64}/#{name.chomp(".html").video_sanitise}.gif" + '" alt="View file!" /></a></div></div>' + "\n"
+				tid += 1
+				turls = "#{Down_bucket_url}#{id.to_s.to_b64}/#{name.chomp(".html").video_sanitise}-still.gif"
+				turl = "#{Down_bucket_url}#{id.to_s.to_b64}/#{name.chomp(".html").video_sanitise}.gif"
+				top_files +='<img src="' + turls +
+							"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
+							"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
+							"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
+							'/></a></div></div>' + "\n"
 			else
 				top_files +=
 					'<img src="t' + id.to_s.to_b64 + '" alt="View file!" /></a></div></div>' + "\n"

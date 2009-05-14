@@ -265,7 +265,13 @@ FCGI.each_cgi {|cgi|
 		if content_type_main == 'image'
 			file_link = '<img src="t' + id.to_b64 + '" alt="View file!" />'
 		elsif is_video
-			file_link = '<img src="' + "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}.gif" + '" alt="View file!" />'
+			turls = "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}-still.gif"
+			turl = "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}.gif"
+			file_link = '<img src="' + turls +
+			'" alt="View file!" id="thumb_1" ' +
+			'onmouseover="document.getElementById(\'thumb_1\').src=\'' + turl + '\'" ' +
+			'onmouseout="document.getElementById(\'thumb_1\').src=\'' + turls + '\'" ' +
+			'/>'
 		elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
 			res = Cache.get($0 + 'meta' + id)
 			if res.nil?

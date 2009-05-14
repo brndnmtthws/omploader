@@ -193,6 +193,7 @@ FCGI.each_cgi {|cgi|
 				row_number = 0
 			end
 			file_number = 0
+			tid = 0
 			if !wheres.empty?
 				other_wheres = wheres
 				other_wheres << (page - 1) * results
@@ -215,7 +216,15 @@ FCGI.each_cgi {|cgi|
 				file_number = file_number + 1
 				if images_only
 					if is_video > 0
-						files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif" + '" alt="View file!" /></a></div></div>' + "\n"
+						tid += 1
+						turls = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}-still.gif"
+						turl = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif"
+
+						files_list += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + turls +
+							"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
+							"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
+							"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
+							'/></a></div></div>' + "\n"
 					else
 						files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 					end
