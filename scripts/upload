@@ -165,11 +165,28 @@ FCGI.each_cgi {|cgi|
 					next if url =~ /127\.0\.0\.1/i
 					next if url =~ /:\/\/127\.0\.0\.1\//i
 					next if url =~ /:\/\/localhost\//i
-					c = Curl::Easy.perform(url) do |curl|
-						curl.follow_location = true
-						curl.max_redirects = 10
+					# check if it's a youtube or metacafe url
+					if url =~ /^http:\/\/(\w*\.?)?youtube\.com\/((v\/)|(watch)).*/
+						out = Tempfile.new('video')
+						vid = out.path
+						out.close!
+						next if !system('youtube-dl', '-qb', url, '-o', vid)
+						new_name = `youtube-dl -e #{url}`
+						if !new_name.empty?
+							name = new_name.chomp
+						end
+						inf = File.new(vid, File::RDONLY)
+						datum = inf.read
+						inf.close
+						File.unlink(vid)
+					else
+						c = Curl::Easy.perform(url) do |curl|
+							curl.follow_location = true
+							curl.max_redirects = 10
+							curl.user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.8) Gecko/2009032609 Firefox/3.0.8'
+						end
+						datum = c.body_str
 					end
-					datum = c.body_str
 					next if datum.length > Max_file_size or datum.empty?
 				rescue
 					next

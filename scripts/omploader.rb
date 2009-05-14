@@ -245,9 +245,10 @@ class String
 	def sanitise
 		self.gsub('<', '&lt;').gsub('>', '&gt;')
 	end
-	# remove spaces from video names so s3 doesn't choke
+	# clean up filename a bit
 	def video_sanitise
-		self.gsub(' ', '.')
+		self.gsub(' ', '.') # replace spaces with '.'
+		self.gsub(/[^\w\.\-]/, '_') # replace all non-alphanumeric, underscore or period characters with '_'
 	end
 end
 

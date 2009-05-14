@@ -103,7 +103,7 @@ FCGI.each_cgi {|cgi|
 					is_video = result[2].to_i
 
 					if is_video > 0
-						top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + "#{Down_bucket_url}#{id}/#{name.chomp(".html")}.gif" + '" alt="View file!" /></a></div></div>' + "\n"
+						top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif" + '" alt="View file!" /></a></div></div>' + "\n"
 					else
 						top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 					end

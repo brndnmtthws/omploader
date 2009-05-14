@@ -215,7 +215,7 @@ FCGI.each_cgi {|cgi|
 				file_number = file_number + 1
 				if images_only
 					if is_video > 0
-						files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + "#{Down_bucket_url}#{id}/#{name.chomp(".html")}.gif" + '" alt="View file!" /></a></div></div>' + "\n"
+						files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="' + "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif" + '" alt="View file!" /></a></div></div>' + "\n"
 					else
 						files_list += '        <div class="thumb float"><div class="container"><a href="v' + id + '"><img src="t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 					end
