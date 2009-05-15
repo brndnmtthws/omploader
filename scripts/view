@@ -36,7 +36,7 @@ FCGI.each_cgi {|cgi|
 			stmt.close
 			valid = info[3].to_i
 			is_video = info[4].to_i
-			if is_video and !valid
+			if is_video > 0 and valid < 1
 				Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_short)
 			else
 				Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
