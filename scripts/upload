@@ -116,6 +116,7 @@ end
 
 FCGI.each_cgi {|cgi|
 	begin
+		GC.start
 		db = db_connect
 
 		output = ''
