@@ -95,17 +95,12 @@ div#footer div.right {
 	float: right;
 }
 
-div#container div.title a, div#footer a, div#vidinfos a {
+div#container div.title a, div#footer a {
 	color: #8000a0;
 	text-decoration: none;
 }
 
-div#vidinfos a {
-	color: #400060;
-	text-decoration: none;
-}
-
-div#container div.title a:hover, div #footer a:hover, div#vidinfos a:hover {
+div#container div.title a:hover, div #footer a:hover {
 	color: #f0e1e5;
 	background-color: #8000a0;
 }
@@ -389,6 +384,27 @@ div#container div.content div.upload div.code {
 div#container div.content div.form textarea.comment {
 	height: 100px;
 }
+
+video {
+/*	border: 1px solid #333333;
+	padding: 4px;*/
+}
+
+div#vidinfos {
+	padding: 3px 0 20px 0;
+	color: #8000A0;
+}
+
+div#vidinfos a {
+	color: #C0B1B5;
+	text-decoration: none;
+}
+
+div#vidinfos a:hover {
+	color: #f6f6f6;
+	background-color: #8000a0;
+}
+
 
 /*div#container div.content ol li + li + li p > strong { display: block; width: 250px; height: 200px; background-image: url('http://omploader.org/vNzdu'); }
 div#container div.content ol li + li + li p > strong + strong { display: inline; background-image: none; }*/
