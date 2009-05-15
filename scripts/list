@@ -147,21 +147,29 @@ FCGI.each_cgi {|cgi|
 		if images_only
 			where_clause += ' and (content_types_main.type like "image" or metadata.is_video = 1) '
 		end
+
+		names_where_clause = ''
+		comments_where_clause = ''
+		search_sql = ''
 		wheres = search.gsub(/%/, '\\%').gsub(/_/, '\\_').split(' ')
 		wheres.each_index{|i| wheres[i] = '%' + wheres[i] + '%'}
-		search_where_clause = ''
 		for item in wheres
-			search_where_clause += ' (names.name like ? or comments_body.body like ?) and'
+			names_where_clause += ' names.name like ? or'
+			comments_where_clause += ' comments_body.body like ? or'
 		end
-		search_where_clause = search_where_clause.chomp("and")
-		if !search_where_clause.empty?
-			where_clause = where_clause + ' and (' + search_where_clause + ' ) '
+		names_where_clause = names_where_clause.chomp("or")
+		comments_where_clause = comments_where_clause.chomp("or")
+		if !names_where_clause.empty?
+			where_clause = where_clause + ' and ((' + names_where_clause + ') or ' + '(' + comments_where_clause + ')) '
+			search_sql = ' left join comments on metadata.id = comments.metadata_id left join comments_body on comments_body.id = comments.comment_id '
 		end
 		wheres*=2
 
+		common_sql = 'from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id '
+
 		count = Cache.get($0 + 'count' + Digest::SHA1.hexdigest(where_clause + wheres.to_s))
 		if count.nil?
-			query = db.prepare('select count(*) from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join comments on metadata.id = comments.metadata_id left join comments_body on comments_body.id = comments.comment_id ' + where_clause)
+			query = db.prepare('select count(*) ' + common_sql + search_sql + where_clause)
 			if !wheres.empty?
 				stmt = query.execute(*wheres)
 			else
@@ -177,7 +185,7 @@ FCGI.each_cgi {|cgi|
 
 		files_list = Cache.get($0 + 'files' + Digest::SHA1.hexdigest(cgi.query_string.to_s + prefs.to_s))
 		if files_list.nil?
-			query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type, metadata.is_video from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join comments on metadata.id = comments.metadata_id left join comments_body on comments_body.id = comments.comment_id ' + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if images_only
 				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 					files_list_info = ''
@@ -285,7 +293,7 @@ FCGI.each_cgi {|cgi|
 		end
 		num_rows = Cache.get($0 + 'num_rows' + Digest::SHA1.hexdigest(cgi.query_string.to_s))
 		if num_rows.nil?
-		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join comments on metadata.id = comments.metadata_id left join comments_body on comments_body.id = comments.comment_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+		query = db.prepare('select metadata.id ' + common_sql + search_sql + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 		if !wheres.empty?
 			other_wheres = wheres
 			other_wheres.delete_at(other_wheres.size - 1)
