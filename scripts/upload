@@ -183,6 +183,7 @@ FCGI.each_cgi {|cgi|
 						c = Curl::Easy.perform(url) do |curl|
 							curl.follow_location = true
 							curl.max_redirects = 10
+							curl.headers["User-Agent"] = cgi.user_agent
 						end
 						datum = c.body_str
 					end
