@@ -151,7 +151,7 @@ FCGI.each_cgi {|cgi|
 		wheres.each_index{|i| wheres[i] = '%' + wheres[i] + '%'}
 		search_where_clause = ''
 		for item in wheres
-			search_where_clause += ' names.name like ? or comments_body.body like ? and'
+			search_where_clause += ' (names.name like ? or comments_body.body like ?) and'
 		end
 		search_where_clause = search_where_clause.chomp("and")
 		if !search_where_clause.empty?
