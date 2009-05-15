@@ -8,9 +8,9 @@
 
 require 'pathname'
 
-path = Pathname.new(__FILE__).dirname
+Path = Pathname.new(__FILE__).dirname
 
-$LOAD_PATH << path
+$LOAD_PATH << Path
 
 require 'omploader'
 
@@ -76,7 +76,7 @@ def complete(arg, size)
 	end
 end
 
-def delete(arg)
+def do_delete(arg)
 	begin
 		id = arg.to_id
 		# Verify that id is strictly numeric.
@@ -89,12 +89,12 @@ def delete(arg)
 		query = Db.prepare('delete from thumbnails, votes, metadata using metadata left join thumbnails on thumbnails.id = metadata.thumbnail_id left join votes on votes.metadata_id = metadata.id where metadata.id = ?')
 		stmt = query.execute(id)
 		begin
-			File.unlink(path + Paths['data'] + '/' + id.to_b64)
+			File.unlink(Path + Paths['data'] + '/' + id.to_b64)
 		rescue Errno::ENOENT
 		end
 		# shouldn't be any thumbs, but it can't hurt to try
 		begin
-			File.unlink(path + Paths['thumbnails'] + '/' + id.to_b64)
+			File.unlink(Path + Paths['thumbnails'] + '/' + id.to_b64)
 		rescue Errno::ENOENT
 		end
 		Db.commit
@@ -112,7 +112,7 @@ end
 
 
 if delete
-	delete(argv[0])
+	do_delete(argv[0])
 elsif complete
 	size = argv[0].to_i
 	id = argv[1].to_s
