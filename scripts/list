@@ -149,18 +149,19 @@ FCGI.each_cgi {|cgi|
 		end
 		wheres = search.gsub(/%/, '\\%').gsub(/_/, '\\_').split(' ')
 		wheres.each_index{|i| wheres[i] = '%' + wheres[i] + '%'}
-		names_where_clause = ''
+		search_where_clause = ''
 		for item in wheres
-			names_where_clause += ' names.name like ? and'
+			search_where_clause += ' names.name like ? or comments_body.body like ? and'
 		end
-		names_where_clause = names_where_clause.chomp("and")
-		if !names_where_clause.empty?
-			where_clause = where_clause + ' and (' + names_where_clause + ' ) '
+		search_where_clause = search_where_clause.chomp("and")
+		if !search_where_clause.empty?
+			where_clause = where_clause + ' and (' + search_where_clause + ' ) '
 		end
+		wheres*=2
 
 		count = Cache.get($0 + 'count' + Digest::SHA1.hexdigest(where_clause + wheres.to_s))
 		if count.nil?
-			query = db.prepare('select count(*) from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause)
+			query = db.prepare('select count(*) from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join comments on metadata.id = comments.metadata_id left join comments_body on comments_body.id = comments.comment_id ' + where_clause)
 			if !wheres.empty?
 				stmt = query.execute(*wheres)
 			else
@@ -174,9 +175,9 @@ FCGI.each_cgi {|cgi|
 			page = 1
 		end
 
-		files_list = Cache.get($0 + 'files' + cgi.query_string.to_s + prefs.to_s)
+		files_list = Cache.get($0 + 'files' + Digest::SHA1.hexdigest(cgi.query_string.to_s + prefs.to_s))
 		if files_list.nil?
-			query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type, metadata.is_video from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type, metadata.is_video from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join comments on metadata.id = comments.metadata_id left join comments_body on comments_body.id = comments.comment_id ' + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if images_only
 				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 					files_list_info = ''
@@ -273,7 +274,7 @@ FCGI.each_cgi {|cgi|
 				files_list += '        </table>' + "\n"
 			end
 			files_list += '      </div>' + "\n"
-			Cache.set($0 + 'files' + cgi.query_string.to_s + prefs.to_s, files_list, Default_cache_expiry_short)
+			Cache.set($0 + 'files' + Digest::SHA1.hexdigest(cgi.query_string.to_s + prefs.to_s), files_list, Default_cache_expiry_short)
 		end
 
 		page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
@@ -282,9 +283,9 @@ FCGI.each_cgi {|cgi|
 		else
 			page_links += '        First <span class="separator">&#x2503;</span> Previous'
 		end
-		num_rows = Cache.get($0 + 'num_rows' + cgi.query_string.to_s)
+		num_rows = Cache.get($0 + 'num_rows' + Digest::SHA1.hexdigest(cgi.query_string.to_s))
 		if num_rows.nil?
-		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+		query = db.prepare('select metadata.id from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join comments on metadata.id = comments.metadata_id left join comments_body on comments_body.id = comments.comment_id ' + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 		if !wheres.empty?
 			other_wheres = wheres
 			other_wheres.delete_at(other_wheres.size - 1)
@@ -295,7 +296,7 @@ FCGI.each_cgi {|cgi|
 		end
 		num_rows = stmt.num_rows
 		stmt.close
-		Cache.set($0 + 'num_rows' + cgi.query_string.to_s, num_rows, Default_cache_expiry_short)
+		Cache.set($0 + 'num_rows' + Digest::SHA1.hexdigest(cgi.query_string.to_s), num_rows, Default_cache_expiry_short)
 		end
 		if num_rows > 0
 			page_links += ' <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
