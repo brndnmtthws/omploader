@@ -14,13 +14,16 @@ animals = ['gerbils', 'kitties', 'geese', 'turkeys', 'honey badgers', 'Javeeds',
 
 def form_input(input_type, input_name, count=1)
 	ret = ''
+	i = 1
 	if input_type != "file"
 		count.times do
-			ret += "\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" size="25" class="input field" /><br />' + "\n"
+			ret += "\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + i.to_s + '" size="25" class="input field" /><br />' + "\n"
+			i += 1
 		end
 	else
 		count.times do
-			ret += "\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + '1" class="input field" /><br />' + "\n"
+			ret += "\t\t\t\t\t\t" + '<input type="' + input_type + '" name="' + input_name + i.to_s + '" class="input field" /><br />' + "\n"
+			i += 1
 		end
 	end
 	return ret
