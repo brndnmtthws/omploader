@@ -179,6 +179,24 @@ FCGI.each_cgi {|cgi|
 						datum = inf.read
 						inf.close
 						File.unlink(vid)
+						# metacafe code, almost works but I suspect going from gdaKey to __gda__ something changes that I have not figured out yet
+# 					elsif url =~ /^http:\/\/(\w*\.?)?metacafe\.com\/watch\/.+\/.+\/.*/
+# 						c = Curl::Easy.perform(url) do |curl|
+# 							curl.follow_location = true
+# 							curl.max_redirects = 10
+# 							curl.headers["User-Agent"] = cgi.user_agent
+# 						end
+# 						vidurl = c.body_str
+# 						next if !vidurl = /mediaURL=(.+)&gdaKey=([^&]+)&/.match(vidurl)
+# 						vidurl = URI.parse(URI.unescape(vidurl[1]) + '&__gda__=' + vidurl[2]).normalize
+# 						log = Logger.new(Paths['log'])
+# 						log.error(vidurl.to_s)
+# 						c = Curl::Easy.perform(vidurl.to_s) do |curl|
+# 							curl.follow_location = true
+# 							curl.max_redirects = 10
+# 							curl.headers["User-Agent"] = cgi.user_agent
+# 						end
+# 						datum = c.body_str
 					else
 						c = Curl::Easy.perform(url) do |curl|
 							curl.follow_location = true
