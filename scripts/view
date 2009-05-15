@@ -21,6 +21,7 @@ FCGI.each_cgi {|cgi|
 		end
 
 		info = Cache.get($0 + id)
+		is_video = valid = 0
 		if info.nil?
 			db_check(db)
 			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type, metadata.valid, metadata.is_video from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
@@ -33,14 +34,20 @@ FCGI.each_cgi {|cgi|
 			end
 			info = stmt.fetch
 			stmt.close
-			Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
+			valid = info[3].to_i
+			is_video = info[4].to_i
+			if is_video and !valid
+				Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_short)
+			else
+				Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
+			end
 		else
 			info = Marshal.load(Base64.decode64(info))
+			valid = info[3].to_i
+			is_video = info[4].to_i
 		end
 		name = info[0].to_s
 		content_type = info[1]+ '/' + info[2]
-		valid = info[3].to_i
-		is_video = info[4].to_i
 		if valid < 1
 			if is_video > 0
 				raise 'Sorry, we\'re still working on it.  Go grab some lunch or something.'
