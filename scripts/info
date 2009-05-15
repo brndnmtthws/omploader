@@ -110,9 +110,17 @@ FCGI.each_cgi {|cgi|
 			end
 			info = query.fetch
 			query.close
-			Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
+			is_video = info[8].to_i
+			valid = info[9].to_i
+			if is_video > 0 and valid < 1
+				Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_short)
+			else
+				Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
+			end
 		else
 			info = Marshal.load(Base64.decode64(info))
+			is_video = info[8].to_i
+			valid = info[9].to_i
 		end
 		name = info[0]
 		size = info[1]
@@ -122,8 +130,6 @@ FCGI.each_cgi {|cgi|
 		content_type_main = info[5].to_s
 		content_type_sub = info[6].to_s
 		info_owner_name = info[7].to_s
-		is_video = info[8].to_i
-		valid = info[9].to_i
 		if valid < 1
 			if is_video > 0
 				raise 'Sorry, we\'re still working on it.  Go grab some lunch or something.'
