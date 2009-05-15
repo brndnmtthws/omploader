@@ -183,7 +183,6 @@ FCGI.each_cgi {|cgi|
 						c = Curl::Easy.perform(url) do |curl|
 							curl.follow_location = true
 							curl.max_redirects = 10
-							curl.user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.8) Gecko/2009032609 Firefox/3.0.8'
 						end
 						datum = c.body_str
 					end
