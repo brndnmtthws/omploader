@@ -77,7 +77,7 @@ argv.each do |arg|
 		$stderr.puts "Invalid argument '#{arg}': file does not exist (or is not a regular file)."
 		errors += 1
 		next
-	elsif File.size(arg) > 2**28
+	elsif File.size(arg) > 2**31
 		$stderr.puts "Error omploading '#{arg}': file exceeds " + (2**28).to_s + " bytes (size was " + File.size(arg).to_s + ")."
 		errors += 1
 		next
