@@ -82,15 +82,6 @@ div#footer {
 	margin: 20px 0 10px 0;
 }
 
-body.video div#footer {
-	width: 722px;
-	margin: auto;
-}
-
-div#footer.video {
-	background-color: #c0b1b5;
-}
-
 div#footer div.right {
 	float: right;
 }
@@ -110,16 +101,6 @@ div#container {
 	margin: auto;
 	padding: 0;
 	width: 722px;
-}
-
-body.video div#container {
-	width: 100%;
-}
-
-div#info_area {
-	width: 732px;
-	margin: auto;
-	padding: 0;
 }
 
 div#container div.title {
@@ -411,6 +392,52 @@ div#vidinfos a:hover {
 	background-color: #8000a0;
 }
 
+
+body.video div#container {
+	width: 100%;
+}
+
+body.video div#info_area {
+	width: 732px;
+	margin: auto;
+	padding: 5px;
+}
+
+body.video div#info_area div.title {
+	background-color: #c0b1b5;
+	border-color: #5A00AE;
+}
+
+body.video div#info_area div.content {
+	background-color: #DDDDDD;
+/* 	border: 1px solid #F6F6F6; */
+	padding: 10px;
+	margin-left: 1px;
+	margin-right: 1px;
+}
+
+body.video div#footer {
+	width: 722px;
+	margin: auto;
+}
+
+body.video div#footer {
+	background-color: #c0b1b5;
+	border-color: #5A00AE;
+}
+
+body.video div#container div.content div.thumb {
+	background-color:#eeeeee;
+	border:1px solid #BBBBBB;
+}
+
+body.video div#container div.content div.thumb:hover {
+	border-color: #333;
+}
+
+body.video div#container div.content div.thumb a:hover {
+	color: #8B00FF;
+}
 
 /*div#container div.content ol li + li + li p > strong { display: block; width: 250px; height: 200px; background-image: url('http://omploader.org/vNzdu'); }
 div#container div.content ol li + li + li p > strong + strong { display: inline; background-image: none; }*/
