@@ -254,7 +254,7 @@ FCGI.each_cgi {|cgi|
 			else
 				next
 			end
-			name = name.sanitise
+			name = name.sanitise.gsub(/[\t\n\r\f]/, '')
 
 			begin
 				if cgi.has_key?('paste') and syntax == 'raw'
