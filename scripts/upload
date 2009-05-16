@@ -38,14 +38,6 @@ def get_video_body(id, name)
 								$("#infolink").text("+ Show Info");
 							}
 						);
-						$("#the_video").toggle(
-							function() {
-								this.play();
-							},
-							function() {
-								this.pause();
-							}
-						);
 				});
 			</script>
 EOF
