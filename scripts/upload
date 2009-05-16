@@ -15,6 +15,35 @@ require 'id3lib'
 require 'digest/sha1'
 require 'vorbisfile'
 
+def get_video_body(id, name)
+	turls = "#{Down_bucket_url}#{id}/#{name}-still.gif"
+	turl = "#{Down_bucket_url}#{id}/#{name}.gif"
+	vurl = "#{Down_bucket_url}#{id}/#{name}.ogg"
+	html = <<-EOF;
+			<video src=#{vurl}" controls="true">
+				<h2>Can't see anything?  Try a browser that can playback Ogg media using &lt;video&gt; and &lt;audio&gt;. Try <a href="http://www.mozilla.com/en-US/firefox/all-beta.html">Firefox 3.5 beta</a>, <a href="http://labs.opera.com/news/2008/07/18/">Opera experimental builds</a> or <a href="http://www.apple.com/safari/">Safari</a> with <a href="http://xiph.org/quicktime/">XiphQT</a>.</h2>
+				<img src="#{turls}" id="thumb_1" onmouseover="document.getElementById('thumb_1').src='#{turl}'" onmouseout="document.getElementById('thumb_1').src='#{turls}'" />
+			</video>
+			<div id="vidinfos"><a href="#{vurl}?torrent">Download</a> <span class="separator">&#x2503;</span> <a id="infolink" href="">+ Show Info</a></div>
+			<div id="info_area"></div>
+			<script type="text/javascript">
+				$(document).ready(function() {
+						$("#infolink").toggle(
+							function() {
+								$("#info_area").load("/j#{id}");
+								$("#infolink").text("- Hide Info");
+							},
+							function() {
+								$("#info_area").empty();
+								$("#infolink").text("+ Show Info");
+							}
+						);
+				});
+			</script>
+EOF
+	return html_pre('', '', false, true) + html + html_post(true)
+end
+
 def get_output(id, name, name_displayed, type, host)
 	top = ''
 	common = <<-EOF;
@@ -22,16 +51,16 @@ def get_output(id, name, name_displayed, type, host)
 		<div class="left">Info:</div><div class="right"><a href="/i#{id}">http://#{host}/i#{id}</a></div>
 		<div class="left">File:</div><div class="right"><a href="/v#{id}">http://#{host}/v#{id}</a></div>
 		<div class="left">&nbsp;</div><div class="right"><a href="/v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
-	EOF
+EOF
 	if type == 'image'
 		top = <<-EOF;
 		<div class="thumb automargin"><div class="container"><a href="/v#{id}"><img src="/t#{id}" alt="View file!" /></a></div></div>
-		EOF
+EOF
 		common += <<-EOF;
 		<div class="left">Thumbnail:</div><div class="right"><a href="/t#{id}">http://#{host}/t#{id}</a></div>
 		<br class="clear" />
 		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}][img]http://#{host}/t#{id}[/img][/url]</div></div>
-		EOF
+EOF
 	else
 		common += <<-EOF;
 		<br class="clear" />
@@ -323,19 +352,7 @@ FCGI.each_cgi {|cgi|
 				if content_type_main == 'video'
 					# o deer, special effects required
 					# compose html dealy
-					html5_notice = "\t\t\t\t" + '<h2>Can\'t see anything?  Try a browser that can playback Ogg media using &lt;video&gt; and &lt;audio&gt;. Try <a href="http://www.mozilla.com/en-US/firefox/all-beta.html">Firefox 3.5 beta</a>, <a href="http://labs.opera.com/news/2008/07/18/">Opera experimental builds</a> or <a href="http://www.apple.com/safari/">Safari</a> with <a href="http://xiph.org/quicktime/">XiphQT</a>.</h2>' + "\n"
-					turls = "#{Down_bucket_url}#{id}/#{actual_name}-still.gif"
-					turl = "#{Down_bucket_url}#{id}/#{actual_name}.gif"
-					video_html = html_pre('', '', false, true) +
-						"\t\t\t" +'<video src="' + Down_bucket_url + id + '/' + actual_name + '.ogg" controls="true">' + "\n" +
-						"\t\t\t\t" + '<img src="' + turls +
-						'" id="thumb_1" ' +
-						'onmouseover="document.getElementById(\'thumb_1\').src=\'' + turl + '\'" ' +
-						'onmouseout="document.getElementById(\'thumb_1\').src=\'' + turls + '\'" />' + "\n" +
-						html5_notice + "\t\t\t" + '</video>' + "\n" +
-						"\t\t\t" +'<div id="vidinfos"><a href="' + Down_bucket_url + id + '/' + actual_name + '.ogg?torrent">Download</a>' +
-						' <span class="separator">&#x2503;</span> <a href="/i' + id + '">Video Info</a></div>' + "\n" +
-						html_post(true)
+					video_html = get_video_body(id, actual_name)
 					query = db.prepare('update metadata set size = ?, valid = ?, is_video = ? where metadata.id = ?')
 					stmt = query.execute(video_html.length, 0, 1, id.to_id)
 					stmt.close

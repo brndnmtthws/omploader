@@ -38,6 +38,11 @@ FCGI.each_cgi {|cgi|
 			hide_comments = 0
 		end
 
+		ajax = 0
+		if cgi.has_key?('ajax')
+			ajax = cgi.params['ajax'].to_s.to_i
+		end
+
 		if cgi.has_key?('hide_comments') and hide_comments != cgi.params['hide_comments'].to_s.to_i
 			hide_comments = cgi.params['hide_comments'].to_s.to_i
 			update_prefs = true
@@ -174,67 +179,73 @@ FCGI.each_cgi {|cgi|
 			Cache.set($0 + 'name' + id, owner_name, Default_cache_expiry_long)
 		end
 
+		ichar = 'i'
+		if ajax > 0
+			ichar = 'j'
+		end
 		if hide_comments == 1
-			hide_link = '<a href="/i' + id.to_b64 + '-show">+ Show (' + comment_count.to_s + ')</a> <span class="separator">&#x2503;</span> <a href="/i' + id.to_b64 + '-show#comment_post">Post</a>'
+			hide_link = '<a href="/' + ichar + id.to_b64 + '-show">+ Show (' + comment_count.to_s + ')</a> <span class="separator">&#x2503;</span> <a href="/' + ichar + id.to_b64 + '-show#comment_post">Post</a>'
 		else
-			hide_link = '<a href="/i' + id.to_b64 + '-hide">- Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
+			hide_link = '<a href="/' + ichar + id.to_b64 + '-hide">- Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
 		end
 
 		#		cgi.out('text/plain') { comment_count.to_s }
 		#		db.commit
 		#		next
 
-		comments_body = Cache.get($0 + 'comments' + id)
-		if comments_body.nil? or update_prefs
-			comments_body =
+		comments_body = ''
+		if ajax == 0
+			comments_body = Cache.get($0 + 'comments' + id)
+			if comments_body.nil? or update_prefs
+				comments_body =
 					"\t\t\t" + '<a name="comment_top">' + "\n" +
 					"\t\t\t" + '<div class="title">' + "\n" + 
 					"\t\t\t\t" + '<div class="links">' + hide_link + '</div>' + "\n" +
 					"\t\t\t\t" + '<div>Comments</div>' + "\n" +
 					"\t\t\t" + '</div>' + "\n"
-			if hide_comments == 0
-				cnum = 0
-				if comment_count > 0
-					query = db.prepare('select	comments.id, comments.creation_date, comments_body.body,	names.name from comments inner join metadata on metadata.id = comments.metadata_id inner join comments_body on comments_body.id = comments.comment_id	left join owners on owners.id = comments.owner_id left join names on names.id = owners.name_id where metadata.id = ? order by comments.creation_date asc')
-					comment_array = Array.new
-					query.execute(id).num_rows.times do
-						cnum += 1
-						res = query.fetch
-						array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
-						comment_array << array
-					end
-					query.close
-					comment_array.each { |array|
-						num = array[0]
-						cid = array[1]
-						date = array[2]
-						body = array[3].sub(/\A[\r\n]+/, '').sub(/[\r\n]+\z/, '')
-						lname = array[4]
-						if lname.nil? or lname.empty?
-							lname = 'some luser'
-						end
-						if body =~ /\A\[thumb\]([\w+\/]+)\[\/thumb\]/
-							if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-								body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
-								body += '<br class="clear" />'
-							elsif body =~ /\A\[thumb\]v([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-								body.sub!(/\[thumb\]v([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
-								body += '<br class="clear" />'
-							elsif body =~ /\A\[thumb\]i([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
-								body.sub!(/\[thumb\]i([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
-								body += '<br class="clear" />'
+					if hide_comments == 0
+						cnum = 0
+						if comment_count > 0
+							query = db.prepare('select	comments.id, comments.creation_date, comments_body.body,	names.name from comments inner join metadata on metadata.id = comments.metadata_id inner join comments_body on comments_body.id = comments.comment_id	left join owners on owners.id = comments.owner_id left join names on names.id = owners.name_id where metadata.id = ? order by comments.creation_date asc')
+							comment_array = Array.new
+							query.execute(id).num_rows.times do
+								cnum += 1
+								res = query.fetch
+								array = [cnum.to_s, res[0].to_s, res[1].to_s, res[2], res[3]]
+								comment_array << array
 							end
-						end
-						while body =~ /\[i\].+\[\/i\]/
-							body.sub!(/\[i\](.+?)\[\/i\]/, '<em>\1</em>')
-						end
-						while body =~ /\[b\].+\[\/b\]/
-							body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
-						end
-						if body =~ /http:\/\/.*http:\/\//m
-							body = "i'm gay SPAM SPAM SPAM"
-						end
-						comments_body +=
+							query.close
+							comment_array.each { |array|
+								num = array[0]
+								cid = array[1]
+								date = array[2]
+								body = array[3].sub(/\A[\r\n]+/, '').sub(/[\r\n]+\z/, '')
+								lname = array[4]
+								if lname.nil? or lname.empty?
+									lname = 'some luser'
+								end
+								if body =~ /\A\[thumb\]([\w+\/]+)\[\/thumb\]/
+									if db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
+										body.sub!(/\[thumb\]([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
+										body += '<br class="clear" />'
+									elsif body =~ /\A\[thumb\]v([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
+										body.sub!(/\[thumb\]v([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
+										body += '<br class="clear" />'
+									elsif body =~ /\A\[thumb\]i([\w+\/]+)\[\/thumb\]/ and db.prepare('select id from metadata where id = ?').execute($1.to_id).num_rows > 0
+										body.sub!(/\[thumb\]i([\w+\/]+)\[\/thumb\][\r\n]*/, '<div class="thumb float" style="margin: 0 5px 0 0"><div class="container"><a href="v\1"><img src="/t\1" alt="View file!" /></a></div></div>')
+										body += '<br class="clear" />'
+									end
+								end
+								while body =~ /\[i\].+\[\/i\]/
+									body.sub!(/\[i\](.+?)\[\/i\]/, '<em>\1</em>')
+								end
+								while body =~ /\[b\].+\[\/b\]/
+									body.sub!(/\[b\](.+?)\[\/b\]/, '<strong>\1</strong>')
+								end
+								if body =~ /http:\/\/.*http:\/\//m
+									body = "i'm gay SPAM SPAM SPAM"
+								end
+								comments_body +=
 						"\t\t\t" + '<a name="comment_' + cid + '"></a>' + "\n" +
 						"\t\t\t" + '<div class="content comment left-align">' + "\n" +
 						"\t\t\t\t" + '<div style="float: left"><strong>' + lname + '</strong> <span style="color: #666">wrote:</span></div>' + "\n" +
@@ -242,14 +253,14 @@ FCGI.each_cgi {|cgi|
 						"\t\t\t\t" + '<br class="clear" />' + "\n" +
 						"\t\t\t\t" + '<pre>' + body + '</pre>' + "\n" +
 						"\t\t\t" + '</div>' + "\n"
-					}
+							}
 						Cache.set($0 + 'comments' + id, comments_body, Default_cache_expiry_short)
-				end
+						end
+					end
 			end
-		end
 
-		if throttle.to_i < Max_upload_count and !owner_id.nil?
-			comments_body +=
+			if throttle.to_i < Max_upload_count and !owner_id.nil?
+				comments_body +=
 				"\t\t\t" + '<a name="comment_post"></a>' + "\n" +
 				"\t\t\t" + '<div class="content">' + "\n" +
 				"\t\t\t\t" + '<form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
@@ -270,10 +281,11 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t" + '</form>' + "\n" +
 				"\t\t\t" + '</div>' + "\n"
-		else
-			comments_body +=
+			else
+				comments_body +=
 				"\t\t\t" + '<a name="comment_post"></a>' + "\n" +
 				"\t\t\t" + '<div class="content large">NO COOKIE!</div>' + "\n"
+			end
 		end
 		meta = ''
 		if content_type_main == 'image'
@@ -308,8 +320,12 @@ FCGI.each_cgi {|cgi|
 			file_link = '<img src="/t' + id.to_b64 + '" alt="View file!" />'
 		end
 
-		cgi.out('type' => 'text/html') {
-			html_pre(' – ' + name + ' (' + content_type + ')') +
+		html_out = ''
+		if ajax == 0
+			html_out +=
+				html_pre(' – ' + name + ' (' + content_type + ')')
+		end
+		html_out +=
 			"\t\t\t" + '<div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
 			"\t\t\t\t" + '<div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
@@ -325,8 +341,12 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t" + '<div class="content">' + "\n" +
 			referrers +
 			"\t\t\t" + '</div>' + "\n" +
-			comments_body +
-			html_post
+			comments_body
+		if ajax == 0
+			html_out += html_post
+		end
+		cgi.out('type' => 'text/html') {
+			html_out
 		}
 		if update_prefs
 			if !owner_id.nil?
