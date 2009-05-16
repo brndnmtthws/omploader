@@ -400,7 +400,7 @@ body.video div#container {
 body.video div#info_area {
 	width: 732px;
 	margin: auto;
-	padding: 5px;
+/* 	padding: 5px; */
 }
 
 body.video div#info_area div.title {
@@ -414,11 +414,6 @@ body.video div#info_area div.content {
 	padding: 10px;
 	margin-left: 1px;
 	margin-right: 1px;
-}
-
-body.video div#footer {
-	width: 722px;
-	margin: auto;
 }
 
 body.video div#footer {
@@ -437,6 +432,11 @@ body.video div#container div.content div.thumb:hover {
 
 body.video div#container div.content div.thumb a:hover {
 	color: #8B00FF;
+}
+
+body.video div#footer {
+	width: 720px;
+	margin: auto;
 }
 
 /*div#container div.content ol li + li + li p > strong { display: block; width: 250px; height: 200px; background-image: url('http://omploader.org/vNzdu'); }
