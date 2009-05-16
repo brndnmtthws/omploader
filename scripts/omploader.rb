@@ -243,7 +243,7 @@ class String
 
 	# Sanitise HTML code to avoid opening tags.
 	def sanitise
-		self.gsub('<', '&lt;').gsub('>', '&gt;')
+		self.gsub('<', '&lt;').gsub('>', '&gt;').gsub('[\n\r\t]', '')
 	end
 	# clean up filename a bit
 	def video_sanitise
