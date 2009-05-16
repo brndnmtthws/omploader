@@ -117,8 +117,9 @@ body.video div#container {
 }
 
 div#info_area {
-	width: 722px;
+	width: 732px;
 	margin: auto;
+	padding: 0;
 }
 
 div#container div.title {
