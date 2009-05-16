@@ -20,7 +20,7 @@ def get_video_body(id, name)
 	turl = "#{Down_bucket_url}#{id}/#{name}.gif"
 	vurl = "#{Down_bucket_url}#{id}/#{name}.ogg"
 	html = <<-EOF;
-			<video src="#{vurl}" controls="true">
+			<video id="the_video" src="#{vurl}" controls="true">
 				<h2>Can't see anything?  Try a browser that can playback Ogg media using &lt;video&gt; and &lt;audio&gt;. Try <a href="http://www.mozilla.com/en-US/firefox/all-beta.html">Firefox 3.5 beta</a>, <a href="http://labs.opera.com/news/2008/07/18/">Opera experimental builds</a> or <a href="http://www.apple.com/safari/">Safari</a> with <a href="http://xiph.org/quicktime/">XiphQT</a>.</h2>
 				<img src="#{turls}" id="thumb_1" onmouseover="document.getElementById('thumb_1').src='#{turl}'" onmouseout="document.getElementById('thumb_1').src='#{turls}'" />
 			</video>
@@ -36,6 +36,14 @@ def get_video_body(id, name)
 							function() {
 								$("#info_area").empty();
 								$("#infolink").text("+ Show Info");
+							}
+						);
+						$("#the_video").toggle(
+							function() {
+								this.play();
+							},
+							function() {
+								this.pause();
 							}
 						);
 				});
