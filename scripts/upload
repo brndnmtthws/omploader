@@ -340,10 +340,8 @@ FCGI.each_cgi {|cgi|
 					stmt = query.execute(video_html.length, 0, 1, id.to_id)
 					stmt.close
 					file = File.new(Paths['video_up_data'] + '/' + id + '-' + actual_name, File::CREAT|File::TRUNC|File::RDWR, 0664)
+					file.write(datum)
 					file.close
-					mmap2 = Mmap.new(file.path, 'rw')
-					mmap2.insert(0, datum)
-					mmap2.munmap
 					# touch notify file
 					system('touch', Paths['video_up_data'] + '/-notify-' + id + '-' + actual_name)
 					mmap.insert(0, video_html)
