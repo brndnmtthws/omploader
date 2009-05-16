@@ -53,7 +53,7 @@ FCGI.each_cgi {|cgi|
 		comment_body = ''
 
 		if !owner_id.nil? and cgi.has_key?('loldongs' + owner_id) and throttle.to_i < Max_upload_count
-			lolres = Captcha.validate(cgi.remote_addr, cgi['recaptcha_challenge_field'].read.to_s, cgi['recaptcha_response_field'].read.to_s, Captcha)
+			lolres = Captcha.validate(cgi.remote_addr, cgi['recaptcha_challenge_field'].read.to_s, cgi['recaptcha_response_field'].read.to_s)
 			if !lolres
 				cgi.out('text/html') {
 					html_pre + '        <div class="content large">Captcha failure :(</div>' + html_post
@@ -183,9 +183,10 @@ FCGI.each_cgi {|cgi|
 		if ajax > 0
 			ichar = 'j'
 		end
-		if hide_comments == 1
+		hide_link = ''
+		if hide_comments == 1 and ajax == 0
 			hide_link = '<a href="/' + ichar + id.to_b64 + '-show">+ Show (' + comment_count.to_s + ')</a> <span class="separator">&#x2503;</span> <a href="/' + ichar + id.to_b64 + '-show#comment_post">Post</a>'
-		else
+		elsif ajax == 0
 			hide_link = '<a href="/' + ichar + id.to_b64 + '-hide">- Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
 		end
 
@@ -194,10 +195,9 @@ FCGI.each_cgi {|cgi|
 		#		next
 
 		comments_body = ''
-		if ajax == 0
-			comments_body = Cache.get($0 + 'comments' + id)
-			if comments_body.nil? or update_prefs
-				comments_body =
+		comments_body = Cache.get($0 + 'comments' + id + ajax.to_s)
+		if comments_body.nil? or update_prefs
+			comments_body =
 					"\t\t\t" + '<a name="comment_top">' + "\n" +
 					"\t\t\t" + '<div class="title">' + "\n" +
 					"\t\t\t\t" + '<div class="links">' + hide_link + '</div>' + "\n" +
@@ -254,13 +254,13 @@ FCGI.each_cgi {|cgi|
 						"\t\t\t\t" + '<pre>' + body + '</pre>' + "\n" +
 						"\t\t\t" + '</div>' + "\n"
 							}
-						Cache.set($0 + 'comments' + id, comments_body, Default_cache_expiry_short)
+						Cache.set($0 + 'comments' + id + ajax.to_s, comments_body, Default_cache_expiry_short)
 						end
 					end
-			end
+		end
 
-			if throttle.to_i < Max_upload_count and !owner_id.nil?
-				comments_body +=
+		if throttle.to_i < Max_upload_count and !owner_id.nil? and ajax == 0
+			comments_body +=
 				"\t\t\t" + '<a name="comment_post"></a>' + "\n" +
 				"\t\t\t" + '<div class="content">' + "\n" +
 				"\t\t\t\t" + '<form enctype="multipart/form-data" action="i' + id.to_b64 + '" method="post">' + "\n" +
@@ -281,11 +281,10 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t" + '</form>' + "\n" +
 				"\t\t\t" + '</div>' + "\n"
-			else
-				comments_body +=
+		elsif ajax == 0
+			comments_body +=
 				"\t\t\t" + '<a name="comment_post"></a>' + "\n" +
 				"\t\t\t" + '<div class="content large">NO COOKIE!</div>' + "\n"
-			end
 		end
 		meta = ''
 		if content_type_main == 'image'
