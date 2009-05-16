@@ -53,7 +53,7 @@ FCGI.each_cgi {|cgi|
 		comment_body = ''
 
 		if !owner_id.nil? and cgi.has_key?('loldongs' + owner_id) and throttle.to_i < Max_upload_count
-			lolres = Captcha.validate(cgi.remote_addr, cgi['recaptcha_challenge_field'].read.to_s, cgi['recaptcha_response_field'].read.to_s)
+			lolres = Captcha.validate(cgi.remote_addr, cgi['recaptcha_challenge_field'].read.to_s, cgi['recaptcha_response_field'].read.to_s, Captcha)
 			if !lolres
 				cgi.out('text/html') {
 					html_pre + '        <div class="content large">Captcha failure :(</div>' + html_post
@@ -199,7 +199,7 @@ FCGI.each_cgi {|cgi|
 			if comments_body.nil? or update_prefs
 				comments_body =
 					"\t\t\t" + '<a name="comment_top">' + "\n" +
-					"\t\t\t" + '<div class="title">' + "\n" + 
+					"\t\t\t" + '<div class="title">' + "\n" +
 					"\t\t\t\t" + '<div class="links">' + hide_link + '</div>' + "\n" +
 					"\t\t\t\t" + '<div>Comments</div>' + "\n" +
 					"\t\t\t" + '</div>' + "\n"
