@@ -326,8 +326,15 @@ FCGI.each_cgi {|cgi|
 		end
 		html_out +=
 			"\t\t\t" + '<div class="title">Information for ' + id.to_b64 + '</div>' + "\n" +
-			"\t\t\t" + '<div class="content">' + "\n" +
-			"\t\t\t\t" + '<div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n" +
+			"\t\t\t" + '<div class="content">' + "\n"
+		if ajax == 0
+			html_out +=
+				"\t\t\t\t" + '<div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '">' + file_link + '</a></div></div>' + "\n"
+		else
+			html_out +=
+				"\t\t\t\t" + '<div class="thumb automargin"><div class="container">' + file_link + '</div></div>' + "\n"
+		end
+		html_out +=
 			"\t\t\t\t" + '<div class="left"><strong>Owner:</strong></div><div class="right">' + info_owner_name + '</div><br class="clear" />' + "\n" +
 			"\t\t\t\t" + '<div class="left"><strong>Name:</strong></div><div class="right"><a href="v' + id.to_b64 + '/' + name + '">' + name + '</a></div><br class="clear" />' + "\n" +
 			"\t\t\t\t" + '<div class="left"><strong>Size:</strong></div><div class="right">' + size + '</div><br class="clear" />' + "\n" +
