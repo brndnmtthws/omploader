@@ -67,6 +67,7 @@ errors = 0
 wait = 5
 
 Url = 'http://omploader.org/'
+Max_size = 2**30
 
 used_stdin = false
 first = true
@@ -77,8 +78,8 @@ argv.each do |arg|
 		$stderr.puts "Invalid argument '#{arg}': file does not exist (or is not a regular file)."
 		errors += 1
 		next
-	elsif File.size(arg) > 2**31
-		$stderr.puts "Error omploading '#{arg}': file exceeds " + (2**28).to_s + " bytes (size was " + File.size(arg).to_s + ")."
+	elsif File.size(arg) > Max_size
+		$stderr.puts "Error omploading '#{arg}': file exceeds " + (Max_size).to_s + " bytes (size was " + File.size(arg).to_s + ")."
 		errors += 1
 		next
 	end
