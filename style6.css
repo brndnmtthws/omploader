@@ -373,8 +373,7 @@ div#container div.content div.form textarea.comment {
 }
 
 video {
-/*	border: 1px solid #333333;
-	padding: 4px;*/
+	width: 85%;
 }
 
 div#vidinfos {

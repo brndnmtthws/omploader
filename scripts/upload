@@ -20,26 +20,13 @@ def get_video_body(id, name)
 	turl = "#{Down_bucket_url}#{id}/#{name}.gif"
 	vurl = "#{Down_bucket_url}#{id}/#{name}.ogg"
 	html = <<-EOF;
-			<video id="the_video" src="#{vurl}" controls="true" width="85%">
+			<video id="the_video" src="#{vurl}" controls="true">
 				<h2>Can't see anything?  You probably need a browser that can playback Ogg media using &lt;video&gt; and &lt;audio&gt;. Try <a href="http://www.mozilla.com/en-US/firefox/all-beta.html">Firefox 3.5 beta</a>, <a href="http://labs.opera.com/news/2008/07/18/">Opera experimental builds</a> or <a href="http://www.apple.com/safari/">Safari</a> with <a href="http://xiph.org/quicktime/">XiphQT</a>.</h2>
 				<img src="#{turls}" id="thumb_1" onmouseover="document.getElementById('thumb_1').src='#{turl}'" onmouseout="document.getElementById('thumb_1').src='#{turls}'" />
 			</video>
 			<div id="vidinfos"><a href="#{vurl}?torrent">Download</a> <span class="separator">&#x2503;</span> <a id="infolink" href="">+ Show Info</a></div>
 			<div id="info_area"></div>
-			<script type="text/javascript">
-				$(document).ready(function() {
-						$("#infolink").toggle(
-							function() {
-								$("#info_area").load("/j#{id}");
-								$("#infolink").text("- Hide Info");
-							},
-							function() {
-								$("#info_area").empty();
-								$("#infolink").text("+ Show Info");
-							}
-						);
-				});
-			</script>
+			<script type="text/javascript" src="/jvid.js"></script>
 EOF
 	return html_pre('', '', false, true) + html + html_post(true)
 end
