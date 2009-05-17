@@ -1,5 +1,5 @@
 function resizevid() {
-	var vid_perc = 0.95; // percentage of window size
+	var vid_perc = 0.90; // percentage of window size
 	var vheight = $("#the_video").height();
 	var vwidth = $("#the_video").width();
 	var wheight = $(window).height();
@@ -27,9 +27,7 @@ $(document).ready(function() {
 			}
 		);
 		$(window).resize(function() { resizevid(); });
-		$("#the_video").onreadystatechange(function() {
-			if ($("#the_video").videoWidth) {
+		$("#the_video").bind("loadedmetadata", function() {
 			resizevid();
-			}
 		});
 });
