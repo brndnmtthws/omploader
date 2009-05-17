@@ -93,16 +93,16 @@ def html_pre(title = '', search = '', showsearch = true, video = false)
 		"\t\t" + '<div id="container">' + "\n" +
 		"\t\t\t" + '<div id="header">' + "\n" +
 		"\t\t\t\t" + '<div id="title"><a href="/"><img src="/omploader2.png" alt="omploader" /></a></div>'  + "\n" +
-		"\t\t\t\t" + '<div id="slogan"><h1>' + Slogan + '™</h1></div>'  + "\n" +
-		"\t\t\t\t" + '<form enctype="multipart/form-data" action="l" method="post">' + "\n"
+		"\t\t\t\t" + '<div id="slogan"><h1>' + Slogan + '™</h1></div>'  + "\n"
 	if showsearch
 		html_pre +=
+			"\t\t\t\t" + '<form enctype="multipart/form-data" action="l" method="post">' + "\n" +
 			"\t\t\t\t\t" + '<div id="search">' + "\n" +
 			"\t\t\t\t\t\t" + '<input name="search_post" size="20" class="field" type="text" value="' + search.gsub(/\\/, '\\') + '" /><input value="search" class="button" type="submit" />' + "\n" +
-			"\t\t\t\t\t" + '</div>' + "\n"
+			"\t\t\t\t\t" + '</div>' + "\n" +
+			"\t\t\t\t" + '</form>' + "\n"
 	end
 	html_pre +=
-		"\t\t\t\t" + '</form>' + "\n" +
 		"\t\t\t" + '</div>' + "\n"
 end
 
