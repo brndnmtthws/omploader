@@ -1,15 +1,24 @@
 function resizevid() {
-	var vidmpx = 1.3 // this adjusts size of videor
-	var oheight = $("#the_video").height();
-	var owidth = $("#the_video").width();
-	var mpx = (owidth / oheight ) / 1.3;
-	$("#the_video").width($(window).height() * mpx);
+	var vid_perc = 0.95; // percentage of window size
+	var vheight = $("#the_video").height();
+	var vwidth = $("#the_video").width();
+	var wheight = $(window).height();
+	var wwidth = $(window).width();
+	var vratio = vwidth / vheight;
+	var wratio = wwidth / wheight;
+	if (vratio > wratio) {
+		$("#the_video").width(wwidth * vid_perc);
+	} else {
+		$("#the_video").width(wheight * vratio);
+	}
 }
 
 $(document).ready(function() {
 		$("#infolink").toggle(
 			function() {
-				$("#info_area").load("/jNQ");
+				var addr = location.href;
+				addr = addr.match(/\/v([A-Za-z0-9]+).*/)[1];
+				$("#info_area").load("/j" + addr);
 				$("#infolink").text("- Hide Info");
 			},
 			function() {
@@ -17,6 +26,10 @@ $(document).ready(function() {
 				$("#infolink").text("+ Show Info");
 			}
 		);
-		resizevid();
 		$(window).resize(function() { resizevid(); });
+		$("#the_video").onreadystatechange(function() {
+			if ($("#the_video").videoWidth) {
+			resizevid();
+			}
+		});
 });
