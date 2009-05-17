@@ -9,7 +9,7 @@ function resizevid() {
 	if (vratio > wratio) {
 		$("#the_video").width(wwidth * vid_perc);
 	} else {
-		$("#the_video").width(wheight * vratio);
+		$("#the_video").width(wheight * vratio * vid_perc);
 	}
 }
 
