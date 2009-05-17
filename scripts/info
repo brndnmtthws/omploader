@@ -289,7 +289,7 @@ FCGI.each_cgi {|cgi|
 		meta = ''
 		if content_type_main == 'image'
 			file_link = '<img src="/t' + id.to_b64 + '" alt="View file!" />'
-		elsif is_video
+		elsif is_video > 1
 			turls = "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}-still.gif"
 			turl = "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}.gif"
 			file_link = '<img src="' + turls +
