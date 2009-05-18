@@ -15,7 +15,7 @@ require 'id3lib'
 require 'digest/sha1'
 require 'vorbisfile'
 
-def get_video_body(id, name)
+def get_video_body(id, name, orig_name)
 	turls = "#{Down_bucket_url}#{id}/#{name}-still.gif"
 	turl = "#{Down_bucket_url}#{id}/#{name}.gif"
 	vurl = "#{Down_bucket_url}#{id}/#{name}.ogg"
@@ -28,7 +28,7 @@ def get_video_body(id, name)
 			<div id="info_area"></div>
 			<script type="text/javascript" src="/jvid.js"></script>
 EOF
-	return html_pre('', '', false, true) + html + html_post(true)
+	return html_pre(' – ' + orig_name, '', false, true) + html + html_post(true)
 end
 
 def get_output(id, name, name_displayed, type, host)
@@ -339,7 +339,7 @@ FCGI.each_cgi {|cgi|
 				if content_type_main == 'video'
 					# o deer, special effects required
 					# compose html dealy
-					video_html = get_video_body(id, actual_name)
+					video_html = get_video_body(id, actual_name, name.chomp('.html'))
 					query = db.prepare('update metadata set size = ?, valid = ?, is_video = ? where metadata.id = ?')
 					stmt = query.execute(video_html.length, 0, 1, id.to_id)
 					stmt.close
