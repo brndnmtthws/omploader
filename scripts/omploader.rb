@@ -34,6 +34,18 @@ Slogans = [
 	'<em>Yes We Can!</em>',
 	'Beta since 2004',
 	'Hey!!',
+	'An Omp is Forever',
+	'I\'m Lovin\' Omp',
+	'Bigger. Better. Omploader.',
+	'What Happens in Omp, Stays in Omp',
+	'Don\'t Just Cover Up Bad Odors. Get Omp!',
+	'Smile! You\'re on Omp!',
+	'Omp, now 100% Certified Organic.',
+	'Omp. Not for Everyone.',
+	'Next Time Ask for Omploader',
+	'Omp Therefore I am',
+	'Serving You Since You Got Here',
+	'Omp: Service You Can Trust',
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
