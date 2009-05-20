@@ -58,6 +58,8 @@ Paths = ConfigFile['paths']
 
 Down_bucket_url = ConfigFile['amazon_s3']['down_bucket_url']
 
+Footer_ad = ConfigFile['footer_ad']
+
 Sql = Mysql.init
 
 def db_connect
@@ -113,10 +115,14 @@ def html_post(video = false)
 	else
 		html_post += "\t\t\t" + '<div id="footer">' + "\n"
 	end
-		html_post += "\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>' + "\n" +
+	html_post += "\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>' + "\n" +
 		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##bikes">bikes</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://git.omp.am/?p=omploader.git">git</a> <span class="separator">&#x2503;</span> <a href="about.html">about/faq</a>' + "\n" +
 		"\t\t\t" + '</div>' + "\n" +
-		"\t\t" + '</div>' + "\n" +
+		"\t\t" + '</div>' + "\n"
+	if !Footer_ad.empty?
+		html_post += "\t\t" + Footer_ad + "\n"
+	end
+	html_post +=
 		"\t" + '</body>' + "\n" +
 		'</html>'
 end

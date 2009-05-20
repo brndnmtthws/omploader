@@ -75,3 +75,6 @@ httpd:
   # not all httpd servers support this
   # an apache2 module can be found here: http://tn123.ath.cx/mod_xsendfile/
   xsendfile: true
+
+# define if you need to throw ads in the footer
+footer_ad:
