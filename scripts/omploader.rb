@@ -95,9 +95,6 @@ def html_pre(title = '', search = '', showsearch = true, video = false)
 	if video
 		html_pre += "\t\t" + '<script type="text/javascript" src="/jquery.js"></script>' + "\n"
 	end
-	if !Footer_ad.empty?
-		html_pre += "\t\t" + Footer_ad + "\n"
-	end
 	html_pre +=
 		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
 		"\t" + '</head>' + "\n"
@@ -133,7 +130,11 @@ def html_post(video = false)
 	html_post += "\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>' + "\n" +
 		"\t\t\t\t" + '<a href="irc://irc.freenode.net/##bikes">bikes</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://git.omp.am/?p=omploader.git">git</a> <span class="separator">&#x2503;</span> <a href="about.html">about/faq</a>' + "\n" +
 		"\t\t\t" + '</div>' + "\n" +
-		"\t\t" + '</div>' + "\n" +
+		"\t\t" + '</div>' + "\n"
+	if !Footer_ad.empty?
+		html_post += "\t\t" + Footer_ad + "\n"
+	end
+	html_post +=
 		"\t" + '</body>' + "\n" +
 		'</html>'
 end
