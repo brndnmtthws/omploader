@@ -164,7 +164,7 @@ if cleanup
 				File.unlink(path)
 				puts 'done.'
 			else
-				query = Db.prepare('select id from metadata where id = ?')
+				query = Db.prepare('select id from metadata where id = ? and is_video = 0')
 				stmt = query.execute(base.to_id)
 				if stmt.num_rows < 1
 					# junk
