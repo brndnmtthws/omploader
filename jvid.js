@@ -1,5 +1,5 @@
 function resizevid() {
-	var vid_perc = 0.90; // percentage of window size
+	var vid_perc = 0.95; // percentage of window size
 	var vheight = $("#the_video").height();
 	var vwidth = $("#the_video").width();
 	var wheight = $(window).height();
