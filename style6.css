@@ -410,7 +410,7 @@ body.video div#info_area div.title {
 body.video div#info_area div.content {
 	background-color: #DDDDDD;
 /* 	border: 1px solid #F6F6F6; */
-	padding: 10px;
+/*	padding: 10px;*/
 	margin-left: 1px;
 	margin-right: 1px;
 }
@@ -434,7 +434,7 @@ body.video div#container div.content div.thumb a:hover {
 }
 
 body.video div#footer {
-	width: 714px;
+	width: 710px;
 	margin: auto;
 }
 

@@ -87,7 +87,7 @@ FCGI.each_cgi {|cgi|
 				html = get_video_body(id.to_b64, name.chomp('.html').video_sanitise, name.chomp('.html'))
 				Cache.set($0 + 'v' + id, Base64.encode64(Marshal.dump(html)), Default_cache_expiry_long * 10)
 			end
-			cgi.out(cgi_head) {html}
+			cgi.out(cgi_head) { html }
 		else
 			if Xsendfile
 				cgi_head['X-Sendfile'] = Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64
