@@ -408,7 +408,7 @@ body.video div#info_area div.title {
 	border-color: #5A00AE;
 }
 
-body.video div#info_area div.content {
+body.video div#container div.content div#info_area div.content {
 	background-color: #ddd;
 /* 	border: 1px solid #F6F6F6; */
 /*	padding: 10px;*/
@@ -426,16 +426,16 @@ body.video div#container div.content {
 	border: none;
 }
 
-body.video div#container div.content div.thumb {
+body.video div#container div.content div#info_area div.thumb {
 	background-color:#eee;
 	border:1px solid #BBBBBB;
 }
 
-body.video div#container div.content div.thumb:hover {
+body.video div#container div.content div#info_area div.thumb:hover {
 	border-color: #333;
 }
 
-body.video div#container div.content div.thumb a:hover {
+body.video div#container div.content div#info_area div.thumb a:hover {
 	color: #8B00FF;
 }
 

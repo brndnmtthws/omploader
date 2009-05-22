@@ -189,6 +189,8 @@ FCGI.each_cgi {|cgi|
 			hide_link = '<a href="/' + ichar + id.to_b64 + '-show">+ Show (' + comment_count.to_s + ')</a> <span class="separator">&#x2503;</span> <a href="/' + ichar + id.to_b64 + '-show#comment_post">Post</a>'
 		elsif ajax == 0
 			hide_link = '<a href="/' + ichar + id.to_b64 + '-hide">- Hide</a> <span class="separator">&#x2503;</span> <a href="#comment_post">Post</a>'
+		else
+			hide_link = '<a href="/i' + id.to_b64 + '#comment_post">Post</a>'
 		end
 
 		#		cgi.out('text/plain') { comment_count.to_s }
