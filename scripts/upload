@@ -317,9 +317,6 @@ FCGI.each_cgi {|cgi|
 
 				id = id.to_s.to_b64
 
-				file = File.new(Paths['data'] + '/' + id, File::CREAT|File::TRUNC|File::RDWR, 0664)
-				file.close
-				mmap = Mmap.new(file.path, 'rw')
 				if content_type_main == 'video'
 					# o deer, special effects required
 					# compose html dealy
@@ -331,11 +328,13 @@ FCGI.each_cgi {|cgi|
 					file.close
 					# touch notify file
 					system('touch', Paths['video_up_data'] + '/-notify-' + id + '-' + actual_name)
-					mmap.insert(0, video_html)
 				else
+					file = File.new(Paths['data'] + '/' + id, File::CREAT|File::TRUNC|File::RDWR, 0664)
+					file.close
+					mmap = Mmap.new(file.path, 'rw')
 					mmap.insert(0, datum)
+					mmap.munmap
 				end
-				mmap.munmap
 				if name.length > 15
 					name_displayed = name[0..13] + '…'
 				else
