@@ -382,12 +382,12 @@ div#vidinfos {
 	color: #8000A0;
 }
 
-div#vidinfos a {
+body.video div#container div.content div#vidinfos a {
 	color: #C0B1B5;
 	text-decoration: none;
 }
 
-div#vidinfos a:hover {
+body.video div#container div.content div#vidinfos a:hover {
 	color: #f6f6f6;
 	background-color: #8000a0;
 }
