@@ -65,7 +65,7 @@ FCGI.each_cgi {|cgi|
 			stmt.close
 			mine_only = prefs[0].to_s.to_i
 			opts = Listing_opts.invert
-			list_images = opts[prefs[1].to_i]
+			prefs[1] = list_images = opts[prefs[1].to_i]
 			results = prefs[2].to_s.to_i
 			Cache.set($0 + 'prefs' + owner_id, prefs, Default_cache_expiry_long)
 		elsif !prefs.nil?
