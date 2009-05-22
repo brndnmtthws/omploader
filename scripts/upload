@@ -324,7 +324,7 @@ FCGI.each_cgi {|cgi|
 					# o deer, special effects required
 					# compose html dealy
 					query = db.prepare('update metadata set size = ?, valid = ?, is_video = ? where metadata.id = ?')
-					stmt = query.execute(0, 0, 1, id.to_id)
+					stmt = query.execute(1, 0, 1, id.to_id)
 					stmt.close
 					file = File.new(Paths['video_up_data'] + '/' + id + '-' + actual_name, File::CREAT|File::TRUNC|File::RDWR, 0664)
 					file.write(datum)
