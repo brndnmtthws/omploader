@@ -124,6 +124,7 @@ div#container div.content {
 	margin-bottom: 10px;
 }
 
+
 div#container div.content a {
 	color: #8000a0;
 	text-decoration: none;
@@ -408,7 +409,7 @@ body.video div#info_area div.title {
 }
 
 body.video div#info_area div.content {
-	background-color: #DDDDDD;
+	background-color: #ddd;
 /* 	border: 1px solid #F6F6F6; */
 /*	padding: 10px;*/
 	margin-left: 1px;
@@ -420,8 +421,13 @@ body.video div#footer {
 	border-color: #5A00AE;
 }
 
+body.video div#container div.content {
+	background-color: #010101;
+	border: none;
+}
+
 body.video div#container div.content div.thumb {
-	background-color:#eeeeee;
+	background-color:#eee;
 	border:1px solid #BBBBBB;
 }
 
