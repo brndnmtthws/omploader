@@ -9,6 +9,46 @@
 require 'omploader'
 require 'uri'
 
+def get_rss_top
+	rss_top = <<-EOF;
+<?xml version="1.0"?>
+<rss version="2.0">
+	<channel>
+		<ttl>#{Default_cache_expiry_long}</ttl>
+EOF
+	return rss_top
+end
+
+def get_rss_item(title, link, description, pubDate, image = '')
+	rss_item = <<-EOF;
+		<item>
+			<title>#{title}</title>
+			<link>#{link}</link>
+			<description>#{description}</description>
+			<pubDate>#{pubDate}</pubDate>
+EOF
+	if !image.empty?
+		rss_item += <<-EOF;
+			<image>#{image}</image>
+		</item>
+EOF
+	else
+		rss_item += <<-EOF;
+		</item>
+EOF
+	end
+end
+
+def get_rss_bot
+	rss_bot = <<-EOF;
+	</channel>
+</rss>
+EOF
+	return rss_bot
+end
+
+Listing_opts = {'n' => 0, 'y' => 1, 'i' => 2, 'v' => 3}
+
 FCGI.each_cgi {|cgi|
 	begin
 		db = db_connect
@@ -24,17 +64,23 @@ FCGI.each_cgi {|cgi|
 			prefs = stmt.fetch
 			stmt.close
 			mine_only = prefs[0].to_s.to_i
-			list_images = prefs[1].to_s.to_i
+			opts = Listing_opts.invert
+			list_images = opts[prefs[1].to_i]
 			results = prefs[2].to_s.to_i
 			Cache.set($0 + 'prefs' + owner_id, prefs, Default_cache_expiry_long)
 		elsif !prefs.nil?
 			mine_only = prefs[0].to_s.to_i
-			list_images = prefs[1].to_s.to_i
+			list_images = prefs[1].to_s
 			results = prefs[2].to_s.to_i
 		else
 			mine_only = 0
-			list_images = 0
+			list_images = 'n'
 			results = 20
+		end
+
+		is_rss = 0
+		if cgi.has_key?('rss')
+			is_rss = cgi.params['rss'].to_s.to_i
 		end
 
 		mine_sel = cgi.params['mine_only'].to_s
@@ -49,22 +95,20 @@ FCGI.each_cgi {|cgi|
 			mine_only_opt = 'n'
 		end
 
-		if cgi.params['images_only'].to_s == 'y'
+		if cgi.params['images_only'].to_s =~ /[yvi]/
 			images_only = true
-			images_only_opt = 'y'
-			list_images = 1
+			list_images = images_only_opt = cgi.params['images_only'].to_s
 		elsif cgi.params['images_only'].to_s == 'n'
 			images_only = false
-			images_only_opt = 'n'
-			list_images = 0
+			list_images = images_only_opt = cgi.params['images_only'].to_s
 		else
-			if list_images == 0
-				images_only = false
-				images_only_opt = 'n'
-			else
+			if list_images =~ /[yvi]/
 				images_only = true
-				images_only_opt = 'y'
+			else
+				images_only = false
+				list_images = 'n'
 			end
+			images_only_opt = list_images
 		end
 
 		if images_only
@@ -89,7 +133,7 @@ FCGI.each_cgi {|cgi|
 			order = 'desc'
 		end
 
-		if mine_sel != mine_only or results != results_sel or cgi.params['images_only'].to_s =~ /^n{1}$|^y{1}$/
+		if mine_sel != mine_only or results != results_sel or cgi.params['images_only'].to_s =~ /^n{1}$|^y{1}$|^i{1}$|^v{1}$/
 			mine_only = mine_sel
 			results = results_sel
 			if results > maxres
@@ -144,8 +188,12 @@ FCGI.each_cgi {|cgi|
 		if mine_only != 0 and !owner_id.nil?
 			where_clause += ' and metadata.owner_id = ' + owner_id + ' '
 		end
-		if images_only
+		if images_only and images_only_opt == 'y'
 			where_clause += ' and (content_types_main.type like "image" or metadata.is_video = 1) '
+		elsif images_only and images_only_opt == 'v'
+			where_clause += ' and metadata.is_video = 1 '
+		elsif images_only and images_only_opt == 'i'
+			where_clause += ' and content_types_main.type like "image" '
 		end
 
 		names_where_clause = ''
@@ -185,11 +233,11 @@ FCGI.each_cgi {|cgi|
 
 		files_list = Cache.get($0 + 'files' + Digest::SHA1.hexdigest(cgi.query_string.to_s + prefs.to_s))
 		if files_list.nil?
-			query = db.prepare('select metadata.id, metadata.creation_time, metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
-			if images_only
+			query = db.prepare('select metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			if images_only and is_rss == 0
 				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 					files_list_info = ''
-			else
+			elsif is_rss == 0
 				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 				'        <table>' + "\n" +
 				'          <tr>' + "\n" +
@@ -199,8 +247,10 @@ FCGI.each_cgi {|cgi|
 				'            <th class="small">&ldquo;&rdquo;<a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
 				'            <th class="small">Time<a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
 				'          </tr>' + "\n"
-				row_number = 0
+			else
+				files_list = ''
 			end
+			row_number = 0
 			file_number = 0
 			tid = 0
 			if !wheres.empty?
@@ -229,28 +279,38 @@ FCGI.each_cgi {|cgi|
 						turls = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}-still.gif"
 						turl = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif"
 
-						files_list += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="' + turls +
-							"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
-							"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
-							"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
-							'/></a></div></div>' + "\n"
+						if is_rss > 0
+							files_list += get_rss_item(name, "http://#{cgi.host}/v#{id}", name, time, turls)
+						else
+							files_list += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="' + turls +
+								"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
+								"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
+								"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
+								'/></a></div></div>' + "\n"
+						end
 					else
-						files_list += '        <div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+						if is_rss > 0
+							files_list += get_rss_item(name, "http://#{cgi.host}/v#{id}", name, time, "http://#{cgi.host}/t#{id}")
+						else
+							files_list += '        <div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+						end
 					end
-					files_list_info += '        <div class="info float"><a href="/i' + id + '">Info</a></div>' + "\n"
-					if file_number == 5
-						file_number = 0
-						files_list += '        <br class="clear" />' + "\n"
-						files_list += files_list_info
-						files_list += '        <br class="clear" />' + "\n"
-						files_list_info = ''
+					if is_rss == 0
+						files_list_info += '        <div class="info float"><a href="/i' + id + '">Info</a></div>' + "\n"
+						if file_number == 5
+							file_number = 0
+							files_list += '        <br class="clear" />' + "\n"
+							files_list += files_list_info
+							files_list += '        <br class="clear" />' + "\n"
+							files_list_info = ''
+						end
 					end
 				else
 					row_number += 1
-					if row_number % 2 == 1
+					if row_number % 2 == 1 and is_rss == 0
 						files_list +=
 						'          <tr>' + "\n"
-					else
+					elsif is_rss == 0
 						files_list +=
 						'          <tr class="even">' + "\n"
 					end
@@ -261,27 +321,31 @@ FCGI.each_cgi {|cgi|
 						name_displayed = name
 					end
 
-					files_list +=
-					'            <td><a href="/v' + id + '" title="' + name.gsub(/&/, '&amp;') + '">' + name_displayed.gsub(/&/, '&amp;') + '</a></td>' + "\n" +
-					'            <td class="small"><a href="/i' + id + '">Info</a></td>' + "\n" +
-					'            <td class="small">' + hits + '</td>' + "\n" +
-					'            <td class="small">' + comment_count + '</td>' + "\n" +
-					'            <td class="small">' + time.sub(' ', '&nbsp;') + '</td>' + "\n" +
-					'          </tr>' +  "\n"
+					if is_rss == 0
+						files_list +=
+							'            <td><a href="/v' + id + '" title="' + name.gsub(/&/, '&amp;') + '">' + name_displayed.gsub(/&/, '&amp;') + '</a></td>' + "\n" +
+							'            <td class="small"><a href="/i' + id + '">Info</a></td>' + "\n" +
+							'            <td class="small">' + hits + '</td>' + "\n" +
+							'            <td class="small">' + comment_count + '</td>' + "\n" +
+							'            <td class="small">' + time[5..time.length].chomp(' GMT').gsub(' ', '&nbsp;') + '</td>' + "\n" +
+							'          </tr>' +  "\n"
+					else
+						files_list += get_rss_item(name, "http://#{cgi.host}/v#{id}", name, time)
+					end
 				end
 			end
 			stmt.close
 
-			if images_only
+			if images_only and is_rss == 0
 				if file_number != 0
 					files_list += '        <br class="clear" />' + "\n"
 					files_list += files_list_info
 					files_list += '        <br class="clear" />' + "\n"
 				end
-			else
+			elsif is_rss == 0
 				files_list += '        </table>' + "\n"
 			end
-			files_list += '      </div>' + "\n"
+			files_list += '      </div>' + "\n" unless is_rss == 1
 			Cache.set($0 + 'files' + Digest::SHA1.hexdigest(cgi.query_string.to_s + prefs.to_s), files_list, Default_cache_expiry_short)
 		end
 
@@ -293,18 +357,18 @@ FCGI.each_cgi {|cgi|
 		end
 		num_rows = Cache.get($0 + 'num_rows' + Digest::SHA1.hexdigest(cgi.query_string.to_s))
 		if num_rows.nil?
-		query = db.prepare('select metadata.id ' + common_sql + search_sql + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
-		if !wheres.empty?
-			other_wheres = wheres
-			other_wheres.delete_at(other_wheres.size - 1)
-			other_wheres << page * results
-			stmt = query.execute(*other_wheres)
-		else
-			stmt = query.execute(page * results)
-		end
-		num_rows = stmt.num_rows
-		stmt.close
-		Cache.set($0 + 'num_rows' + Digest::SHA1.hexdigest(cgi.query_string.to_s), num_rows, Default_cache_expiry_short)
+			query = db.prepare('select metadata.id ' + common_sql + search_sql + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			if !wheres.empty?
+				other_wheres = wheres
+				other_wheres.delete_at(other_wheres.size - 1)
+				other_wheres << page * results
+				stmt = query.execute(*other_wheres)
+			else
+				stmt = query.execute(page * results)
+			end
+			num_rows = stmt.num_rows
+			stmt.close
+			Cache.set($0 + 'num_rows' + Digest::SHA1.hexdigest(cgi.query_string.to_s), num_rows, Default_cache_expiry_short)
 		end
 		if num_rows > 0
 			page_links += ' <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
@@ -313,16 +377,23 @@ FCGI.each_cgi {|cgi|
 		end
 		page_links += "\n" + '      </div>' + "\n"
 
+		owner_linque = lambda {|key| results.to_s + order_short + column_short + key + images_only_opt + page.to_s + param_search }
 		if mine_only == 1
-			mine_only_msg = '<a href="l' + results.to_s + order_short + column_short + 'n' + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">show anyone\'s</a> [ <span class="pink">showing mine</span> ]'
+			mine_only_msg = 'showing: [ <span class="pink">mine</span> ] <a href="l' + owner_linque.call('n') + '" style="text-decoration: none">anyone\'s</a>'
 		else
-			mine_only_msg = '<a href="l' + results.to_s + order_short + column_short + 'y' + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">show mine</a> [ <span class="pink">showing anyone\'s</span> ]'
+			mine_only_msg = 'showing: <a href="l' + owner_linque.call('y') + '" style="text-decoration: none">mine</a> [ <span class="pink">anyone\'s</span> ]'
 		end
 
-		if images_only
-			images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'n' + page.to_s + param_search + '" style="text-decoration: none">show all files</a> [ <span class="pink">showing visuals</span> ]'
+		# extremely ugly :(
+		type_linque = lambda {|key| results.to_s + order_short + column_short + mine_only_opt + key + page.to_s + param_search }
+		if list_images == 'y'
+			images_only_msg = 'showing: <a href="l' + type_linque.call('n') + '" style="text-decoration: none">all</a> [ <span class="pink">visuals</span> ] <a href="l' + type_linque.call('i') + '" style="text-decoration: none">images</a> <a href="l' + type_linque.call('v') + '" style="text-decoration: none">videos</a>'
+		elsif list_images == 'v'
+			images_only_msg = 'showing: <a href="l' + type_linque.call('n') + '" style="text-decoration: none">all</a> <a href="l' + type_linque.call('y') + '" style="text-decoration: none">visuals</a> <a href="l' + type_linque.call('i') + '" style="text-decoration: none">images</a> [ <span class="pink">videos</span> ]'
+		elsif list_images == 'i'
+			images_only_msg = 'showing: <a href="l' + type_linque.call('n') + '" style="text-decoration: none">all</a> <a href="l' + type_linque.call('y') + '" style="text-decoration: none">visuals</a> [ <span class="pink">images</span> ] <a href="l' + type_linque.call('v') + '" style="text-decoration: none">videos</a>'
 		else
-			images_only_msg = '<a href="l' + results.to_s + order_short + column_short + mine_only_opt + 'y' + page.to_s + param_search + '" style="text-decoration: none">show visuals</a> [ <span class="pink">showing all files</span> ]'
+			images_only_msg = 'showing: [ <span class="pink">all</span> ] <a href="l' + type_linque.call('y') + '" style="text-decoration: none">visuals</a> <a href="l' + type_linque.call('i') + '" style="text-decoration: none">images</a> <a href="l' + type_linque.call('v') + '" style="text-decoration: none">videos</a>'
 		end
 
 		if count > (page - 1) * results + results
@@ -340,7 +411,7 @@ FCGI.each_cgi {|cgi|
 			results_html = '        More Results | <a href="l' + (results - 5).to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + '" style="text-decoration: none">Fewer Results</a><br />' + "\n"
 		end
 
-		if shown.to_i == 0
+		if shown.to_i == 0 and is_rss == 0
 			files_list_title = ''
 			files_list = '      <div class="content large">No results.</div>' + "\n"
 		else
@@ -350,27 +421,35 @@ FCGI.each_cgi {|cgi|
 				'</div>' + "\n"
 		end
 
-		db.commit
-		cgi.out('text/html') {
-			html_pre('', search) +
-			'      <div class="content large">' + "\n" +
-			'        ' + mine_only_msg + '<br />' + "\n" +
-			'        ' + images_only_msg + "\n" +
-			'      </div>' + "\n" +
-			files_list_title +
-			page_links +
-			files_list +
-			page_links +
-			html_post
-		}
+		if is_rss > 0
+			rss = get_rss_top + files_list + get_rss_bot
+			cgi.out('application/rss+xml') { rss }
+		else
+			this_url = results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search
+			rss_link = ('		<link rel="alternate" title="Slashdot RSS" href="/rss%s" type="application/rss+xml">' % this_url) + "\n"
+
+			cgi.out('text/html') {
+				html_pre('', search) +
+					'      <div class="content large">' + "\n" +
+					'        ' + mine_only_msg + '<br />' + "\n" +
+					'        ' + images_only_msg + "\n" +
+					'      </div>' + "\n" +
+					rss_link +
+					files_list_title +
+					page_links +
+					files_list +
+					page_links +
+					html_post
+			}
+		end
 
 		if update_prefs
 			if !owner_id.nil?
 				query = db.prepare('update owners set show_mine = ?, list_results = ?, list_images = ? where id = ?')
-				query.execute(mine_only.to_s, results.to_s, list_images, owner_id).close
+				query.execute(mine_only.to_s, results.to_s, Listing_opts[list_images], owner_id).close
 				prefs = Array.new
 				prefs[0] = mine_only.to_s
-				prefs[1] = list_images.to_s
+				prefs[1] = list_images
 				prefs[2] = results.to_s
 				Cache.set($0 + 'prefs' + owner_id.to_s, prefs, Default_cache_expiry_long)
 			end
