@@ -241,11 +241,11 @@ FCGI.each_cgi {|cgi|
 				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 				'        <table>' + "\n" +
 				'          <tr>' + "\n" +
-				'            <th>Name<a href="l' + results.to_s + 'an' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dn' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
-				'            <th class="small">Info</th>' + "\n" +
-				'            <th class="small">Hits<a href="l' + results.to_s + 'ah' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dh' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
-				'            <th class="small">&ldquo;&rdquo;<a href="l' + results.to_s + 'ac' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dc' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
-				'            <th class="small">Time<a href="l' + results.to_s + 'at' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&uarr;</a><a href="l' + results.to_s + 'dt' + mine_only_opt + images_only_opt + page.to_s + param_search + '">&darr;</a></th>' + "\n" +
+				'           <th>Name</th>' + "\n" +
+				'			<th class="small">Info</th>' + "\n" +
+				'			<th class="small">Hits</th>' + "\n" +
+				'			<th class="small">&ldquo;&rdquo;</th>' + "\n" +
+				'			<th class="small">Time</th>' + "\n" +
 				'          </tr>' + "\n"
 			else
 				files_list = ''
@@ -377,24 +377,32 @@ FCGI.each_cgi {|cgi|
 		end
 		page_links += "\n" + '      </div>' + "\n"
 
+		spanny1 = lambda {|str| return "[ <span class=\"pink\">#{str}</span> ]" }
+		spanny2 = lambda {|str| return "[<span class=\"pink\">#{str}</span>]" }
+		linkit = lambda {|func, key, str, opt, spanny|
+			if opt.to_s == '1'
+				opt = 'y'
+			elsif opt.to_s == '0'
+				opt = 'n'
+			end
+			if key == opt
+				return spanny.call(str)
+			else
+				return "<a href=\"/l#{func.call(key)}\" style=\"text-decoration: none\">#{str}</a>"
+			end
+		}
 		owner_linque = lambda {|key| results.to_s + order_short + column_short + key + images_only_opt + page.to_s + param_search }
-		if mine_only == 1
-			mine_only_msg = 'showing: [ <span class="pink">mine</span> ] <a href="l' + owner_linque.call('n') + '" style="text-decoration: none">anyone\'s</a>'
-		else
-			mine_only_msg = 'showing: <a href="l' + owner_linque.call('y') + '" style="text-decoration: none">mine</a> [ <span class="pink">anyone\'s</span> ]'
-		end
+		mine_only_msg = "showing: #{linkit.call(owner_linque, 'y', 'mine', mine_only, spanny1)} #{linkit.call(owner_linque, 'n', "anyone's", mine_only, spanny1)}"
 
-		# extremely ugly :(
 		type_linque = lambda {|key| results.to_s + order_short + column_short + mine_only_opt + key + page.to_s + param_search }
-		if list_images == 'y'
-			images_only_msg = 'showing: <a href="l' + type_linque.call('n') + '" style="text-decoration: none">all</a> [ <span class="pink">visuals</span> ] <a href="l' + type_linque.call('i') + '" style="text-decoration: none">images</a> <a href="l' + type_linque.call('v') + '" style="text-decoration: none">videos</a>'
-		elsif list_images == 'v'
-			images_only_msg = 'showing: <a href="l' + type_linque.call('n') + '" style="text-decoration: none">all</a> <a href="l' + type_linque.call('y') + '" style="text-decoration: none">visuals</a> <a href="l' + type_linque.call('i') + '" style="text-decoration: none">images</a> [ <span class="pink">videos</span> ]'
-		elsif list_images == 'i'
-			images_only_msg = 'showing: <a href="l' + type_linque.call('n') + '" style="text-decoration: none">all</a> <a href="l' + type_linque.call('y') + '" style="text-decoration: none">visuals</a> [ <span class="pink">images</span> ] <a href="l' + type_linque.call('v') + '" style="text-decoration: none">videos</a>'
-		else
-			images_only_msg = 'showing: [ <span class="pink">all</span> ] <a href="l' + type_linque.call('y') + '" style="text-decoration: none">visuals</a> <a href="l' + type_linque.call('i') + '" style="text-decoration: none">images</a> <a href="l' + type_linque.call('v') + '" style="text-decoration: none">videos</a>'
-		end
+		images_only_msg = "showing: #{linkit.call(type_linque, 'n', 'all', list_images, spanny1)} #{linkit.call(type_linque, 'y', "visuals", list_images, spanny1)} #{linkit.call(type_linque, 'i', "images", list_images, spanny1)} #{linkit.call(type_linque, 'v', "videos", list_images, spanny1)}"
+
+		sort_linque = lambda {|ordery| results.to_s + ordery + mine_only_opt + images_only_opt + page.to_s + param_search }
+		sort_msg = "order by: " +
+			"date #{linkit.call(sort_linque, 'dt', '&darr', order_short + column_short, spanny2)}#{linkit.call(sort_linque, 'at', '&uarr', order_short + column_short, spanny2)} " +
+			"name #{linkit.call(sort_linque, 'dn', '&darr', order_short + column_short, spanny2)}#{linkit.call(sort_linque, 'an', '&uarr', order_short + column_short, spanny2)} " +
+			"hits #{linkit.call(sort_linque, 'dh', '&darr', order_short + column_short, spanny2)}#{linkit.call(sort_linque, 'ah', '&uarr', order_short + column_short, spanny2)} " +
+			"&ldquo;&rdquo; #{linkit.call(sort_linque, 'dc', '&darr', order_short + column_short, spanny2)}#{linkit.call(sort_linque, 'ac', '&uarr', order_short + column_short, spanny2)}"
 
 		if count > (page - 1) * results + results
 			shown = ((page - 1) * results + results).to_s
@@ -432,7 +440,8 @@ FCGI.each_cgi {|cgi|
 				html_pre('', search) +
 					'      <div class="content large">' + "\n" +
 					'        ' + mine_only_msg + '<br />' + "\n" +
-					'        ' + images_only_msg + "\n" +
+					'        ' + images_only_msg + '<br />' + "\n" +
+					'        ' + sort_msg + "\n" +
 					'      </div>' + "\n" +
 					rss_link +
 					files_list_title +
