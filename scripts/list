@@ -377,9 +377,8 @@ FCGI.each_cgi {|cgi|
 		end
 		page_links += "\n" + '      </div>' + "\n"
 
-		spanny1 = lambda {|str| return "[ <span class=\"pink\">#{str}</span> ]" }
-		spanny2 = lambda {|str| return "[<span class=\"pink\">#{str}</span>]" }
-		linkit = lambda {|func, key, str, opt, spanny|
+		spanny = lambda {|str| return "<span class=\"pink\">#{str}</span>" }
+		linkit = lambda {|func, key, str, opt|
 			if opt.to_s == '1'
 				opt = 'y'
 			elsif opt.to_s == '0'
@@ -392,17 +391,17 @@ FCGI.each_cgi {|cgi|
 			end
 		}
 		owner_linque = lambda {|key| results.to_s + order_short + column_short + key + images_only_opt + page.to_s + param_search }
-		mine_only_msg = "showing: #{linkit.call(owner_linque, 'y', 'mine', mine_only, spanny1)} #{linkit.call(owner_linque, 'n', "anyone's", mine_only, spanny1)}"
+		mine_only_msg = "showing: #{linkit.call(owner_linque, 'y', 'mine', mine_only)} #{linkit.call(owner_linque, 'n', "anyone's", mine_only)}"
 
 		type_linque = lambda {|key| results.to_s + order_short + column_short + mine_only_opt + key + page.to_s + param_search }
-		images_only_msg = "showing: #{linkit.call(type_linque, 'n', 'all', list_images, spanny1)} #{linkit.call(type_linque, 'y', "visuals", list_images, spanny1)} #{linkit.call(type_linque, 'i', "images", list_images, spanny1)} #{linkit.call(type_linque, 'v', "videos", list_images, spanny1)}"
+		images_only_msg = "showing: #{linkit.call(type_linque, 'n', 'all', list_images)} #{linkit.call(type_linque, 'y', "visuals", list_images)} #{linkit.call(type_linque, 'i', "images", list_images)} #{linkit.call(type_linque, 'v', "videos", list_images)}"
 
 		sort_linque = lambda {|ordery| results.to_s + ordery + mine_only_opt + images_only_opt + page.to_s + param_search }
 		sort_msg = "order by: " +
-			"date #{linkit.call(sort_linque, 'dt', '&darr', order_short + column_short, spanny2)}#{linkit.call(sort_linque, 'at', '&uarr', order_short + column_short, spanny2)} " +
-			"name #{linkit.call(sort_linque, 'dn', '&darr', order_short + column_short, spanny2)}#{linkit.call(sort_linque, 'an', '&uarr', order_short + column_short, spanny2)} " +
-			"hits #{linkit.call(sort_linque, 'dh', '&darr', order_short + column_short, spanny2)}#{linkit.call(sort_linque, 'ah', '&uarr', order_short + column_short, spanny2)} " +
-			"&ldquo;&rdquo; #{linkit.call(sort_linque, 'dc', '&darr', order_short + column_short, spanny2)}#{linkit.call(sort_linque, 'ac', '&uarr', order_short + column_short, spanny2)}"
+			"date #{linkit.call(sort_linque, 'dt', '&darr', order_short + column_short)}#{linkit.call(sort_linque, 'at', '&uarr', order_short + column_short)} " +
+			"name #{linkit.call(sort_linque, 'dn', '&darr', order_short + column_short)}#{linkit.call(sort_linque, 'an', '&uarr', order_short + column_short)} " +
+			"hits #{linkit.call(sort_linque, 'dh', '&darr', order_short + column_short)}#{linkit.call(sort_linque, 'ah', '&uarr', order_short + column_short)} " +
+			"&ldquo;&rdquo; #{linkit.call(sort_linque, 'dc', '&darr', order_short + column_short)}#{linkit.call(sort_linque, 'ac', '&uarr', order_short + column_short)}"
 
 		if count > (page - 1) * results + results
 			shown = ((page - 1) * results + results).to_s

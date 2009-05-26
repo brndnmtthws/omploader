@@ -90,7 +90,7 @@ def html_pre(title = '', search = '', showsearch = true, video = false)
 		'<html xml:lang="en" lang="en">' + "\n" +
 		"\t" + '<head>' + "\n" +
 		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
-		"\t\t" + '<link rel="stylesheet" type="text/css" href="/style6.css" />' + "\n" +
+		"\t\t" + '<link rel="stylesheet" type="text/css" href="/style7.css" />' + "\n" +
 		"\t\t" + '<link rel="shortcut icon" href="/omploader_icon2.png" type="image/x-icon" />' + "\n"
 	if video
 		html_pre += "\t\t" + '<script type="text/javascript" src="/jquery.js"></script>' + "\n"
