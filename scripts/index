@@ -208,7 +208,7 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t\t\t" + '<div class="label">Syntax</div>' + "\n" +
 					"\t\t\t\t\t\t\t" + '<select name="syntax" class="input">' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option selected="selected" value="raw">Plain Text</option>' + "\n" +
-					"\t\t\t\t\t\t\t\t" + '<option value="">Auto detect</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="">Auto detect (fyi sux)</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option disabled="disabled">––––––––––</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="c">C</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="cobol">COBOL</option>' + "\n" +
@@ -221,6 +221,7 @@ FCGI.each_cgi {|cgi|
 					"\t\t\t\t\t\t\t\t" + '<option value="java">Java</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="javascript">JavaScript</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="lisp">Lisp</option>' + "\n" +
+					"\t\t\t\t\t\t\t\t" + '<option value="lua">Lua</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="mysql">MySQL</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="pascal">Pascal</option>' + "\n" +
 					"\t\t\t\t\t\t\t\t" + '<option value="perl">Perl</option>' + "\n" +

@@ -216,6 +216,8 @@ FCGI.each_cgi {|cgi|
 				next if datum.length > Max_file_size or datum.empty?
 				name = cgi['name'].read
 				name = 'pasta' if name !~ /\S/
+				# filter out weird chars
+				syntax.gsub(/[^\w]/, '')
 					if syntax != 'raw'
 						datum = vimcolour(datum, syntax, name)
 					end
