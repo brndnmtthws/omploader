@@ -391,10 +391,10 @@ FCGI.each_cgi {|cgi|
 			end
 		}
 		owner_linque = lambda {|key| results.to_s + order_short + column_short + key + images_only_opt + page.to_s + param_search }
-		mine_only_msg = "showing: #{linkit.call(owner_linque, 'y', 'mine', mine_only)} #{linkit.call(owner_linque, 'n', "anyone's", mine_only)}"
+		mine_only_msg = "added by: #{linkit.call(owner_linque, 'y', 'me', mine_only)} #{linkit.call(owner_linque, 'n', "anyone", mine_only)}"
 
 		type_linque = lambda {|key| results.to_s + order_short + column_short + mine_only_opt + key + page.to_s + param_search }
-		images_only_msg = "showing: #{linkit.call(type_linque, 'n', 'all', list_images)} #{linkit.call(type_linque, 'y', "visuals", list_images)} #{linkit.call(type_linque, 'i', "images", list_images)} #{linkit.call(type_linque, 'v', "videos", list_images)}"
+		images_only_msg = "types: #{linkit.call(type_linque, 'n', 'all', list_images)} #{linkit.call(type_linque, 'y', "visuals", list_images)} #{linkit.call(type_linque, 'i', "images", list_images)} #{linkit.call(type_linque, 'v', "videos", list_images)}"
 
 		sort_linque = lambda {|ordery| results.to_s + ordery + mine_only_opt + images_only_opt + page.to_s + param_search }
 		sort_msg = "order by: " +
