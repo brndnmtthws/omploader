@@ -46,6 +46,7 @@ Slogans = [
 	'Omp Therefore I am',
 	'Serving You Since You Got Here',
 	'Omp: Service You Can Trust',
+	'Excellent Source of Whole Grains',
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
