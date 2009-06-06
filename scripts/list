@@ -233,7 +233,7 @@ FCGI.each_cgi {|cgi|
 
 		files_list = Cache.get($0 + 'files' + Digest::SHA1.hexdigest(cgi.query_string.to_s + prefs.to_s))
 		if files_list.nil?
-			query = db.prepare('select metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			query = db.prepare('select distinct metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, content_types_main.type, content_types_sub.type, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if images_only and is_rss == 0
 				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 					files_list_info = ''

@@ -458,5 +458,24 @@ div.big {
 	font-size: 1.6em;
 }
 
+div.codebox {
+	text-align: left;
+	width: 600px;
+	margin: auto;
+}
+
+div.code {
+	text-align: left;
+	width: 600px;
+	border: 1px solid #999;
+	margin: auto;
+	padding: 5px;
+	background-color: #fdd;
+}
+
+div.code pre {
+	margin: 0;
+}
+
 /*div#container div.content ol li + li + li p > strong { display: block; width: 250px; height: 200px; background-image: url('http://omploader.org/vNzdu'); }
 div#container div.content ol li + li + li p > strong + strong { display: inline; background-image: none; }*/

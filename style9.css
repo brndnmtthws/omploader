@@ -48,6 +48,11 @@ br.clear {
 	clear: both;
 }
 
+span.pink {
+	color: #f6f6f6;
+	background-color: #cc00ff;
+}
+
 span.separator {
 	font-weight: normal;
 }
@@ -82,15 +87,6 @@ div#footer {
 	margin: 20px 0 10px 0;
 }
 
-body.video div#footer {
-	width: 722px;
-	margin: auto;
-}
-
-div#footer.video {
-	background-color: #c0b1b5;
-}
-
 div#footer div.right {
 	float: right;
 }
@@ -110,10 +106,6 @@ div#container {
 	margin: auto;
 	padding: 0;
 	width: 722px;
-}
-
-body.video div#container {
-	width: 100%;
 }
 
 div#container div.title {
@@ -136,6 +128,7 @@ div#container div.content {
 	padding: 5px;
 	margin-bottom: 10px;
 }
+
 
 div#container div.content a {
 	color: #8000a0;
@@ -386,8 +379,7 @@ div#container div.content div.form textarea.comment {
 }
 
 video {
-/*	border: 1px solid #333333;
-	padding: 4px;*/
+	width: 85%;
 }
 
 div#vidinfos {
@@ -395,16 +387,95 @@ div#vidinfos {
 	color: #8000A0;
 }
 
-div#vidinfos a {
+body.video div#container div.content div#vidinfos a {
 	color: #C0B1B5;
 	text-decoration: none;
 }
 
-div#vidinfos a:hover {
+body.video div#container div.content div#vidinfos a:hover {
 	color: #f6f6f6;
 	background-color: #8000a0;
 }
 
+
+body.video div#container {
+	width: 100%;
+}
+
+body.video div#info_area {
+	width: 722px;
+	margin: auto;
+/* 	padding: 5px; */
+}
+
+body.video div#info_area div.title {
+	background-color: #c0b1b5;
+	border-color: #5A00AE;
+}
+
+body.video div#container div.content div#info_area div.content {
+	background-color: #ddd;
+/* 	border: 1px solid #F6F6F6; */
+/*	padding: 10px;*/
+	margin-left: 1px;
+	margin-right: 1px;
+}
+
+body.video div#footer {
+	background-color: #c0b1b5;
+	border-color: #5A00AE;
+}
+
+body.video div#container div.content {
+	background-color: #010101;
+	border: none;
+}
+
+body.video div#container div.content div#info_area div.thumb {
+	background-color:#eee;
+	border:1px solid #BBBBBB;
+}
+
+body.video div#container div.content div#info_area div.thumb:hover {
+	border-color: #333;
+}
+
+body.video div#container div.content div#info_area div.thumb a:hover {
+	color: #8B00FF;
+}
+
+body.video div#footer {
+	width: 710px;
+	margin: auto;
+}
+
+div.biggest {
+	font-size: 2em;
+	font-weight: bold;
+}
+
+div.big {
+	font-size: 1.6em;
+}
+
+div.codebox {
+	text-align: left;
+	width: 600px;
+	margin: auto;
+}
+
+div.code {
+	text-align: left;
+	width: 600px;
+	border: 1px solid #999;
+	margin: auto;
+	padding: 5px;
+	background-color: #fdd;
+}
+
+div.code pre {
+	margin: 0;
+}
 
 /*div#container div.content ol li + li + li p > strong { display: block; width: 250px; height: 200px; background-image: url('http://omploader.org/vNzdu'); }
 div#container div.content ol li + li + li p > strong + strong { display: inline; background-image: none; }*/
