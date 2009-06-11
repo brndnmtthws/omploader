@@ -292,7 +292,7 @@ FCGI.each_cgi {|cgi|
 						if is_rss > 0
 							files_list += get_rss_item(name, "http://#{cgi.host}/v#{id}", name, time, "http://#{cgi.host}/t#{id}")
 						else
-							files_list += '        <div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+							files_list += '        <div class="thumb float"><div class="container"><a href="/v' + id + '" title="' + name + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 						end
 					end
 					if is_rss == 0

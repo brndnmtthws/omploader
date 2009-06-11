@@ -65,7 +65,7 @@ FCGI.each_cgi {|cgi|
 			name = result.first.to_s
 			is_video = is_videors[id].to_i
 
-			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id.to_s.to_b64 + '">'
+			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id.to_s.to_b64 + '" title="' + name + '">'
 			if is_video > 0
 				tid += 1
 				turls = "#{Down_bucket_url}#{id.to_s.to_b64}/#{name.chomp(".html").video_sanitise}-still.gif"
