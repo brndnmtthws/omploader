@@ -286,7 +286,7 @@ FCGI.each_cgi {|cgi|
 								"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
 								"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
 								"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
-								'/></a></div></div>' + "\n"
+								' title="' + name.chomp('.html') + '"/></a></div></div>' + "\n"
 						end
 					else
 						if is_rss > 0
