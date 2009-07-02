@@ -111,7 +111,7 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t" + '</div>' + "\n" +
 				"\t\t\t" + '<div class="content">' + "\n"
 				top_files_info = ''
-				query = db.prepare('select metadata.id, names.name, metadata.is_video from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where (content_types_main.type = "image" or metadata.is_video = 1) and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
+				query = db.prepare('select metadata.id, names.name, metadata.is_video from metadata inner join names on names.id = metadata.name_id where (metadata.is_image = 1 or metadata.is_video = 1) and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
 				stmt = query.execute
 				tid = 0
 				stmt.num_rows.times do
@@ -140,7 +140,7 @@ FCGI.each_cgi {|cgi|
 				top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
 				"\t\t\t\t" + '<br />' + "\n" +
 				"\t\t\t\t" + '<div class="filelist">' + "\n"
-				query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where content_types_main.type != "image" and metadata.is_video = 0 and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
+				query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.is_image = 0 and metadata.is_video = 0 and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
 				stmt = query.execute
 				stmt.num_rows.times do
 					result = stmt.fetch

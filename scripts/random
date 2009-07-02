@@ -32,8 +32,8 @@ FCGI.each_cgi {|cgi|
 		overall_tries = 0
 		while count > 0
 			rand_id = rand(max - min) + min
-			query = db.prepare('select metadata.id, metadata.is_video from metadata inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id where metadata.id = ? and metadata.valid = ? and (content_types_main.type = "image" or metadata.is_video = ?)')
-			stmt = query.execute(rand_id, 1, 1)
+			query = db.prepare('select metadata.id, metadata.is_video from metadata where metadata.id = ? and metadata.valid = 1 and (metadata.is_image = 1 or metadata.is_video = 1)')
+			stmt = query.execute(rand_id)
 			res = stmt.fetch
 			num_rows = stmt.num_rows
 			stmt.close
