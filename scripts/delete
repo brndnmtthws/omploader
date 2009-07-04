@@ -196,7 +196,7 @@ if cleanup
 				stmt.close
 			end
 		end
-		query = Db.prepare('select id from metadata')
+		query = Db.prepare('select id from metadata where is_video = 0')
 		stmt = query.execute
 		num_rows = stmt.num_rows
 		num_rows.times do
