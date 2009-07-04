@@ -234,7 +234,7 @@ FCGI.each_cgi {|cgi|
 		cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search)
 		files_list = Cache.get($0 + 'files' + cache_key)
 		if files_list.nil?
-			query = db.prepare('select distinct metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			query = db.prepare('select metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if images_only and is_rss == 0
 				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 					files_list_info = ''
@@ -262,6 +262,7 @@ FCGI.each_cgi {|cgi|
 				stmt = query.execute((page - 1) * results)
 			end
 			num_rows = stmt.num_rows
+			id_set = Array.new
 			num_rows.times do
 				result = stmt.fetch
 				id = result[0].to_s
@@ -270,7 +271,8 @@ FCGI.each_cgi {|cgi|
 				comment_count = result[3].to_s
 				name = result[4].to_s
 				is_video = result[5].to_i
-				next if id.to_i < 1
+				next if id.to_i < 1 or id_set.include?(id)
+				id_set << id
 				id = id.to_b64
 
 				file_number = file_number + 1
@@ -358,7 +360,7 @@ FCGI.each_cgi {|cgi|
 		end
 		num_rows = Cache.get($0 + 'num_rows' + cache_key)
 		if num_rows.nil?
-			query = db.prepare('select distinct metadata.id ' + common_sql + search_sql + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			query = db.prepare('select metadata.id ' + common_sql + search_sql + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if !wheres.empty?
 				other_wheres = Array.new(wheres)
 				other_wheres << page * results
