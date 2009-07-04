@@ -162,7 +162,6 @@ FCGI.each_cgi {|cgi|
 
 		page = cgi.params['page'].to_s.to_i
 		page = 1 if page == 0
-		#		cgi.out('text/plain') { 'gay' }
 
 		search = ''
 		if cgi.has_key?('search_post') and cgi['search_post'].class == StringIO
@@ -232,7 +231,8 @@ FCGI.each_cgi {|cgi|
 			page = 1
 		end
 
-		files_list = Cache.get($0 + 'files' + Digest::SHA1.hexdigest(cgi.query_string.to_s + prefs.to_s))
+		cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search)
+		files_list = Cache.get($0 + 'files' + cache_key)
 		if files_list.nil?
 			query = db.prepare('select distinct metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if images_only and is_rss == 0
@@ -347,7 +347,7 @@ FCGI.each_cgi {|cgi|
 				files_list += '        </table>' + "\n"
 			end
 			files_list += '      </div>' + "\n" unless is_rss == 1
-			Cache.set($0 + 'files' + Digest::SHA1.hexdigest(cgi.query_string.to_s + prefs.to_s), files_list, Default_cache_expiry_short)
+			Cache.set($0 + 'files' + cache_key, files_list, Default_cache_expiry_short)
 		end
 
 		page_links = '      <div class="content" style="margin-bottom: 5px">' + "\n"
@@ -356,7 +356,7 @@ FCGI.each_cgi {|cgi|
 		else
 			page_links += '        First <span class="separator">&#x2503;</span> Previous'
 		end
-		num_rows = Cache.get($0 + 'num_rows' + Digest::SHA1.hexdigest(cgi.query_string.to_s))
+		num_rows = Cache.get($0 + 'num_rows' + cache_key)
 		if num_rows.nil?
 			query = db.prepare('select distinct metadata.id ' + common_sql + search_sql + where_clause + 'order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if !wheres.empty?
@@ -368,7 +368,7 @@ FCGI.each_cgi {|cgi|
 			end
 			num_rows = stmt.num_rows
 			stmt.close
-			Cache.set($0 + 'num_rows' + Digest::SHA1.hexdigest(cgi.query_string.to_s), num_rows, Default_cache_expiry_short)
+			Cache.set($0 + 'num_rows' + cache_key, num_rows, Default_cache_expiry_short)
 		end
 		if num_rows > 0
 			page_links += ' <span class="separator">&#x2503;</span> <a href="l' + results.to_s + order_short + column_short + mine_only_opt + images_only_opt + (page + 1).to_s + param_search + '">Next</a>'
