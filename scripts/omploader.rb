@@ -40,6 +40,7 @@ Slogans = [
 	'What Happens in Omp, Stays in Omp',
 	'Don\'t Just Cover Up Bad Odors. Get Omp!',
 	'Smile! You\'re on Omp!',
+	'Smile! You\'re an Omp!',
 	'Omp, now 100% Certified Organic.',
 	'Omp. Not for Everyone.',
 	'Next Time Ask for Omploader',
