@@ -61,14 +61,14 @@ def vimcolour(datum, filetype, title)
 		-c 'set t_Co=88'              \
 		-c 'syntax on'                \
 		-c 'set filetype=#{filetype}' \
+		-c 'ts=4'                     \
+		-c 'shiftwidth=4'             \
 		-c 'set number'               \
 		-c 'colorscheme inkpot'       \
 		-c 'let html_use_css = 1'     \
 		-c 'let use_xhtml = 1'        \
 		-c 'run syntax/2html.vim'     \
 		-c 'bdelete 1'                \
-		-c 'ts=4'                     \
-		-c 'shiftwidth=4'             \
 		-c 'wq! #{tempfile.path}'     \
 		#{tempfile.path}              }
 
