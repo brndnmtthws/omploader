@@ -17,7 +17,7 @@ FCGI.each_cgi {|cgi|
 
 		top_files =
 			"\t\t\t" + '<div class="title">' + "\n" +
-			"\t\t\t\t" + 'Random Images' + "\n" +
+			"\t\t\t\t" + 'Random Images/Videos' + "\n" +
 			"\t\t\t" + '</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n"
 		query = db.prepare('select max(id), min(id) from metadata')
