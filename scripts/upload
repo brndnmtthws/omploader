@@ -57,7 +57,12 @@ def vimcolour(datum, filetype, title)
 	# Set terminal colours to 88 to allow us to use the Inkpot theme.
 	# The bdelete command is to delete the first buffer, so the generated HTML
 	# does not have to be saved to a different file.
+	# With vim, you can only have 10 --cmd commands, and 10 -c commands.  --cmd
+	# commands are executed before -c commands.
 	%x{vim -n -e                      \
+		--cmd 'set enc=utf-8'         \
+		--cmd 'set ts=4'              \
+		--cmd 'set shiftwidth=4'      \
 		-c 'set t_Co=88'              \
 		-c 'syntax on'                \
 		-c 'set filetype=#{filetype}' \
