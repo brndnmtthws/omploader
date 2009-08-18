@@ -231,7 +231,12 @@ FCGI.each_cgi {|cgi|
 			page = 1
 		end
 
-		cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search)
+		cache_key = ''
+		if mine_only != 0 and !owner_id.nil?
+			cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + owner_id.to_s)
+		else
+			cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search)
+		end
 		files_list = Cache.get($0 + 'files' + cache_key)
 		if files_list.nil?
 			query = db.prepare('select metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
