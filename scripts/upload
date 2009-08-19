@@ -121,7 +121,6 @@ end
 
 FCGI.each_cgi {|cgi|
 	begin
-		GC.start
 		db = db_connect
 
 		output = ''
@@ -353,6 +352,7 @@ FCGI.each_cgi {|cgi|
 					name_displayed = name
 				end
 				output = output + get_output(id, name, name_displayed, content_type_main, cgi.host)
+				GC.start
 			rescue Mysql::Error => err
 				db.rollback
 				if err.errno == 1062
