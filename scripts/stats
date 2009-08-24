@@ -15,11 +15,12 @@ def do_stats
 		gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
 			"\t\t\t\t" + '<div class="filelist">' + "\n"
-			query = db.prepare('select count(id), sum(displayed_size) from metadata;')
+			query = db.prepare('select count(id), sum(displayed_size), avg(displayed_size) from metadata;')
 		stmt = query.execute
 		res = stmt.fetch
 		count = res[0]
 		size = to_readable_bytes(res[1].to_f)
+		avg_size = to_readable_bytes(res[2].to_f)
 		query = db.prepare('select count(id) from visitors;')
 		stmt = query.execute
 		res = stmt.fetch
@@ -33,6 +34,9 @@ def do_stats
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Data store size:</b> </span><span class="filename">' + size + '</span>' + "\n" +
+				"\t\t\t\t\t" + '</div>' + "\n" +
+				"\t\t\t\t\t" + '<div class="file">' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><b>Average file size:</b> </span><span class="filename">' + avg_size + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n" +
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Unique visitors in last ' + (Visitor_expiry/3600).to_s + ' hours:</b> </span><span class="filename">' + visitors.to_s + '</span>' + "\n" +
