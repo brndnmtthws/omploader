@@ -24,7 +24,7 @@ FCGI.each_cgi {|cgi|
 		if thumb.nil?
 			visitor_id = get_cached_visitor_id(cgi, db)
 
-			query = db.prepare('select metadata.content_type_id, metadata.thumbnail_id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
+			query = db.prepare('select metadata.content_type_id, metadata.thumbnail_id, names.name, is_image from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
 			stmt = query.execute(id)
 			num_rows = stmt.num_rows
 			info = stmt.fetch
@@ -37,73 +37,67 @@ FCGI.each_cgi {|cgi|
 			content_type_id = info[0].to_s
 			thumbnail_id = info[1].to_s
 			name = info[2].to_s
+			is_image = info[3].to_i
 
 			if !content_type_id.empty?
 				name = name.insert(name.rindex('.'), '-thumb') if !name.empty? and name =~ /\./
 
-					query = db.prepare('select content_types_main.type, content_types_sub.type from content_types inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where content_types.id = ?')
-				stmt = query.execute(content_type_id)
-				result = stmt.fetch
-				stmt.close
+					if is_image > 0 and thumbnail_id.empty?
+						datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r')
+						imlist = Magick::ImageList.new
+						imlist.from_blob(datum.to_str)
+						imlist = imlist.coalesce
+						thumb = imlist.flatten_images
 
-				content_type = result[0]+ '/' + result[1]
-
-				if result[0] == 'image' and thumbnail_id.empty?
-					datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r')
-					imlist = Magick::ImageList.new
-					imlist.from_blob(datum.to_str)
-					imlist = imlist.coalesce
-					thumb = imlist.flatten_images
-
-					# Determine best thumbnail size.
-					if (thumb.columns.to_f / thumb.rows.to_f) == (4/3.0)
-						thumb = thumb.thumbnail(120, 90)
-					elsif (thumb.columns.to_f / thumb.rows.to_f) > (4/3.0)
-						if (((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f))*90).to_i == 0
-							thumb = thumb.thumbnail(120, 1)
+						# Determine best thumbnail size.
+						if (thumb.columns.to_f / thumb.rows.to_f) == (4/3.0)
+							thumb = thumb.thumbnail(120, 90)
+						elsif (thumb.columns.to_f / thumb.rows.to_f) > (4/3.0)
+							if (((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f))*90).to_i == 0
+								thumb = thumb.thumbnail(120, 1)
+							else
+								thumb = thumb.thumbnail(120, 90 * ((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f)))
+							end
 						else
-							thumb = thumb.thumbnail(120, 90 * ((4.0/3) / (thumb.columns.to_f / thumb.rows.to_f)))
+							if (((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0))*120).to_i == 0
+								thumb = thumb.thumbnail(1, 90)
+							else
+								thumb = thumb.thumbnail(120 * ((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0)), 90)
+							end
 						end
+						datum.munmap
+
+						file = File.new(Paths['thumbnails'] + '/' + id.to_b64, File::CREAT|File::TRUNC|File::RDWR, 0664)
+						file.close
+						thumb = thumb.quantize(number_colors=256)
+						datum = Mmap.new(file.path, 'rw')
+						datum.insert(0, thumb.to_blob { self.format = 'png'; self.quality = 95; self.depth = 8 }.to_s)
+						datum.unmap
+
+						query = db.prepare('insert into thumbnails (last_accessed) values (current_timestamp)')
+						stmt = query.execute
+						insert_id = stmt.insert_id
+						stmt.close
+
+						query = db.prepare('update metadata set thumbnail_id = ? where id = ?')
+						query.execute(insert_id, id).close
+
+						cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+						db.commit
+						Cache.set($0 + id, Base64.encode64(Marshal.dump(name)), Default_cache_expiry_long)
+						GC.start
+					elsif is_image > 0
+						query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
+						query.execute(thumbnail_id).close
+						cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+						db.commit
+						Cache.set($0 + id, Base64.encode64(Marshal.dump(name)), Default_cache_expiry_long)
 					else
-						if (((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0))*120).to_i == 0
-							thumb = thumb.thumbnail(1, 90)
-						else
-							thumb = thumb.thumbnail(120 * ((thumb.columns.to_f / thumb.rows.to_f) / (4/3.0)), 90)
-						end
+						cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/../omploader_thumb.png') {''}
+						db.commit
+						thumb = 'omploader-thumb.png'
+						Cache.set($0 + id, Base64.encode64(Marshal.dump(thumb)), Default_cache_expiry_long)
 					end
-					datum.munmap
-
-					file = File.new(Paths['thumbnails'] + '/' + id.to_b64, File::CREAT|File::TRUNC|File::RDWR, 0664)
-					file.close
-					thumb = thumb.quantize(number_colors=256)
-					datum = Mmap.new(file.path, 'rw')
-					datum.insert(0, thumb.to_blob { self.format = 'png'; self.quality = 95; self.depth = 8 }.to_s)
-					datum.unmap
-
-					query = db.prepare('insert into thumbnails (last_accessed) values (current_timestamp)')
-					stmt = query.execute
-					insert_id = stmt.insert_id
-					stmt.close
-
-					query = db.prepare('update metadata set thumbnail_id = ? where id = ?')
-					query.execute(insert_id, id).close
-
-					cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
-					db.commit
-					Cache.set($0 + id, Base64.encode64(Marshal.dump(name)), Default_cache_expiry_long)
-					GC.start
-				elsif result[0] == 'image'
-					query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
-					query.execute(thumbnail_id).close
-					cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
-					db.commit
-					Cache.set($0 + id, Base64.encode64(Marshal.dump(name)), Default_cache_expiry_long)
-				else
-					cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/../omploader_thumb.png') {''}
-					db.commit
-					thumb = 'omploader-thumb.png'
-					Cache.set($0 + id, Base64.encode64(Marshal.dump(thumb)), Default_cache_expiry_long)
-				end
 			end
 		else
 			name = Marshal.load(Base64.decode64(thumb))
