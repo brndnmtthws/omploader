@@ -9,7 +9,7 @@
 require 'omploader'
 
 diseases = ['happy', 'rabid', 'ugly', 'christian', 'brazilian', 'zombie', 'scientologist', 'retarded', 'horny']
-animals = ['gerbils', 'kitties', 'geese', 'turkeys', 'honey badgers', 'Javeeds', 'nerds', 'ninjas', 'vaginas', 'kiwis', 'baby seals', 'gnus']
+animals = ['gerbils', 'kitties', 'geese', 'turkeys', 'honey badgers', 'Javeeds', 'nerds', 'ninjas', 'vaginas', 'kiwis', 'baby seals', 'gnus', 'Skones']
 
 
 def form_input(input_type, input_name, count=1)
