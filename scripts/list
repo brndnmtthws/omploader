@@ -215,7 +215,14 @@ FCGI.each_cgi {|cgi|
 		common_sql = 'from metadata inner join names on names.id = metadata.name_id '
 		 # inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id '
 
-		count = Cache.get($0 + 'count' + Digest::SHA1.hexdigest(where_clause + wheres.to_s))
+		cache_key = ''
+		if mine_only != 0 and !owner_id.nil?
+			cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + owner_id.to_s)
+		else
+			cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search)
+		end
+
+		count = Cache.get($0 + 'count' + cache_key)
 		if count.nil?
 			query = db.prepare('select count(*) ' + common_sql + search_sql + where_clause)
 			if !wheres.empty?
@@ -225,18 +232,12 @@ FCGI.each_cgi {|cgi|
 			end
 			count = stmt.fetch.to_s.to_i
 			stmt.close
-			Cache.set($0 + 'count' + Digest::SHA1.hexdigest(where_clause + wheres.to_s), count, Default_cache_expiry_long)
+			Cache.set($0 + 'count' + cache_key, count, Default_cache_expiry_short)
 		end
 		if page > count / results + 1
 			page = 1
 		end
 
-		cache_key = ''
-		if mine_only != 0 and !owner_id.nil?
-			cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search + owner_id.to_s)
-		else
-			cache_key = Digest::SHA1.hexdigest(results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search)
-		end
 		files_list = Cache.get($0 + 'files' + cache_key)
 		if files_list.nil?
 			query = db.prepare('select metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
