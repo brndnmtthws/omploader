@@ -20,30 +20,30 @@ filename = 'pasta'
 
 # Pipe?
 begin
-  stdin = STDIN.read_nonblock(4096)
-  # argv << '' #< FIXME: What is the use of this?
+	stdin = STDIN.read_nonblock(4096)
+	# argv << '' #< FIXME: What is the use of this?
 rescue Errno::EAGAIN
-  # We just ignore this
+	# We just ignore this
 end
 
 opts = GetoptLong.new(
-  [ '--help',     '-h', GetoptLong::NO_ARGUMENT       ],
-  [ '--filename', '-f', GetoptLong::REQUIRED_ARGUMENT ],
-  [ '--quiet',    '-q', GetoptLong::NO_ARGUMENT       ],
-  [ '--url',      '-u', GetoptLong::NO_ARGUMENT       ]
+	[ '--help',     '-h', GetoptLong::NO_ARGUMENT       ],
+	[ '--filename', '-f', GetoptLong::REQUIRED_ARGUMENT ],
+	[ '--quiet',    '-q', GetoptLong::NO_ARGUMENT       ],
+	[ '--url',      '-u', GetoptLong::NO_ARGUMENT       ]
 )
 
 opts.each do |opt, arg|
-  case opt
-    when '--help'
-		  help = true
-    when '--filename'
-      filename = arg
-    when '--quiet'
-		  quiet = true
-    when '--url'
-		  url_only = true
-  end
+	case opt
+	when '--help'
+		help = true
+	when '--filename'
+		filename = arg
+	when '--quiet'
+		quiet = true
+	when '--url'
+		url_only = true
+	end
 end
 
 argv << ARGV.join(' ')
