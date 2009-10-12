@@ -21,7 +21,6 @@ filename = 'pasta'
 # Pipe?
 begin
 	stdin = STDIN.read_nonblock(4096)
-	# argv << '' #< FIXME: What is the use of this?
 rescue Errno::EAGAIN
 	# We just ignore this
 end
@@ -46,7 +45,7 @@ opts.each do |opt, arg|
 	end
 end
 
-argv << ARGV.join(' ')
+ARGV.each do |a| argv << a end
 
 nocurl = false
 curl = %x{curl --version 2> /dev/null}
@@ -80,7 +79,6 @@ used_stdin = false
 first = true
 
 argv.each do |arg|
-
 	if stdin.nil? and !used_stdin and !File.file?(arg)
 		$stderr.puts "Invalid argument '#{arg}': file does not exist (or is not a regular file)."
 		errors += 1
