@@ -76,5 +76,10 @@ httpd:
   # an apache2 module can be found here: http://tn123.ath.cx/mod_xsendfile/
   xsendfile: true
 
+general:
+  # number of files per directory within the data store DO NOT change this
+  # unless you know what you're doing, it will destroy your installation
+  files_per_dir = 10000
+
 # define if you need to throw ads in the footer
 footer_ad:

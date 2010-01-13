@@ -73,6 +73,8 @@ Paths = ConfigFile['paths']
 
 Down_bucket_url = ConfigFile['amazon_s3']['down_bucket_url']
 
+Files_per_dir = ['general']['files_per_dir'].to_i
+
 Sql = Mysql.init
 
 def db_connect
@@ -251,6 +253,24 @@ class String
 		str = str.to_i(base=36).to_s
 		str.gsub!('/', '_')
 		return str
+	end
+
+	def to_path(t)
+		str = self
+		str.gsub!('/', '-/')
+		str.gsub!('_', '/')
+		i = str.to_i / Files_per_dir
+
+		str = "%s/%s/%s/%s" % [Dir.pwd, Paths[t], i.to_s, id.to_b64]
+
+	# Convert id to file path name for data
+	def to_data_path
+		return self.to_path('data')
+	end
+
+	# Convert id to file path name for data
+	def to_thumb_path
+		return self.to_path('thumbnails')
 	end
 
 	# Sanitise HTML code to avoid opening tags.

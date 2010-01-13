@@ -89,10 +89,10 @@ FCGI.each_cgi {|cgi|
 			cgi.out(cgi_head) { html }
 		else
 			if Xsendfile
-				cgi_head['X-Sendfile'] = Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64
+				cgi_head['X-Sendfile'] = id.to_data_path
 				cgi.out(cgi_head) {''}
 			else
-				file = File.new(Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64, mode='r')
+				file = File.new(id.to_data_path)
 				cgi.out(cgi_head) {file.read}
 				file.close
 			end
