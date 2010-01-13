@@ -340,7 +340,7 @@ FCGI.each_cgi {|cgi|
 						stmt = query.execute(id.to_id)
 						stmt.close
 					end
-					file = File.new(id.to_id.to_path, File::CREAT|File::TRUNC|File::RDWR, 0664)
+					file = File.new(Paths['data'] + '/' + id, File::CREAT|File::TRUNC|File::RDWR, 0664)
 					file.close
 					mmap = Mmap.new(file.path, 'rw')
 					mmap.insert(0, datum)

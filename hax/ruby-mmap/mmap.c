@@ -1113,7 +1113,7 @@ mm_sub_bang_int(bang_st)
 	}
 	else {
 	    RSTRING(str)->ptr += start;
-	    repl = rb_reg_regsub(repl, str, regs);
+	    repl = rb_reg_regsub(repl, str, regs, str);
 	    RSTRING(str)->ptr -= start;
 	}
 	if (OBJ_TAINTED(repl)) tainted = 1;
@@ -1211,7 +1211,7 @@ mm_gsub_bang_int(bang_st)
 	}
 	else {
 	    RSTRING(str)->ptr += start;
-	    val = rb_reg_regsub(repl, str, regs);
+	    val = rb_reg_regsub(repl, str, regs, str);
 	    RSTRING(str)->ptr -= start;
 	}
 	if (OBJ_TAINTED(repl)) tainted = 1;
