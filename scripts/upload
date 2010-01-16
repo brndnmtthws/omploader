@@ -236,6 +236,8 @@ FCGI.each_cgi {|cgi|
 			begin
 				if cgi.has_key?('paste') and syntax == 'raw'
 					content_type = 'text/plain'
+				elsif cgi.has_key?('paste')
+					content_type = 'text/html'
 				else
 					fm = FileMagic.new(FileMagic::MAGIC_MIME)
 					content_type = fm.buffer(datum)
