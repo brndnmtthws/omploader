@@ -26,7 +26,7 @@ FCGI.each_cgi {|cgi|
 
 		owner_id = get_cached_owner_id(cgi, db)
 
-		hide_comments = Cache.get($0 + 'hide_comments ' + owner_id.to_s)
+		hide_comments = Cache.get($0 + 'hide_comments' + owner_id.to_s)
 		if !owner_id.nil? and hide_comments.nil?
 			query = db.prepare('select hide_comments from owners where id = ?')
 			query.execute(owner_id)
@@ -362,7 +362,7 @@ FCGI.each_cgi {|cgi|
 				query = db.prepare('update owners set hide_comments = ? where id = ?')
 				res = query.execute(hide_comments.to_s, owner_id)
 				query.close
-				Cache.set($0 + 'hide_comments ' + owner_id, hide_comments.to_s, Default_cache_expiry_long)
+				Cache.set($0 + 'hide_comments' + owner_id, hide_comments.to_s, Default_cache_expiry_long)
 			end
 		end
 		db.commit
