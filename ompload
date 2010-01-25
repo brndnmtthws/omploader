@@ -126,7 +126,7 @@ argv.each do |arg|
 		errors += 1
 		next
 	end
-	output = IO.read(tmp.path)
+	output = File.read(tmp.path, encoding: 'utf-8')
 
 	# parse for an ID
 	if output =~ /View file: <a href="v([A-Za-z0-9+\/]+)">/
