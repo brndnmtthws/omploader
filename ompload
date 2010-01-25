@@ -10,6 +10,7 @@
 
 require 'getoptlong'
 require 'tempfile'
+require 'iconv'
 
 argv = Array.new
 
@@ -126,7 +127,8 @@ argv.each do |arg|
 		errors += 1
 		next
 	end
-	output = File.read(tmp.path, encoding: 'utf-8')
+	output = IO.read(tmp.path)
+	output = Iconv.conv('ASCII//IGNORE//TRANSLIT', 'UTF-8', output)
 
 	# parse for an ID
 	if output =~ /View file: <a href="v([A-Za-z0-9+\/]+)">/
