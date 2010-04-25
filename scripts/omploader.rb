@@ -253,10 +253,16 @@ class String
 		return str
 	end
 
+	# Get data subdirectory from on b64 id.
+	def get_subdir
+		return self[0..1]
+	end
+
 	# Sanitise HTML code to avoid opening tags.
 	def sanitise
 		self.gsub('<', '&lt;').gsub('>', '&gt;')
 	end
+
 	# clean up filename a bit
 	def video_sanitise
 		self.gsub(' ', '.') # replace spaces with '.'
