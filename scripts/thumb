@@ -67,7 +67,8 @@ FCGI.each_cgi {|cgi|
 						end
 						datum.munmap
 
-						file = File.new(Paths['thumbnails'] + '/' + id.to_b64, File::CREAT|File::TRUNC|File::RDWR, 0664)
+						Dir.mkdir(Paths['thumbnails'] + '/' + id.to_b64.get_subdir) if not File.directory?(Paths['thumbnails'] + '/' + id.to_b64.get_subdir)
+						file = File.new(Paths['thumbnails'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64, File::CREAT|File::TRUNC|File::RDWR, 0664)
 						file.close
 						thumb = thumb.quantize(number_colors=256)
 						datum = Mmap.new(file.path, 'rw')
@@ -82,14 +83,14 @@ FCGI.each_cgi {|cgi|
 						query = db.prepare('update metadata set thumbnail_id = ? where id = ?')
 						query.execute(insert_id, id).close
 
-						cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+						cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64) {''}
 						db.commit
 						Cache.set($0 + id, Base64.encode64(Marshal.dump(name)), Default_cache_expiry_long)
 						GC.start
 					elsif is_image > 0
 						query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
 						query.execute(thumbnail_id).close
-						cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64) {''}
+						cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64) {''}
 						db.commit
 						Cache.set($0 + id, Base64.encode64(Marshal.dump(name)), Default_cache_expiry_long)
 					else
@@ -101,7 +102,7 @@ FCGI.each_cgi {|cgi|
 			end
 		else
 			name = Marshal.load(Base64.decode64(thumb))
-			file = Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64
+			file = Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64
 			if !File.exists?(file)
 				file = Dir.pwd + '/../omploader_thumb.png'
 			end
