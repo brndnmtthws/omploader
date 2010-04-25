@@ -43,7 +43,7 @@ FCGI.each_cgi {|cgi|
 				name = name.insert(name.rindex('.'), '-thumb') if !name.empty? and name =~ /\./
 
 					if is_image > 0 and thumbnail_id.empty?
-						datum = Mmap.new(Paths['data'] + '/' + id.to_b64, 'r')
+						datum = Mmap.new(Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64, 'r')
 						imlist = Magick::ImageList.new
 						imlist.from_blob(datum.to_str)
 						imlist = imlist.coalesce
