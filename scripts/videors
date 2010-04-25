@@ -89,12 +89,12 @@ def do_delete(arg)
 		query = Db.prepare('delete from thumbnails, votes, metadata using metadata left join thumbnails on thumbnails.id = metadata.thumbnail_id left join votes on votes.metadata_id = metadata.id where metadata.id = ?')
 		stmt = query.execute(id)
 		begin
-			File.unlink(Path + Paths['data'] + '/' + id.to_b64)
+			File.unlink(Path + Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64)
 		rescue Errno::ENOENT
 		end
 		# shouldn't be any thumbs, but it can't hurt to try
 		begin
-			File.unlink(Path + Paths['thumbnails'] + '/' + id.to_b64)
+			File.unlink(Path + Paths['thumbnails'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64)
 		rescue Errno::ENOENT
 		end
 		Db.commit
