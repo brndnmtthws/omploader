@@ -156,7 +156,7 @@ if cleanup
 		end
 		Db.commit
 		Find.find(Paths['data']) do |path|
-			next if path.count('/') < 2
+			next if path.count('/') < 2 or !File.file?(path)
 			base = File.basename(path)
 			if base.to_id == 0 or base != base.to_id.to_b64
 				# junk
@@ -176,7 +176,7 @@ if cleanup
 			end
 		end
 		Find.find(Paths['thumbnails']) do |path|
-			next if path.count('/') < 2
+			next if path.count('/') < 2 or !File.file?(path)
 			base = File.basename(path)
 			if base.to_id == 0 or base != base.to_id.to_b64
 				# junk

@@ -42,7 +42,7 @@ FCGI.each_cgi {|cgi|
 			if !content_type_id.empty?
 				name = name.insert(name.rindex('.'), '-thumb') if !name.empty? and name =~ /\./
 
-					if is_image > 0 and thumbnail_id.empty?
+					if is_image > 0 and thumbnail_id.empty? and File.file?(Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64)
 						datum = Mmap.new(Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64, 'r')
 						imlist = Magick::ImageList.new
 						imlist.from_blob(datum.to_str)
@@ -87,7 +87,7 @@ FCGI.each_cgi {|cgi|
 						db.commit
 						Cache.set($0 + id, Base64.encode64(Marshal.dump(name)), Default_cache_expiry_long)
 						GC.start
-					elsif is_image > 0
+					elsif is_image > 0 and !thumbnail_id.empty?
 						query = db.prepare('update thumbnails set last_accessed = current_timestamp where id = ?')
 						query.execute(thumbnail_id).close
 						cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="' + name + '"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/' + Paths['thumbnails'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64) {''}
@@ -113,7 +113,7 @@ FCGI.each_cgi {|cgi|
 	rescue Magick::ImageMagickError => err
 		# just ignore these for the most part
 		db.rollback unless db.nil?
-		cgi.out('text/plain') { 'This thumbnail is fucked, sorry.' }
+		cgi.out('type' => 'image/png', 'Content-Disposition' => 'inline; filename="omploader-thumb.png"', 'Cache-Control' => 'min-fresh=31536000', 'expires' => Time.now + 31536000, 'X-Sendfile' => Dir.pwd + '/../omploader_thumb.png') {''}
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug

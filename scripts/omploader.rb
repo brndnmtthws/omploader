@@ -6,6 +6,7 @@
 # Distributed under the terms of the GNU General Public License v3
 #
 
+require 'rubygems'
 require 'base64'
 require 'fcgi'
 require 'cgi/session'
