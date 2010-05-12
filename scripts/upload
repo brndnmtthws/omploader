@@ -249,7 +249,7 @@ FCGI.each_cgi {|cgi|
 				actual_content_type_sub = content_type_sub = content_type_split.last
 
 				actual_name = name
-				if content_type_main == 'video'
+				if content_type_main[0..4] == 'video'
 					name = name + '.html'
 					actual_name = actual_name.video_sanitise
 					actual_content_type = 'text/html'
@@ -281,19 +281,19 @@ FCGI.each_cgi {|cgi|
 				id = stmt.insert_id
 				stmt.close
 
-				if content_type == 'audio/mpeg' or content_type == 'application/ogg'
+				if content_type[0..8] == 'audio/mpeg' or content_type[0..14] == 'application/ogg'
 					tmpfile = Tempfile.new(name)
 					tmpfile.close
 					mmap = Mmap.new(tmpfile.path, 'rw')
 					mmap.insert(0, datum)
 					mmap.munmap
-					if content_type == 'audio/mpeg'
+					if content_type[0..9] == 'audio/mpeg'
 						tag = ID3Lib::Tag.new(tmpfile.path)
 						artist = tag.artist.to_s.sanitise
 						title = tag.title.to_s.sanitise
 						album = tag.album.to_s.sanitise
 						year = tag.year.to_s.sanitise
-					elsif content_type == 'application/ogg'
+					elsif content_type[0..14] == 'application/ogg'
 						vf = Ogg::VorbisFile.new
 						tmpfile.open
 						if vf.open(tmpfile)
@@ -325,7 +325,7 @@ FCGI.each_cgi {|cgi|
 
 				id = id.to_s.to_b64
 
-				if content_type_main == 'video'
+				if content_type_main[0..4] == 'video'
 					# o deer, special effects required
 					# compose html dealy
 					query = db.prepare('update metadata set size = 1, valid = 0, is_video = 1 where metadata.id = ?')
@@ -337,7 +337,7 @@ FCGI.each_cgi {|cgi|
 					# touch notify file
 					system('touch', Paths['video_up_data'] + '/-notify-' + id + '-' + actual_name)
 				else
-					if content_type_main == 'image'
+					if content_type_main[0..4] == 'image'
 						query = db.prepare('update metadata set is_image = 1 where metadata.id = ?')
 						stmt = query.execute(id.to_id)
 						stmt.close
