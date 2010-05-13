@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="/style9.css" />
+		<link rel="shortcut icon" href="omploader_icon2.png" type="image/x-icon" />
+		<title>omploader</title>
+	</head>
+	<body>
+		<div id="container">
+			<div id="header">
+				<div id="title"><a href="/"><img src="omploader2.png" alt="omploader" /></a></div>
+				<div id="slogan"><h1>free, lean and mean image &amp; file hosting™</h1></div>
+				<form enctype="multipart/form-data" action="l" method="post">
+					<div id="search">
+						<input name="search_post" size="20" class="field" type="text" value="" /><input value="search" class="button" type="submit" />
+					</div>
+				</form>
+			</div>
+			<div class="content">
+			<div class="content"><div class="faq">
+					<div class="big">Hi!  Below you will find a paypal link for donating to Omploader.  Last month's hosting bill was <b>$573.32</b> and I have so far raised <b>$0 (0%)</b> for last month.</div>
+					<br />
+					<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+						<input type="hidden" name="cmd" value="_donations">
+						<input type="hidden" name="business" value="brenden@diddyinc.com">
+						<input type="hidden" name="lc" value="US">
+						<input type="hidden" name="item_name" value="Keep Omploader alive">
+						<input type="hidden" name="currency_code" value="USD">
+						<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
+						<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+						<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+					</form>
+			</div></div>
+			<div id="footer">
+				<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a></div>
+				<a href="irc://irc.freenode.net/##bikes">bikes</a> <span class="separator">&#x2503;</span> <a href="http://www.ruby-lang.org/">ruby</a> <span class="separator">&#x2503;</span> <a href="http://www.vim.org/">vim</a> <span class="separator">&#x2503;</span> <a href="http://git.omp.am/?p=omploader.git">git</a> <span class="separator">&#x2503;</span> <a href="about.html">about/faq</a>  <span class="separator">&#x2503;</span> <a href="donate.html">donate</a>
+			</div>
+		</div>
+	</body>
+</html>
