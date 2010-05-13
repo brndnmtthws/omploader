@@ -53,7 +53,8 @@ FCGI.each_cgi {|cgi|
 		comment_body = ''
 
 		if !owner_id.nil? and cgi.has_key?('loldongs' + owner_id) and throttle.to_i < Max_upload_count
-			lolres = Captcha.validate(cgi.remote_addr, cgi['recaptcha_challenge_field'].read.to_s, cgi['recaptcha_response_field'].read.to_s)
+			errors = Hash.new
+			lolres = Captcha.validate(cgi.remote_addr, cgi['recaptcha_challenge_field'].read.to_s, cgi['recaptcha_response_field'].read.to_s, errors)
 			if !lolres
 				cgi.out('text/html') {
 					html_pre + '        <div class="content large">Captcha failure :(</div>' + html_post
