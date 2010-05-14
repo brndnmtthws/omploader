@@ -119,6 +119,14 @@ def vimcolour(datum, filetype, title)
 	return datum.join
 end
 
+def acceptable_subtype(type)
+	if type =~ /^png/ return true end
+	if type =~ /^jpeg/ return true end
+	if type =~ /^pjpeg/ return true end
+	if type =~ /^gif/ return true end
+	return false
+end
+
 FCGI.each_cgi {|cgi|
 	begin
 		db = db_connect
@@ -337,7 +345,7 @@ FCGI.each_cgi {|cgi|
 					# touch notify file
 					system('touch', Paths['video_up_data'] + '/-notify-' + id + '-' + actual_name)
 				else
-					if content_type_main[0..4] == 'image'
+					if content_type_main[0..4] == 'image' and acceptable_subtype(content_type_sub)
 						query = db.prepare('update metadata set is_image = 1 where metadata.id = ?')
 						stmt = query.execute(id.to_id)
 						stmt.close
