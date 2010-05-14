@@ -120,10 +120,10 @@ def vimcolour(datum, filetype, title)
 end
 
 def acceptable_subtype(type)
-	if type =~ /^png/ return true end
-	if type =~ /^jpeg/ return true end
-	if type =~ /^pjpeg/ return true end
-	if type =~ /^gif/ return true end
+	return true unless !/^png/.matches(type)
+	return true unless !/^jpeg/.matches(type)
+	return true unless !/^pjpeg/.matches(type)
+	return true unless !/^gif/.matches(type)
 	return false
 end
 
