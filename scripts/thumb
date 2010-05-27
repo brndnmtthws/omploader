@@ -10,6 +10,9 @@ require 'omploader'
 require 'RMagick'
 include Magick
 
+# Limit imagemagick memory to 250MiB
+Magick.limit_resource(:memory, 250)
+
 FCGI.each_cgi {|cgi|
 	begin
 		db = db_connect
