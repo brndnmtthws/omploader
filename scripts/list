@@ -406,10 +406,10 @@ FCGI.each_cgi {|cgi|
 
 		sort_linque = lambda {|ordery| results.to_s + ordery + mine_only_opt + images_only_opt + page.to_s + param_search }
 		sort_msg = "order by: " +
-			"date #{linkit.call(sort_linque, 'dt', '&darr', order_short + column_short)}#{linkit.call(sort_linque, 'at', '&uarr', order_short + column_short)} " +
-			"name #{linkit.call(sort_linque, 'dn', '&darr', order_short + column_short)}#{linkit.call(sort_linque, 'an', '&uarr', order_short + column_short)} " +
-			"hits #{linkit.call(sort_linque, 'dh', '&darr', order_short + column_short)}#{linkit.call(sort_linque, 'ah', '&uarr', order_short + column_short)} " +
-			"&ldquo;&rdquo; #{linkit.call(sort_linque, 'dc', '&darr', order_short + column_short)}#{linkit.call(sort_linque, 'ac', '&uarr', order_short + column_short)}"
+			"date #{linkit.call(sort_linque, 'dt', '&darr;', order_short + column_short)}#{linkit.call(sort_linque, 'at', '&uarr;', order_short + column_short)} " +
+			"name #{linkit.call(sort_linque, 'dn', '&darr;', order_short + column_short)}#{linkit.call(sort_linque, 'an', '&uarr;', order_short + column_short)} " +
+			"hits #{linkit.call(sort_linque, 'dh', '&darr;', order_short + column_short)}#{linkit.call(sort_linque, 'ah', '&uarr;', order_short + column_short)} " +
+			"&ldquo;&rdquo; #{linkit.call(sort_linque, 'dc', '&darr;', order_short + column_short)}#{linkit.call(sort_linque, 'ac', '&uarr;', order_short + column_short)}"
 
 		if count > (page - 1) * results + results
 			shown = ((page - 1) * results + results).to_s
