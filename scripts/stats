@@ -56,7 +56,7 @@ def do_stats
 		if $have_vnstat
 			gen_stats +=
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
-				"\t\t\t\t\t\t" + '<span class="filename"><b>Today\'s bandwidth usage:</b> </span><span class="filename">' + %x{vnstat | tail -n 1 | cut -d ' ' -f 19,20} + '</span>' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><b>Today\'s bandwidth usage:</b> </span><span class="filename">' + %x{vnstat | tail -n 1 | awk '{print $8, $9}'} + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
 		end
 		gen_stats += "\t\t\t\t" + '</div>' + "\n" +
