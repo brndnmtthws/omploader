@@ -8,17 +8,17 @@
 
 require 'omploader'
 
-have_vnstat = true
+$have_vnstat = true
 vnstat = %x{vnstat --version > /dev/null}
 if vnstat.empty?
-	have_vnstat = false
+	$have_vnstat = false
 end
 
-stats_key = 'stats1lol'
+$stats_key = 'stats1lol'
 
 def do_stats
 	begin
-		Cache.set(stats_key + 'time', Time.now.to_i, Default_cache_expiry_long * 10)
+		Cache.set($stats_key + 'time', Time.now.to_i, Default_cache_expiry_long * 10)
 		db = db_connect
 		gen_stats = "\t\t\t" + '<div class="title">General Stats</div>' + "\n" +
 			"\t\t\t" + '<div class="content">' + "\n" +
@@ -53,7 +53,7 @@ def do_stats
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Comments:</b> </span><span class="filename">' + comments.to_s + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
 
-		if have_vnstat
+		if $have_vnstat
 			gen_stats +=
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
 				"\t\t\t\t\t\t" + '<span class="filename"><b>Today\'s bandwidth usage:</b> </span><span class="filename">' + %x{'vnstat | tail -n 1 | cut -d ' ' -f 19,20'} + '</span>' + "\n" +
@@ -122,7 +122,7 @@ def do_stats
 
 									xhtml = gen_stats + new_disc + top_refs
 
-									Cache.set(stats_key, Base64.encode64(html_pre + xhtml + html_post), 0)
+									Cache.set($stats_key, Base64.encode64(html_pre + xhtml + html_post), 0)
 									return html_pre + xhtml + html_post
 	ensure
 		db.close if db
@@ -133,8 +133,8 @@ threads = []
 
 FCGI.each_cgi {|cgi|
 	begin
-		html = Cache.get(stats_key)
-		time = Cache.get(stats_key + 'time')
+		html = Cache.get($stats_key)
+		time = Cache.get($stats_key + 'time')
 		poo_sent = false
 		if !html.nil?
 			cgi.out('text/html') { Base64.decode64(html) }
