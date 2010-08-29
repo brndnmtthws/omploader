@@ -14,7 +14,7 @@ if vnstat.empty?
 	$have_vnstat = false
 end
 
-$stats_key = 'stats3lol'
+$stats_key = 'stats4lol'
 
 def do_stats
 	begin
