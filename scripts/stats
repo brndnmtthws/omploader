@@ -9,12 +9,12 @@
 require 'omploader'
 
 $have_vnstat = true
-vnstat = %x{/usr/bin/vnstat --version > /dev/null}
+vnstat = %x{vnstat --version 2> /dev/null}
 if vnstat.empty?
 	$have_vnstat = false
 end
 
-$stats_key = 'stats2lol'
+$stats_key = 'stats3lol'
 
 def do_stats
 	begin
@@ -56,7 +56,7 @@ def do_stats
 		if $have_vnstat
 			gen_stats +=
 				"\t\t\t\t\t" + '<div class="file">' + "\n" +
-				"\t\t\t\t\t\t" + '<span class="filename"><b>Today\'s bandwidth usage:</b> </span><span class="filename">' + %x{'/usr/bin/vnstat | /usr/bin/tail -n 1 | /usr/bin/cut -d ' ' -f 19,20'} + '</span>' + "\n" +
+				"\t\t\t\t\t\t" + '<span class="filename"><b>Today\'s bandwidth usage:</b> </span><span class="filename">' + %x{'vnstat | tail -n 1 | cut -d ' ' -f 19,20'} + '</span>' + "\n" +
 				"\t\t\t\t\t" + '</div>' + "\n"
 		end
 		gen_stats += "\t\t\t\t" + '</div>' + "\n" +
