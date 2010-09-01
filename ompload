@@ -61,7 +61,7 @@ if curl.empty?
 	$stderr.puts
 end
 
-xclip = %x{xclip -version 2>&1 /dev/null}
+xclip = %x{which xclip 2> /dev/null}
 if xclip.empty?
 	want_xclip = false
 end
