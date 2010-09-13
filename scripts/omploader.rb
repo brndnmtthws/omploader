@@ -298,7 +298,7 @@ def get_cached_owner_id(cgi, db)
 		db_check(db)
 		owner_id = get_owner_id(cgi, db)
 		session_id = session_id(cgi)
-		Cache.set('owner_id' + session_id,
+		Cache.set('owner_id' + session_id.to_s,
 				  Base64.encode64(Marshal.dump(owner_id)),
 				  Default_cache_expiry_short)
 	else
