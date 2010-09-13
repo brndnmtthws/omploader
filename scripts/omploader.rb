@@ -210,10 +210,10 @@ end
 
 def get_owner_id(cgi, db)
 	# need to make new session
-	s1 = session(cgi, true)
+	s1 = session(cgi, false)
 	s1.delete
 	begin
-		s2 = session(cgi, false)
+		s2 = session(cgi, true)
 		# this is a new owner
 		query = db.prepare('delete from owners where session_id = ?')
 		stmt = query.execute(s2.session_id.to_s)
