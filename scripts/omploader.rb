@@ -204,7 +204,6 @@ def session_id(cgi)
 		s = session(cgi, false)
 		return s.session_id.to_s
 	rescue ArgumentError
-		return
 	end
 end
 
@@ -226,10 +225,10 @@ def get_owner_id(cgi, db)
 		owner_id = stmt.insert_id.to_s
 		s2['owner_id'] = owner_id
 		s2.close
+		return owner_id
 	rescue ArgumentError
 		# browser won't allow or doesn't support cookies
 	end
-	return owner_id
 end
 
 class String
