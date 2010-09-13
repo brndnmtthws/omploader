@@ -215,6 +215,8 @@ def get_owner_id(cgi, db)
 	begin
 		s2 = session(cgi, false)
 		# this is a new owner
+		query = db.prepare('delete from owners where session_id = ?')
+		stmt = query.execute(s2.session_id.to_s)
 		query = db.prepare('insert into owners (session_id) values (?)')
 		stmt = query.execute(s2.session_id.to_s)
 		owner_id = stmt.insert_id.to_s
