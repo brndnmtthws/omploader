@@ -204,32 +204,24 @@ def session_id(cgi)
 		s = session(cgi, false)
 		return s.session_id.to_s
 	rescue ArgumentError
-		return ''
+		return
 	end
 end
 
 def get_owner_id(cgi, db)
+	# need to make new session
+	s1 = session(cgi, true)
+	s1.delete
 	begin
-		s = session(cgi, false)
-		query = db.prepare('insert into owners (session_id) values (?) on duplicate key update session_id = ?, id = last_insert_id(id)')
-		stmt = query.execute(s.session_id.to_s, s.session_id.to_s)
-		owner_id = query.insert_id.to_s
-		stmt.close
+		s2 = session(cgi, false)
+		# this is a new owner
+		query = db.prepare('insert into owners (session_id) values (?)')
+		stmt = query.execute(s2.session_id.to_s)
+		owner_id = stmt.insert_id.to_s
+		s2['owner_id'] = owner_id
+		s2.close
 	rescue ArgumentError
-		# need to make new session
-		s1 = session(cgi, true)
-		s1.delete
-		begin
-			s2 = session(cgi, false)
-			# this is a new owner
-			query = db.prepare('insert into owners (session_id) values (?)')
-			stmt = query.execute(s2.session_id.to_s)
-			owner_id = stmt.insert_id.to_s
-			s2['owner_id'] = owner_id
-			s2.close
-		rescue ArgumentError
-			# browser won't allow or doesn't support cookies
-		end
+		# browser won't allow or doesn't support cookies
 	end
 	return owner_id
 end
@@ -290,7 +282,9 @@ def get_cached_visitor_id(cgi, db)
 	if visitor_id.nil?
 		db_check(db)
 		visitor_id = get_visitor_id(cgi, db)
-		Cache.set('visitor_id' + cgi.remote_addr.to_s, Base64.encode64(Marshal.dump(visitor_id)), Default_cache_expiry_long)
+		Cache.set('visitor_id' + cgi.remote_addr.to_s,
+				  Base64.encode64(Marshal.dump(visitor_id)),
+				  Default_cache_expiry_long)
 	else
 		visitor_id = Marshal.load(Base64.decode64(visitor_id))
 	end
@@ -302,7 +296,9 @@ def get_cached_owner_id(cgi, db)
 	if owner_id.nil?
 		db_check(db)
 		owner_id = get_owner_id(cgi, db)
-		Cache.set('owner_id' + session_id(cgi), Base64.encode64(Marshal.dump(owner_id)), Default_cache_expiry_short)
+		Cache.set('owner_id' + session_id(cgi),
+				  Base64.encode64(Marshal.dump(owner_id)),
+				  Default_cache_expiry_short)
 	else
 		owner_id = Marshal.load(Base64.decode64(owner_id))
 	end
