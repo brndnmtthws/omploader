@@ -217,15 +217,16 @@ def get_owner_id(cgi, db)
 		stmt.close
 	rescue ArgumentError
 		# need to make new session
-		s = session(cgi, true)
-		s.close
+		s1 = session(cgi, true)
+		s1.delete
 		begin
-			s = session(cgi, false)
+			s2 = session(cgi, false)
 			# this is a new owner
 			query = db.prepare('insert into owners (session_id) values (?)')
-			stmt = query.execute(s.session_id.to_s)
+			stmt = query.execute(s2.session_id.to_s)
 			owner_id = stmt.insert_id.to_s
-			s['owner_id'] = owner_id
+			s2['owner_id'] = owner_id
+			s2.close
 		rescue ArgumentError
 			# browser won't allow or doesn't support cookies
 		end
