@@ -225,7 +225,7 @@ def get_owner_id(cgi, db)
 		owner_id = stmt.insert_id.to_s
 		s2['owner_id'] = owner_id
 		s2.close
-		return owner_id
+		return [owner_id, s2.session_id.to_s]
 	rescue ArgumentError
 		# browser won't allow or doesn't support cookies
 	end
@@ -301,9 +301,10 @@ def get_cached_owner_id(cgi, db)
 	owner_id = Cache.get('owner_id' + session_id) unless session_id.nil?
 	if owner_id.nil?
 		db_check(db)
-		owner_id = get_owner_id(cgi, db)
-		session_id = session_id(cgi)
-		Cache.set('owner_id' + session_id.to_s,
+		sinfo = get_owner_id(cgi, db)
+		owner_id = sinfo[0]
+		session_id = sinfo[1]
+		Cache.set('owner_id' + session_id,
 				  Base64.encode64(Marshal.dump(owner_id)),
 				  Default_cache_expiry_short)
 	else
