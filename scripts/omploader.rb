@@ -292,11 +292,13 @@ def get_cached_visitor_id(cgi, db)
 end
 
 def get_cached_owner_id(cgi, db)
-	owner_id = Cache.get('owner_id' + session_id(cgi))
+	session_id = session_id(cgi)
+	owner_id = Cache.get('owner_id' + session_id) unless session_id.nil?
 	if owner_id.nil?
 		db_check(db)
 		owner_id = get_owner_id(cgi, db)
-		Cache.set('owner_id' + session_id(cgi),
+		session_id = session_id(cgi)
+		Cache.set('owner_id' + session_id,
 				  Base64.encode64(Marshal.dump(owner_id)),
 				  Default_cache_expiry_short)
 	else
