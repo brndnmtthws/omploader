@@ -209,9 +209,13 @@ def session_id(cgi)
 end
 
 def get_owner_id(cgi, db)
-	# need to make new session
-	s1 = session(cgi, false)
-	s1.delete
+	begin
+		# need to make new session
+		s1 = session(cgi, false)
+		s1.delete
+	rescue ArgumentError
+		# browser won't allow or doesn't support cookies
+	end
 	begin
 		s2 = session(cgi, true)
 		# this is a new owner
