@@ -211,7 +211,7 @@ def get_owner_id(cgi, db)
 	begin
 		# need to make new session
 		s1 = session(cgi, false)
-		s1.delete
+		return [s1['owner_id'], s1.session_id.to_s]
 	rescue ArgumentError
 		# browser won't allow or doesn't support cookies
 	end
