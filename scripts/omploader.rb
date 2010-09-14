@@ -199,10 +199,10 @@ def session(cgi, new)
 		'new_session' => new)
 end
 
-def session_id(cgi)
+def session_info(cgi)
 	begin
 		s = session(cgi, false)
-		return s.session_id.to_s
+		return [s['owner_id'].to_s, s.session_id.to_s]
 	rescue ArgumentError
 	end
 end
@@ -211,7 +211,7 @@ def get_owner_id(cgi, db)
 	begin
 		# need to make new session
 		s1 = session(cgi, false)
-		return [s1['owner_id'], s1.session_id.to_s]
+		s1.delete
 	rescue ArgumentError
 		# browser won't allow or doesn't support cookies
 	end
@@ -297,8 +297,8 @@ def get_cached_visitor_id(cgi, db)
 end
 
 def get_cached_owner_id(cgi, db)
-	session_id = session_id(cgi)
-	owner_id = Cache.get('owner_id' + session_id) unless session_id.nil?
+	sinfo = session_info(cgi)
+	owner_id = Cache.get('owner_id' + sinfo[1]) unless sinfo.nil?
 	if owner_id.nil?
 		db_check(db)
 		sinfo = get_owner_id(cgi, db)
