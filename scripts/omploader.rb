@@ -298,19 +298,12 @@ end
 
 def get_cached_owner_id(cgi, db)
 	sinfo = session_info(cgi)
-	owner_id = Cache.get('owner_id' + sinfo[1]) unless sinfo.nil?
+	return sinfo[0] unless sinfo.nil?
 	if owner_id.nil?
 		db_check(db)
 		sinfo = get_owner_id(cgi, db)
-		owner_id = sinfo[0]
-		session_id = sinfo[1]
-		Cache.set('owner_id' + session_id,
-				  Base64.encode64(Marshal.dump(owner_id)),
-				  Default_cache_expiry_short)
-	else
-		owner_id = Marshal.load(Base64.decode64(owner_id))
+		return sinfo[0]
 	end
-	return owner_id
 end
 
 def to_readable_bytes(bytes)
