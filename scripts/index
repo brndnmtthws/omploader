@@ -43,11 +43,19 @@ FCGI.each_cgi {|cgi|
 			res = stmt.fetch
 			stmt.close
 
-			big = res[0].to_i
-			hide_top_files = res[1].to_i
-			curl = res[2].to_i
-			paste = res[3].to_i
-			Cache.set($0 + 'prefs' + owner_id, res, Default_cache_expiry_long)
+			if !res.nil?
+				big = res[0].to_i
+				hide_top_files = res[1].to_i
+				curl = res[2].to_i
+				paste = res[3].to_i
+				Cache.set($0 + 'prefs' + owner_id, res,
+						  Default_cache_expiry_long)
+			else
+				big = 0
+				hide_top_files = 0
+				curl = 0
+				paste = 0
+			end
 		elsif !prefs.nil?
 			big = prefs[0].to_i
 			hide_top_files = prefs[1].to_i
