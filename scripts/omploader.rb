@@ -299,11 +299,9 @@ end
 def get_cached_owner_id(cgi, db)
 	sinfo = session_info(cgi)
 	return sinfo[0] unless sinfo.nil?
-	if owner_id.nil?
-		db_check(db)
-		sinfo = get_owner_id(cgi, db)
-		return sinfo[0]
-	end
+	db_check(db)
+	sinfo = get_owner_id(cgi, db)
+	return sinfo[0]
 end
 
 def to_readable_bytes(bytes)
