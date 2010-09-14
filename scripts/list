@@ -63,11 +63,17 @@ FCGI.each_cgi {|cgi|
 			stmt = query.execute(owner_id)
 			prefs = stmt.fetch
 			stmt.close
-			mine_only = prefs[0].to_s.to_i
-			opts = Listing_opts.invert
-			prefs[1] = list_images = opts[prefs[1].to_i]
-			results = prefs[2].to_s.to_i
-			Cache.set($0 + 'prefs' + owner_id, prefs, Default_cache_expiry_long)
+			if prefs.nil?
+				mine_only = 0
+				list_images = 'n'
+				results = 20
+			else
+				mine_only = prefs[0].to_s.to_i
+				opts = Listing_opts.invert
+				prefs[1] = list_images = opts[prefs[1].to_i]
+				results = prefs[2].to_s.to_i
+				Cache.set($0 + 'prefs' + owner_id, prefs, Default_cache_expiry_long)
+			end
 		elsif !prefs.nil?
 			mine_only = prefs[0].to_s.to_i
 			list_images = prefs[1].to_s
