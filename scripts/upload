@@ -91,7 +91,7 @@ def vimcolour(datum, filetype, title)
 	datum[0].sub!(/^<\?xml.*\?>$\n/, '')
 	datum[0].sub!(/^(<title>).*(<\/title>)/, "\\1#{title} (VimColour)\\2")
 	datum[0].sub!(/^(pre \{).*;/, '\1 margin: 0;')
-	datum[0].sub!(/^(body \{.*background-color: #)....../, '\1000000; margin: 0; font-size: 1.2em')
+	datum[0].sub!(/^(body \{.*background-color: #)....../, '\1000000; margin: 0; font-size: 1em')
 	datum[0].sub!(/^\.lnr( \{.*;)/, "div#container { display: table-row; }\n" + "div#ln\\1 }\ndiv#ln, div#code { display: table-cell;")
 	datum[0].gsub!(/ text-decoration: underline;/, '')
 	datum[0] += "<div id=\"container\">\n"
