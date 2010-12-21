@@ -9,24 +9,6 @@
 require 'omploader'
 require 'uri'
 
-def get_video_body(id, name, orig_name)
-	turls = "#{Down_bucket_url}#{id}/#{name}-still.gif"
-	turl = "#{Down_bucket_url}#{id}/#{name}.gif"
-	vurl = "#{Down_bucket_url}#{id}/#{name}.ogg"
-	html = <<-EOF;
-			<div class="content">
-				<video id="the_video" src="#{vurl}" controls="true">
-					<div class="biggest" style="width: 60%; text-align: center; margin: 0px auto;">Can't see anything?  You probably need a browser that can playback Ogg media using &lt;video&gt; and &lt;audio&gt;. Try <a href="http://www.firefox.com/">Firefox 3.5</a>, <a href="http://labs.opera.com/news/2008/07/18/">Opera experimental builds</a>, <a href="http://www.apple.com/safari/">Safari</a> with <a href="http://xiph.org/quicktime/">XiphQT</a>, or Google's <a href="http://www.google.com/chrome">Chrome</a>.</div>
-					<img src="#{turls}" id="thumb_1" onmouseover="document.getElementById('thumb_1').src='#{turl}'" onmouseout="document.getElementById('thumb_1').src='#{turls}'" />
-				</video>
-				<div id="vidinfos"><a href="#{vurl}?torrent">Download</a> <span class="separator">&#x2503;</span> <a id="infolink" href="">+ Show Info</a></div>
-				<div id="info_area"></div>
-				<script type="text/javascript" src="/jvid.js"></script>
-			</div>
-EOF
-	return html_pre(' – ' + orig_name, '', false, true) + html + html_post(true)
-end
-
 FCGI.each_cgi {|cgi|
 	begin
 		db = db_connect
@@ -39,10 +21,9 @@ FCGI.each_cgi {|cgi|
 		end
 
 		info = Cache.get($0 + 'vinfo' + id)
-		is_video = valid = 0
 		if info.nil?
 			db_check(db)
-			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type, metadata.valid, metadata.is_video from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
+			query = db.prepare('select names.name, content_types_main.type, content_types_sub.type, metadata.valid from metadata inner join names on names.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id where metadata.id = ?')
 			stmt = query.execute(id)
 
 			# Verify that id exists in database.
@@ -53,49 +34,28 @@ FCGI.each_cgi {|cgi|
 			info = stmt.fetch
 			stmt.close
 			valid = info[3].to_i
-			is_video = info[4].to_i
-			if is_video > 0 and valid < 1
-				Cache.set($0 + 'vinfo' + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_short)
-			else
-				Cache.set($0 + 'vinfo' + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
-			end
+			Cache.set($0 + 'vinfo' + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
 		else
 			info = Marshal.load(Base64.decode64(info))
 			valid = info[3].to_i
-			is_video = info[4].to_i
 		end
 		name = info[0].to_s
 		content_type = info[1]+ '/' + info[2]
 		if valid < 1
-			if is_video > 0
-				raise 'Sorry, we\'re still working on it.  Go grab some lunch or something.'
-			else
-				raise 'Nothing to pee here.'
-			end
+			raise 'Nothing to pee here.'
 		end
 
 		cgi_head = {'type' => content_type,
 					'Content-Disposition' => 'inline; filename="' + name + '"',
 					'Cache-Control' => 'min-fresh=31536000',
 					'expires' => Time.now + 31536000 }
-		if is_video > 0
-			html = Cache.get($0 + 'v' + id)
-			if !html.nil?
-				html = Marshal.load(Base64.decode64(html))
-			else
-				html = get_video_body(id.to_b64, name.chomp('.html').video_sanitise, name.chomp('.html'))
-				Cache.set($0 + 'v' + id, Base64.encode64(Marshal.dump(html)), Default_cache_expiry_long * 10)
-			end
-			cgi.out(cgi_head) { html }
+		if Xsendfile
+			cgi_head['X-Sendfile'] = Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64
+			cgi.out(cgi_head) {''}
 		else
-			if Xsendfile
-				cgi_head['X-Sendfile'] = Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64
-				cgi.out(cgi_head) {''}
-			else
-				file = File.new(Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64, mode='r')
-				cgi.out(cgi_head) {file.read}
-				file.close
-			end
+			file = File.new(Dir.pwd + '/' + Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64, mode='r')
+			cgi.out(cgi_head) {file.read}
+			file.close
 		end
 
 		visitor_id = get_cached_visitor_id(cgi, db)

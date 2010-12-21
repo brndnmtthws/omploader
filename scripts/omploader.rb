@@ -90,7 +90,7 @@ def db_connect
 	return db
 end
 
-def html_pre(title = '', search = '', showsearch = true, video = false)
+def html_pre(title = '', search = '', showsearch = true)
 	html_pre =
 		'<!DOCTYPE html>' + "\n" +
 		'<html xml:lang="en" lang="en">' + "\n" +
@@ -98,17 +98,10 @@ def html_pre(title = '', search = '', showsearch = true, video = false)
 		"\t\t" + '<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />' + "\n" +
 		"\t\t" + '<link rel="stylesheet" type="text/css" href="/style12.css" />' + "\n" +
 		"\t\t" + '<link rel="shortcut icon" href="/omploader_icon2.png" type="image/x-icon" />' + "\n"
-	if video
-		html_pre += "\t\t" + '<script type="text/javascript" src="/jquery.js"></script>' + "\n"
-	end
 	html_pre +=
 		"\t\t" + '<title>omploader' + title + '</title>' + "\n" +
 		"\t" + '</head>' + "\n"
-	if video
-		html_pre += "\t" + '<body class="video">' + "\n"
-	else
-		html_pre += "\t" + '<body>' + "\n"
-	end
+	html_pre += "\t" + '<body>' + "\n"
 	html_pre +=
 		"\t\t" + '<div id="container">' + "\n" +
 		"\t\t\t" + '<div id="header">' + "\n" +
@@ -126,7 +119,7 @@ def html_pre(title = '', search = '', showsearch = true, video = false)
 		"\t\t\t" + '</div>' + "\n"
 end
 
-def html_post(video = false)
+def html_post()
 	html_post = ''
 	html_post += "\t\t\t" + '<div id="footer">' + "\n" +
 		"\t\t\t\t" + '<div class="right"><a href="https://addons.mozilla.org/en-US/firefox/addon/5638">firefox extension</a> <span class="separator">&#x2503;</span> <a href="https://chrome.google.com/extensions/detail/ofkoppnbjeilgpkghfcjaconpmnbpckk?hl=en">chrome extension</a></div>' + "\n" +
@@ -264,12 +257,6 @@ class String
 	# Sanitise HTML code to avoid opening tags.
 	def sanitise
 		self.gsub('<', '&lt;').gsub('>', '&gt;')
-	end
-
-	# clean up filename a bit
-	def video_sanitise
-		self.gsub(' ', '.') # replace spaces with '.'
-		self.gsub(/[^\w\.\-]/, '_') # replace all non-alphanumeric, underscore or period characters with '_'
 	end
 end
 

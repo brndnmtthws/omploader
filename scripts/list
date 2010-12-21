@@ -194,9 +194,7 @@ FCGI.each_cgi {|cgi|
 			where_clause += ' and metadata.owner_id = ' + owner_id + ' '
 		end
 		if images_only and images_only_opt == 'y'
-			where_clause += ' and (metadata.is_image = 1 or metadata.is_video = 1) '
-		elsif images_only and images_only_opt == 'v'
-			where_clause += ' and metadata.is_video = 1 '
+			where_clause += ' and (metadata.is_image = 1) '
 		elsif images_only and images_only_opt == 'i'
 			where_clause += ' and metadata.is_image = 1 '
 		end
@@ -246,7 +244,7 @@ FCGI.each_cgi {|cgi|
 
 		files_list = Cache.get($0 + 'files' + cache_key)
 		if files_list.nil?
-			query = db.prepare('select metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name, metadata.is_video ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
+			query = db.prepare('select metadata.id, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), metadata.hits, metadata.comment_count, names.name ' + common_sql + search_sql + where_clause + ' order by ' + column + ' ' + order + ' limit ?,' + results.to_s)
 			if images_only and is_rss == 0
 				files_list = '      <div class="content" style="margin-bottom: 5px">' + "\n" +
 					files_list_info = ''
@@ -282,33 +280,16 @@ FCGI.each_cgi {|cgi|
 				hits = result[2].to_s
 				comment_count = result[3].to_s
 				name = result[4].to_s
-				is_video = result[5].to_i
 				next if id.to_i < 1 or id_set.include?(id)
 				id_set << id
 				id = id.to_b64
 
 				file_number = file_number + 1
 				if images_only
-					if is_video > 0
-						tid += 1
-						turls = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}-still.gif"
-						turl = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif"
-
-						if is_rss > 0
-							files_list += get_rss_item(name, "http://#{cgi.host}/v#{id}", name, time, turls)
-						else
-							files_list += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="' + turls +
-								"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
-								"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
-								"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
-								' title="' + name.chomp('.html') + '"/></a></div></div>' + "\n"
-						end
+					if is_rss > 0
+						files_list += get_rss_item(name, "http://#{cgi.host}/v#{id}", name, time, "http://#{cgi.host}/t#{id}")
 					else
-						if is_rss > 0
-							files_list += get_rss_item(name, "http://#{cgi.host}/v#{id}", name, time, "http://#{cgi.host}/t#{id}")
-						else
-							files_list += '        <div class="thumb float"><div class="container"><a href="/v' + id + '" title="' + name + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
-						end
+						files_list += '        <div class="thumb float"><div class="container"><a href="/v' + id + '" title="' + name + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 					end
 					if is_rss == 0
 						files_list_info += '        <div class="info float"><a href="/i' + id + '">Info</a></div>' + "\n"
@@ -408,7 +389,7 @@ FCGI.each_cgi {|cgi|
 		mine_only_msg = "added by: #{linkit.call(owner_linque, 'y', 'me', mine_only)} #{linkit.call(owner_linque, 'n', "anyone", mine_only)}"
 
 		type_linque = lambda {|key| results.to_s + order_short + column_short + mine_only_opt + key + page.to_s + param_search }
-		images_only_msg = "types: #{linkit.call(type_linque, 'n', 'all', list_images)} #{linkit.call(type_linque, 'y', "visuals", list_images)} #{linkit.call(type_linque, 'i', "images", list_images)} #{linkit.call(type_linque, 'v', "videos", list_images)}"
+		images_only_msg = "types: #{linkit.call(type_linque, 'n', 'all', list_images)} #{linkit.call(type_linque, 'i', "images", list_images)}"
 
 		sort_linque = lambda {|ordery| results.to_s + ordery + mine_only_opt + images_only_opt + page.to_s + param_search }
 		sort_msg = "order by: " +

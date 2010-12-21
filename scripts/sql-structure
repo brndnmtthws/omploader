@@ -112,7 +112,6 @@ CREATE TABLE `metadata` (
   `name_id` int(10) unsigned NOT NULL,
   `hits` int(10) unsigned NOT NULL default '0',
   `valid` int(10) unsigned NOT NULL default '1',
-  `is_video` int(10) unsigned NOT NULL default '0',
   `is_image` int(10) unsigned NOT NULL default '0',
   `size` int(10) unsigned NOT NULL,
   `displayed_size` int(10) unsigned NOT NULL,

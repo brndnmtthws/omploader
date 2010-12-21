@@ -27,12 +27,11 @@ FCGI.each_cgi {|cgi|
 		min = res[1].to_i
 		count = Max_rand
 		rands = Set.new
-		is_videors = Hash.new
 		try = 0
 		overall_tries = 0
 		while count > 0
 			rand_id = rand(max - min) + min
-			query = db.prepare('select metadata.id, metadata.is_video from metadata where metadata.id = ? and metadata.valid = 1 and (metadata.is_image = 1 or metadata.is_video = 1)')
+			query = db.prepare('select metadata.id from metadata where metadata.id = ? and metadata.valid = 1 and (metadata.is_image = 1)')
 			stmt = query.execute(rand_id)
 			res = stmt.fetch
 			num_rows = stmt.num_rows
@@ -44,7 +43,6 @@ FCGI.each_cgi {|cgi|
 					try = 0
 				end
 			elsif rands.add?(res[0])
-				is_videors[res[0]] = res[1].to_i
 				count -= 1
 			else
 				overall_tries += 1
@@ -63,22 +61,10 @@ FCGI.each_cgi {|cgi|
 			result = stmt.fetch
 			stmt.close
 			name = result.first.to_s
-			is_video = is_videors[id].to_i
 
 			top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id.to_s.to_b64 + '" title="' + name + '">'
-			if is_video > 0
-				tid += 1
-				turls = "#{Down_bucket_url}#{id.to_s.to_b64}/#{name.chomp(".html").video_sanitise}-still.gif"
-				turl = "#{Down_bucket_url}#{id.to_s.to_b64}/#{name.chomp(".html").video_sanitise}.gif"
-				top_files +='<img src="' + turls +
-							"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
-							"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
-							"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
-							'/></a></div></div>' + "\n"
-			else
-				top_files +=
-					'<img src="/t' + id.to_s.to_b64 + '" alt="View file!" /></a></div></div>' + "\n"
-			end
+			top_files +=
+				'<img src="/t' + id.to_s.to_b64 + '" alt="View file!" /></a></div></div>' + "\n"
 			top_files_info += "\t\t\t\t" + '<div class="info float"><a href="/i' + id.to_s.to_b64 + '">Info</a></div>' + "\n"
 			if count % 5 == 0
 				top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n"

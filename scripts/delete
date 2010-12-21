@@ -77,7 +77,6 @@ if !comments
 	argv.each do |arg|
 		delete(arg)
 	end
-	$stderr.puts '*** NOTICE ***: This script doesn\'t yet remove videos from S3 when deleted.'
 end
 
 if comments
@@ -164,7 +163,7 @@ if cleanup
 				File.unlink(path)
 				puts 'done.'
 			else
-				query = Db.prepare('select id from metadata where id = ? and is_video = 0')
+				query = Db.prepare('select id from metadata where id = ?')
 				stmt = query.execute(base.to_id)
 				if stmt.num_rows < 1
 					# junk
@@ -196,7 +195,7 @@ if cleanup
 				stmt.close
 			end
 		end
-		query = Db.prepare('select id from metadata where is_video = 0')
+		query = Db.prepare('select id from metadata')
 		stmt = query.execute
 		num_rows = stmt.num_rows
 		num_rows.times do

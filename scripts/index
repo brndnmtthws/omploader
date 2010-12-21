@@ -119,7 +119,7 @@ FCGI.each_cgi {|cgi|
 				"\t\t\t" + '</div>' + "\n" +
 				"\t\t\t" + '<div class="content">' + "\n"
 				top_files_info = ''
-				query = db.prepare('select metadata.id, names.name, metadata.is_video from metadata inner join names on names.id = metadata.name_id where (metadata.is_image = 1 or metadata.is_video = 1) and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
+				query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where (metadata.is_image = 1) and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
 				stmt = query.execute
 				tid = 0
 				stmt.num_rows.times do
@@ -127,28 +127,15 @@ FCGI.each_cgi {|cgi|
 					break if result.nil?
 					id = result[0].to_s.to_b64
 					name = result[1].to_s
-					is_video = result[2].to_i
 
-					if is_video > 0
-						tid += 1
-						turls = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}-still.gif"
-						turl = "#{Down_bucket_url}#{id}/#{name.chomp(".html").video_sanitise}.gif"
-
-						top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="' + turls +
-							"\" alt=\"View file!\" id=\"thumb_#{tid}\" " +
-							"onmouseover=\"document.getElementById('thumb_#{tid}').src='" + turl + '\'" ' +
-							"onmouseout=\"document.getElementById('thumb_#{tid}').src='" + turls + '\'" ' +
-							'/></a></div></div>' + "\n"
-					else
-						top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
-					end
+					top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 					top_files_info += "\t\t\t\t" + '<div class="info float"><a href="/i' + id + '">Info</a></div>' + "\n"
 				end
 				stmt.close
 				top_files += "\t\t\t\t" + '<br class="clear" />' + "\n" + top_files_info + "\t\t\t\t" + '<br class="clear" />' + "\n" +
 				"\t\t\t\t" + '<br />' + "\n" +
 				"\t\t\t\t" + '<div class="filelist">' + "\n"
-				query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.is_image = 0 and metadata.is_video = 0 and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
+				query = db.prepare('select metadata.id, names.name from metadata inner join names on names.id = metadata.name_id where metadata.is_image = 0 and unix_timestamp(metadata.creation_time) > unix_timestamp(current_timestamp) - 604800 order by metadata.hits desc, metadata.creation_time desc limit 5')
 				stmt = query.execute
 				stmt.num_rows.times do
 					result = stmt.fetch

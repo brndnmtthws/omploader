@@ -106,9 +106,9 @@ FCGI.each_cgi {|cgi|
 			raise 'You are a trad.'
 		end
 		info = Cache.get($0 + id)
-		is_video = valid = 0
+		valid = 0
 		if info.nil?
-			query = db.prepare('select n1.name, metadata.displayed_size, metadata.hits, metadata.comment_count, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), content_types_main.type, content_types_sub.type, n2.name, metadata.is_video, metadata.valid from metadata inner join names as n1 on n1.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join owners on owners.id = metadata.owner_id left join names as n2 on n2.id = owners.name_id where metadata.id = ?')
+			query = db.prepare('select n1.name, metadata.displayed_size, metadata.hits, metadata.comment_count, date_format(metadata.creation_time, "%a, %d %b %Y %T GMT"), content_types_main.type, content_types_sub.type, n2.name, metadata.valid from metadata inner join names as n1 on n1.id = metadata.name_id inner join content_types on content_types.id = metadata.content_type_id inner join content_types_main on content_types_main.id = content_types.content_type_main_id inner join content_types_sub on content_types_sub.id = content_types.content_type_sub_id left join owners on owners.id = metadata.owner_id left join names as n2 on n2.id = owners.name_id where metadata.id = ?')
 			query.execute(id)
 
 			# Verify that id exists in database.
@@ -117,17 +117,15 @@ FCGI.each_cgi {|cgi|
 			end
 			info = query.fetch
 			query.close
-			is_video = info[8].to_i
-			valid = info[9].to_i
-			if is_video > 0 and valid < 1
+			valid = info[8].to_i
+			if valid < 1
 				Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_short)
 			else
 				Cache.set($0 + id, Base64.encode64(Marshal.dump(info)), Default_cache_expiry_long)
 			end
 		else
 			info = Marshal.load(Base64.decode64(info))
-			is_video = info[8].to_i
-			valid = info[9].to_i
+			valid = info[8].to_i
 		end
 		name = info[0]
 		size = info[1]
@@ -138,11 +136,7 @@ FCGI.each_cgi {|cgi|
 		content_type_sub = info[6].to_s
 		info_owner_name = info[7].to_s
 		if valid < 1
-			if is_video > 0
-				raise 'Sorry, we\'re still working on it.  Go grab some lunch or something.'
-			else
-				raise 'Nothing to pee here.'
-			end
+			raise 'Nothing to pee here.'
 		end
 		content_type = content_type_main + '/' + content_type_sub
 
@@ -293,14 +287,6 @@ FCGI.each_cgi {|cgi|
 		meta = ''
 		if content_type_main == 'image'
 			file_link = '<img src="/t' + id.to_b64 + '" alt="View file!" />'
-		elsif is_video > 0
-			turls = "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}-still.gif"
-			turl = "#{Down_bucket_url}#{id.to_b64}/#{name.chomp(".html").video_sanitise}.gif"
-			file_link = '<img src="' + turls +
-			'" alt="View file!" id="thumb_1" ' +
-			'onmouseover="document.getElementById(\'thumb_1\').src=\'' + turl + '\'" ' +
-			'onmouseout="document.getElementById(\'thumb_1\').src=\'' + turls + '\'" ' +
-			'/>'
 		elsif content_type == 'audio/mpeg' or content_type == 'application/ogg'
 			res = Cache.get($0 + 'meta' + id)
 			if res.nil?
