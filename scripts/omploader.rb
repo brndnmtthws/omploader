@@ -54,6 +54,7 @@ Slogans = [
 	'<a href="donate.html">omploader needs you</a>',
 	'<a href="donate.html">freeloaders need not apply</a>',
 	'<a href="donate.html">Omploader doesn\'t want to vanish</a>',
+	'omp there it is',
 ]
 Slogan = Slogans[rand(Slogans.size)]
 
