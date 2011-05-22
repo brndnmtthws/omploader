@@ -15,6 +15,12 @@ require 'id3lib'
 require 'digest/sha1'
 require 'vorbisfile'
 
+def is_banned(content_type)
+	return true if content_type[0..9] == 'audio/mpeg'
+	return true if content_type[0..23] == 'application/octet-stream'
+	return false
+end
+
 def get_output(id, name, name_displayed, type, host)
 	top = ''
 	common = <<-EOF;
@@ -256,6 +262,8 @@ FCGI.each_cgi {|cgi|
 				actual_content_type_main = content_type_main = content_type_split.first
 				actual_content_type_sub = content_type_sub = content_type_split.last
 
+				next if is_banned(content_type)
+
 				actual_name = name
 				query = db.prepare('insert into names (name) values (?) on duplicate key update id = last_insert_id(id)')
 				stmt = query.execute(name)
@@ -282,7 +290,7 @@ FCGI.each_cgi {|cgi|
 				id = stmt.insert_id
 				stmt.close
 
-				if content_type[0..8] == 'audio/mpeg' or content_type[0..14] == 'application/ogg'
+				if content_type[0..9] == 'audio/mpeg' or content_type[0..14] == 'application/ogg'
 					tmpfile = Tempfile.new(name)
 					tmpfile.close
 					mmap = Mmap.new(tmpfile.path, 'rw')
