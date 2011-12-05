@@ -27,7 +27,7 @@ FCGI.each_cgi {|cgi|
 		if thumb.nil?
 			visitor_id = get_cached_visitor_id(cgi, db)
 
-			query = db.prepare('select metadata.thumbnail_id, names.name, is_image from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
+			query = db.prepare('select metadata.thumbnail_id, names.name, is_image, metadata.displayed_size from metadata inner join names on names.id = metadata.name_id where metadata.id = ?')
 			stmt = query.execute(id)
 			num_rows = stmt.num_rows
 			info = stmt.fetch
@@ -40,10 +40,11 @@ FCGI.each_cgi {|cgi|
 			thumbnail_id = info[0].to_s
 			name = info[1].to_s
 			is_image = info[2].to_i
+			size = info[3].to_i
 
 			name = name.insert(name.rindex('.'), '-thumb') if !name.empty? and name =~ /\./
 
-			if is_image > 0 and thumbnail_id.empty? and File.file?(Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64)
+			if is_image > 0 and thumbnail_id.empty? and File.file?(Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64) and size < 4194304
 					datum = Mmap.new(Paths['data'] + '/' + id.to_b64.get_subdir + '/' + id.to_b64, 'r')
 					imlist = Magick::ImageList.new
 					imlist.from_blob(datum.to_str)
