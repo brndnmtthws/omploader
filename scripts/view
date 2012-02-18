@@ -79,18 +79,21 @@ FCGI.each_cgi {|cgi|
 				end
 			end
 			referrer = cgi.referer.to_s
-			referrer = URI.extract(referrer).first
-			if referrer and !referrer.empty?
-				split = URI.split(referrer)
-				host = split[2]
-				if host != cgi.host
-					query = db.prepare('insert into referrers (address) values (?) on duplicate key update id = last_insert_id(id)')
-					stmt = query.execute(referrer)
-					referrer_id = stmt.insert_id.to_s
-					stmt.close
-					query = db.prepare('insert into referrals (referrer_id, metadata_id) values (?,?) on duplicate key update count = count + 1')
-					query.execute(referrer_id, id).close
+			begin
+				referrer = URI.extract(referrer).first
+				if referrer and !referrer.empty?
+					split = URI.split(referrer)
+					host = split[2]
+					if host != cgi.host
+						query = db.prepare('insert into referrers (address) values (?) on duplicate key update id = last_insert_id(id)')
+						stmt = query.execute(referrer)
+						referrer_id = stmt.insert_id.to_s
+						stmt.close
+						query = db.prepare('insert into referrals (referrer_id, metadata_id) values (?,?) on duplicate key update count = count + 1')
+						query.execute(referrer_id, id).close
+					end
 				end
+			rescue URI::BadURIError
 			end
 		end
 
