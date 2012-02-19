@@ -57,7 +57,7 @@ module Shell
 end
 
 module Omploader
-  URL = 'http://ompldr.org'
+  URL = 'http://omploader.org'
   UPLOAD_URL = "#{URL}/upload"
 
   extend self
