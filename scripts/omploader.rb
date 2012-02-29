@@ -151,7 +151,7 @@ def get_visitor_id(cgi, db)
 end
 
 def run_cron(db)
-	q = db.prepare('delete from votes where id in (select id from votes where unix_timestamp(date) < unix_timestamp(current_timestamp) - ? order by id) q')
+	q = db.prepare('delete from votes where id in (select id from (select id from votes where unix_timestamp(date) < unix_timestamp(current_timestamp) - ? order by id) as q)')
 	q.execute(Vote_expiry).close
 	q = db.prepare('select address from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ?')
 	stmt = q.execute(Visitor_expiry)
@@ -161,7 +161,7 @@ def run_cron(db)
 		Cache.delete('visitor_id' + addr)
 	end
 	stmt.close
-	q = db.prepare('delete from visitors where id in (select from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ? order by id) q')
+	q = db.prepare('delete from visitors where id in (select id from (select from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ? order by id) as q)')
 	q.execute(Visitor_expiry).close
 	q = db.prepare('select metadata.id from metadata inner join thumbnails on metadata.thumbnail_id = thumbnails.id where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	stmt = q.execute(Thumbnail_expiry)
@@ -173,11 +173,11 @@ def run_cron(db)
 	stmt.close
 	q = db.prepare('update metadata inner join thumbnails on thumbnails.id = metadata.thumbnail_id set metadata.thumbnail_id = null where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Thumbnail_expiry).close
-	q = db.prepare('delete from thumbnails where id in (select id from thumbnails where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ? order by id) q')
+	q = db.prepare('delete from thumbnails where id in (select id from (select id from thumbnails where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ? order by id) as q)')
 	q.execute(Thumbnail_expiry).close
 	q = db.prepare('update metadata inner join owners on owners.id = metadata.owner_id set metadata.owner_id = null where unix_timestamp(owners.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	q.execute(Owner_expiry).close
-	q = db.prepare('delete from owners where id in (select id from owners where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ? order by id) q')
+	q = db.prepare('delete from owners where id in (select id from (select id from owners where unix_timestamp(last_accessed) < unix_timestamp(current_timestamp) - ? order by id) as q)')
 	q.execute(Owner_expiry).close
 end
 
