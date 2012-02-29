@@ -161,7 +161,7 @@ def run_cron(db)
 		Cache.delete('visitor_id' + addr)
 	end
 	stmt.close
-	q = db.prepare('delete from visitors where id in (select id from (select from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ? order by id) as q)')
+	q = db.prepare('delete from visitors where id in (select id from (select id from visitors where unix_timestamp(last_visit) < unix_timestamp(current_timestamp) - ? order by id) as q)')
 	q.execute(Visitor_expiry).close
 	q = db.prepare('select metadata.id from metadata inner join thumbnails on metadata.thumbnail_id = thumbnails.id where unix_timestamp(thumbnails.last_accessed) < unix_timestamp(current_timestamp) - ?')
 	stmt = q.execute(Thumbnail_expiry)
