@@ -148,7 +148,7 @@ FCGI.each_cgi {|cgi|
 						name_displayed = name
 					end
 
-					top_files += 
+					top_files +=
 					"\t\t\t\t\t" + '<div class="file">' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="filename"><a href="/v' + id + '" title="' + name + '">' + name_displayed + '</a></span>' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="fileinfo"><a href="/i' + id + '">Info</a></span>' + "\n" +
@@ -270,7 +270,10 @@ FCGI.each_cgi {|cgi|
 			top_files
 
 			db.commit
-			cgi.out('text/html') { html_pre + xhtml + html_post }
+			cgi_head = {'type' => 'text/html',
+						'Cache-Control' => 'min-fresh=' + Default_cache_expiry_long.to_s,
+						'expires' => Time.now + Default_cache_expiry_long }
+			cgi.out(cgi_head) { html_pre + xhtml + html_post }
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?
 		if Debug

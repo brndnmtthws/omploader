@@ -44,11 +44,17 @@ FCGI.each_cgi {|cgi|
 
 			xhtml = top_files
 
-			cgi.out('text/html') { html_pre + xhtml + html_post }
-			
+			cgi_head = {'type' => 'text/html',
+						'Cache-Control' => 'min-fresh=' + Default_cache_expiry_long.to_s,
+						'expires' => Time.now + Default_cache_expiry_long }
+			cgi.out(cgi_head) { html_pre + xhtml + html_post }
+
 			Cache.set($0, Base64.encode64(html_pre + xhtml + html_post), Default_cache_expiry_long)
 		else
-			cgi.out('text/html') { Base64.decode64(top_files) }
+			cgi_head = {'type' => 'text/html',
+						'Cache-Control' => 'min-fresh=' + Default_cache_expiry_long.to_s,
+						'expires' => Time.now + Default_cache_expiry_long }
+			cgi.out(cgi_head) { Base64.decode64(top_files) }
 		end
 	rescue Mysql::Error => err
 		db.rollback unless db.nil?

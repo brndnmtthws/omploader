@@ -341,7 +341,10 @@ FCGI.each_cgi {|cgi|
 		if ajax == 0
 			html_out += html_post
 		end
-		cgi.out('type' => 'text/html') {
+		cgi_head = {'type' => 'text/html',
+					'Cache-Control' => 'min-fresh=' + Default_cache_expiry_long.to_s,
+					'expires' => Time.now + Default_cache_expiry_long }
+		cgi.out(cgi_head) {
 			html_out
 		}
 		if update_prefs

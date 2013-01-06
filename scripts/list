@@ -425,12 +425,18 @@ FCGI.each_cgi {|cgi|
 
 		if is_rss > 0
 			rss = get_rss_top + files_list + get_rss_bot
-			cgi.out('application/rss+xml') { rss }
+			cgi_head = {'type' => 'application/rss+xml',
+						'Cache-Control' => 'min-fresh=' + Default_cache_expiry_long.to_s,
+						'expires' => Time.now + Default_cache_expiry_long }
+			cgi.out(cgi_head) { rss }
 		else
 			this_url = results.to_s + order_short + column_short + mine_only_opt + images_only_opt + page.to_s + param_search
 			rss_link = ('		<link rel="alternate" title="Slashdot RSS" href="/rss%s" type="application/rss+xml">' % this_url) + "\n"
 
-			cgi.out('text/html') {
+			cgi_head = {'type' => 'text/html',
+						'Cache-Control' => 'min-fresh=' + Default_cache_expiry_long.to_s,
+						'expires' => Time.now + Default_cache_expiry_long }
+			cgi.out(cgi_head) {
 				html_pre('', search) +
 					'      <div class="content large">' + "\n" +
 					'        ' + mine_only_msg + '<br />' + "\n" +

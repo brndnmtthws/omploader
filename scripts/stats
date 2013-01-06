@@ -137,12 +137,18 @@ FCGI.each_cgi {|cgi|
 		time = Cache.get($stats_key + 'time')
 		poo_sent = false
 		if !html.nil?
-			cgi.out('text/html') { Base64.decode64(html) }
+			cgi_head = {'type' => 'text/html',
+						'Cache-Control' => 'min-fresh=' + Default_cache_expiry_long.to_s,
+						'expires' => Time.now + Default_cache_expiry_long }
+			cgi.out(cgi_head) { Base64.decode64(html) }
 			poo_sent = true
 			next if !time.nil? and Time.now.to_i - time.to_i < Default_cache_expiry_long * 10
 		end
 		if !poo_sent
-			cgi.out('text/html') { do_stats() }
+			cgi_head = {'type' => 'text/html',
+						'Cache-Control' => 'min-fresh=' + Default_cache_expiry_long.to_s,
+						'expires' => Time.now + Default_cache_expiry_long }
+			cgi.out(cgi_head) { do_stats() }
 		else
 			threads << Thread.new { do_stats() }
 		end
