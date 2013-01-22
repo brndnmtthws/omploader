@@ -26,8 +26,8 @@ def get_output(id, name, name_displayed, type, host)
 	common = <<-EOF;
 		<!-- View file: <a href="v#{id}">http://#{host}/v#{id}</a> -->
 		<div class="left">Info:</div><div class="right"><a href="/i#{id}">http://#{host}/i#{id}</a></div>
-		<div class="left">&nbsp;</div><div class="right"><a href="/v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
-		<div class="left">File:</div><div class="right"><a href="/v#{id}">http://#{host}/v#{id}</a></div>
+		<div class="left">File:</div><div class="right"><a href="/v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
+		<div class="left">&nbsp;</div><div class="right"><a href="/v#{id}">http://#{host}/v#{id}</a></div>
 EOF
 	if type == 'image'
 		top = <<-EOF;
