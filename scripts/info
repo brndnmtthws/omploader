@@ -319,7 +319,7 @@ FCGI.each_cgi {|cgi|
 			"\t\t\t" + '<div class="content">' + "\n"
 			if ajax == 0
 				html_out +=
-				"\t\t\t\t" + '<div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '" title="' + name + '">' + file_link + '</a></div></div>' + "\n"
+				"\t\t\t\t" + '<div class="thumb automargin"><div class="container"><a href="v' + id.to_b64 + '/' + name + '" title="' + name + '">' + file_link + '</a></div></div>' + "\n"
 			else
 				html_out +=
 				"\t\t\t\t" + '<div class="thumb automargin"><div class="container">' + file_link + '</div></div>' + "\n"
