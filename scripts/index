@@ -128,7 +128,7 @@ FCGI.each_cgi {|cgi|
 					id = result[0].to_s.to_b64
 					name = result[1].to_s
 
-					top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
+					top_files += "\t\t\t\t" + '<div class="thumb float"><div class="container"><a href="/v' + id + '/' + name + '"><img src="/t' + id + '" alt="View file!" /></a></div></div>' + "\n"
 					top_files_info += "\t\t\t\t" + '<div class="info float"><a href="/i' + id + '">Info</a></div>' + "\n"
 				end
 				stmt.close
@@ -150,7 +150,7 @@ FCGI.each_cgi {|cgi|
 
 					top_files +=
 					"\t\t\t\t\t" + '<div class="file">' + "\n" +
-					"\t\t\t\t\t\t" + '<span class="filename"><a href="/v' + id + '" title="' + name + '">' + name_displayed + '</a></span>' + "\n" +
+					"\t\t\t\t\t\t" + '<span class="filename"><a href="/v' + id + '/' + name + '" title="' + name + '">' + name_displayed + '</a></span>' + "\n" +
 					"\t\t\t\t\t\t" + '<span class="fileinfo"><a href="/i' + id + '">Info</a></span>' + "\n" +
 					"\t\t\t\t\t" + '</div>' + "\n"
 				end

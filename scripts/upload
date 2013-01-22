@@ -26,22 +26,22 @@ def get_output(id, name, name_displayed, type, host)
 	common = <<-EOF;
 		<!-- View file: <a href="v#{id}">http://#{host}/v#{id}</a> -->
 		<div class="left">Info:</div><div class="right"><a href="/i#{id}">http://#{host}/i#{id}</a></div>
-		<div class="left">File:</div><div class="right"><a href="/v#{id}">http://#{host}/v#{id}</a></div>
 		<div class="left">&nbsp;</div><div class="right"><a href="/v#{id}/#{name}">http://#{host}/v#{id}/#{name_displayed}</a></div>
+		<div class="left">File:</div><div class="right"><a href="/v#{id}">http://#{host}/v#{id}</a></div>
 EOF
 	if type == 'image'
 		top = <<-EOF;
-		<div class="thumb automargin"><div class="container"><a href="/v#{id}"><img src="/t#{id}" alt="View file!" /></a></div></div>
+		<div class="thumb automargin"><div class="container"><a href="/v#{id}/#{name}"><img src="/t#{id}" alt="View file!" /></a></div></div>
 EOF
 		common += <<-EOF;
 		<div class="left">Thumbnail:</div><div class="right"><a href="/t#{id}">http://#{host}/t#{id}</a></div>
 		<br class="clear" />
-		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}][img]http://#{host}/t#{id}[/img][/url]</div></div>
+		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}/#{name}][img]http://#{host}/t#{id}[/img][/url]</div></div>
 EOF
 	else
 		common += <<-EOF;
 		<br class="clear" />
-		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}]http://#{host}/v#{id}[/url]</div></div>
+		<div class="left">BBCode:</div><br class="clear" /><div class="right"><div class="code">[url=http://#{host}/v#{id}/#{name}]http://#{host}/v#{id}/#{name}[/url]</div></div>
 		EOF
 	end
 
