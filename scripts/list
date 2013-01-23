@@ -319,7 +319,7 @@ FCGI.each_cgi {|cgi|
 
 					if is_rss == 0
 						files_list +=
-							'            <td><a href="/v' + id + + '/' + name + '" title="' + name.gsub(/&/, '&amp;') + '">' + name_displayed.gsub(/&/, '&amp;') + '</a></td>' + "\n" +
+							'            <td><a href="/v' + id + '/' + name + '" title="' + name.gsub(/&/, '&amp;') + '">' + name_displayed.gsub(/&/, '&amp;') + '</a></td>' + "\n" +
 							'            <td class="small"><a href="/i' + id + '">Info</a></td>' + "\n" +
 							'            <td class="small">' + hits + '</td>' + "\n" +
 							'            <td class="small">' + comment_count + '</td>' + "\n" +
